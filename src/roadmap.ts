@@ -35,6 +35,8 @@ export const ROADMAP: RoadmapItem[] = [
   { id: 'layouts', stage: 'done', area: 'Rhythm', version: '0.5', title: 'Full keyboard layouts', blurb: '60%, TKL and full size with the F-row, navigation keys, arrows and numpad. Native tracking tells numpad keys apart from their twins.' },
   { id: 'net-ranges', stage: 'done', area: 'Insight', version: '0.5', title: 'Network by day, week, month, year and all time', blurb: 'The same ranges as Input, with busiest days per range.' },
   { id: 'eras', stage: 'done', area: 'Look & feel', version: '0.2', title: 'Eras and welcomes', blurb: 'Phosphor, Arcade, Synthwave, Beige Box, Night shift, Paper and Mixtape, each with its own intro.' },
+  { id: 'optimize', stage: 'done', area: 'Performance', version: '0.18', title: 'Optimization pass', blurb: 'The window unloads a minute after it goes to the tray (about 35 MB instead of about 450), never loads at all when started at sign-in, and background threads mostly sleep while you are not typing.' },
+  { id: 'shuffle', stage: 'done', area: 'Look & feel', version: '0.18', title: 'Shuffle eras', blurb: 'A new era at random every time you open Katsudō, from the tray or the taskbar, with its transition.' },
   { id: 'app-keys', stage: 'done', area: 'Rhythm', version: '0.18', title: 'Per-app keyboard heatmaps', blurb: 'Pick any app above the keyboard heatmap to see only its keys, with its most pressed keys and its share of all your typing.' },
   { id: 'ergonomics', stage: 'done', area: 'Rhythm', version: '0.17', title: 'Hand and finger balance', blurb: 'Left vs right, the load on each finger, home row vs reaching. Fingers come from a finger map: touch typing or gaming, per app, with any key moved to the finger you really use.' },
   { id: 'more-eras', stage: 'done', area: 'Look & feel', version: '0.16', title: 'More eras', blurb: 'Ten more, from 1645 to somewhere else: Ronin, Ukiyo-e, Steampunk, Ramen shop, Anime, Cyberpunk, Starship, Signal, Vapor and Vapor night, each with its own art, welcome and transition.' },
@@ -54,7 +56,6 @@ export const ROADMAP: RoadmapItem[] = [
   { id: 'iso', stage: 'planned', area: 'Rhythm', title: 'ISO and other layouts', blurb: 'ISO Enter and the extra key by Left Shift, plus layouts for keyboards that aren\'t US ANSI.' },
 
   // ---- planned ----
-  { id: 'optimize', stage: 'planned', area: 'Performance', version: 'pre-1.0', title: 'Optimization pass', blurb: 'Once feature complete: unload the UI while in the tray (WebView memory down to the tracker\'s few MB), startup and memory budgets, index and query tuning, database compaction, idle CPU at zero.' },
   { id: 'signing', stage: 'planned', area: 'Polish', version: 'pre-1.0', title: 'Signed installer and updates', blurb: 'Code signing so SmartScreen stays quiet, and a built-in update check that you trigger.' },
   { id: 'a11y', stage: 'planned', area: 'Polish', version: 'pre-1.0', title: 'Keyboard and screen-reader pass', blurb: 'Every view usable without a mouse; charts with readable summaries.' },
 

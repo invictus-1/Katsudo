@@ -172,7 +172,9 @@ pub fn start(write: Arc<Mutex<Connection>>) {
             let away = away_limit();
             let mut session: Option<Session> = None;
             loop {
-                std::thread::sleep(Duration::from_millis(50));
+                // Ten times a second only while a game is in front or a session is open.
+                let busy = session.is_some() || IN_GAME.load(Ordering::Relaxed) != 0;
+                std::thread::sleep(Duration::from_millis(if busy { 50 } else { 500 }));
                 let game = IN_GAME.load(Ordering::Relaxed);
                 let now = Instant::now();
                 if let Some(s) = session.as_mut() {

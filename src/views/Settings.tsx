@@ -42,6 +42,12 @@ export function SettingsView({ status, appearance, onAppearance }: {
             <div className="row"><span className="text-strong">Mixtape</span><span className="data-sm theme-era">Every era</span></div>
             <span className="text-small muted">A different era each day. Today: {THEMES.find((t) => t.id === today)?.name}.</span>
           </button>
+          <button type="button" className={`theme-card${appearance.theme === 'shuffle' ? ' is-on' : ''}`}
+            aria-pressed={appearance.theme === 'shuffle'} onClick={() => set({ theme: 'shuffle' }, 'theme', 'shuffle')}>
+            <div className="theme-swatches">{[...THEMES].reverse().map((t) => <i key={t.id} style={{ background: t.swatches[2] }} />)}</div>
+            <div className="row"><span className="text-strong">Shuffle</span><span className="data-sm theme-era">Every era</span></div>
+            <span className="text-small muted">A new era, picked at random, every time you open Katsudō.{appearance.theme === 'shuffle' ? ` Now: ${THEMES.find((t) => t.id === resolveTheme('shuffle'))?.name}.` : ''}</span>
+          </button>
         </div>
       </Panel>
 
@@ -57,6 +63,9 @@ export function SettingsView({ status, appearance, onAppearance }: {
                 options={SCALES.map((s) => ({ value: String(s), label: `${s}%` }))}
                 onChange={(v) => set({ scale: Number(v) }, 'ui_scale', v)} />
             </div>
+            <Switch checked={appearance.theme === 'shuffle'} label="Shuffle eras"
+              hint="A new era, at random, every time you open Katsudō from the tray or the taskbar. Off keeps the era you're on."
+              onChange={(v) => { const keep = resolveTheme(appearance.theme); set({ theme: v ? 'shuffle' : keep }, 'theme', v ? 'shuffle' : keep); }} />
             <Switch defaultChecked={appearance.motion} label="Animations"
               hint="The era's moving art. Paused whenever the window is hidden, so it costs nothing in the tray."
               onChange={(v) => set({ motion: v }, 'motion', String(v))} />

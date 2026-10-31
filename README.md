@@ -60,7 +60,7 @@ The installer is its own little app that picks a random era each time it runs.
 
 ## Light by design
 
-Rust and Tauri, using the WebView already built into Windows instead of shipping a browser: about 10 MB to download. The tracker itself runs at around 0.05% CPU and 60 MB of memory, and its keyboard and mouse hooks count each event in about 18 ns. The window's WebView adds a few hundred MB while it's loaded; unloading it whenever Katsudō sits in the tray is part of the pre-1.0 optimization pass.
+Rust and Tauri, using the WebView already built into Windows instead of shipping a browser: about 15 MB to download. In the tray Katsudō uses about 35 MB of memory and around 0.05% CPU, and its keyboard and mouse hooks count each event in about 18 ns. The window's WebView takes a few hundred MB while it's open; a minute after you close it to the tray, Katsudō unloads it completely (and started at sign-in it never loads it until you open the window). Background threads mostly sleep when you're not typing.
 
 ## Install
 
@@ -96,7 +96,7 @@ Useful switches: `KATSUDO_DATA_DIR=<folder>` runs a separate copy on its own dat
 
 ## Roadmap
 
-The plan lives inside the app (Roadmap in the sidebar), where you can star what you want next. Coming up: more eras, meeting and media awareness, merging several PCs, an optional fully-local "ask your history" model, hand and finger balance, ISO layouts, signed releases and an optimization pass before 1.0.
+The plan lives inside the app (Roadmap in the sidebar), where you can star what you want next. Coming up: more eras, meeting and media awareness, merging several PCs, an optional fully-local "ask your history" model, hand and finger balance, ISO layouts, signed releases and an a final polish before 1.0.
 
 ## Layout
 

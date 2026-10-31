@@ -21,7 +21,7 @@ use rusqlite::{Connection, TransactionBehavior};
 use serde::Serialize;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
@@ -216,6 +216,14 @@ async fn flow_report(state: State<'_, AppState>, from: String, to: String) -> Cm
     .await
     .map_err(err)?
     .map_err(err)
+}
+
+/// When this run of Katsudō started: the page loads afresh each time the window is opened, and
+/// shows the welcome only once per run.
+#[tauri::command]
+fn get_launch() -> u64 {
+    static LAUNCH: std::sync::OnceLock<u64> = std::sync::OnceLock::new();
+    *LAUNCH.get_or_init(|| db::now_secs() as u64)
 }
 
 /// The break nudge the nudge window should show.
@@ -822,12 +830,65 @@ fn installer_choices() -> (Option<bool>, Option<String>) {
     (None, None)
 }
 
+/// Bumped whenever the main window is shown, so an unload scheduled before that is called off.
+static SHOWN: AtomicU64 = AtomicU64::new(0);
+/// How long the window stays loaded after it goes to the tray: reopening within this is instant.
+const UNLOAD_AFTER: std::time::Duration = std::time::Duration::from_secs(60);
+
+/// Show the main window, creating it if it was never made (started in the tray) or was unloaded.
+/// Building a webview waits on the main thread, so it is done from a thread of its own.
 fn show_main(app: &AppHandle) {
+    SHOWN.fetch_add(1, Ordering::SeqCst);
     if let Some(w) = app.get_webview_window("main") {
+        if !w.is_visible().unwrap_or(true) || w.is_minimized().unwrap_or(false) {
+            let _ = w.emit("katsudo-opened", ());
+        }
         let _ = w.show();
         let _ = w.unminimize();
         let _ = w.set_focus();
+        return;
     }
+    let app = app.clone();
+    let _ = std::thread::Builder::new().name("katsudo-window".into()).spawn(move || {
+        if app.get_webview_window("main").is_some() {
+            return show_main(&app);
+        }
+        let Some(config) = app.config().app.windows.iter().find(|w| w.label == "main").cloned() else { return };
+        match tauri::WebviewWindowBuilder::from_config(&app, &config).and_then(|b| b.build()) {
+            Ok(w) => {
+                let _ = w.show();
+                let _ = w.set_focus();
+            }
+            Err(e) => eprintln!("katsudo: main window: {e}"),
+        }
+    });
+}
+
+/// Whether the main window was minimized when last seen, to notice it being restored.
+static MINIMIZED: AtomicBool = AtomicBool::new(false);
+
+/// The window went to the tray: hide it now, and free its webview (most of Katsudō's memory)
+/// if it is still hidden a minute later. Tracking carries on without it.
+fn hide_main(window: &tauri::Window) {
+    let _ = window.hide();
+    let shown = SHOWN.load(Ordering::SeqCst);
+    let app = window.app_handle().clone();
+    let _ = std::thread::Builder::new().name("katsudo-unload".into()).spawn(move || {
+        std::thread::sleep(UNLOAD_AFTER);
+        if SHOWN.load(Ordering::SeqCst) != shown {
+            return;
+        }
+        if let Some(w) = app.get_webview_window("main") {
+            if !w.is_visible().unwrap_or(true) {
+                let _ = w.destroy();
+                // KATSUDO_TEST_REOPEN=<secs> (testing): open the window again that long after.
+                if let Some(secs) = std::env::var("KATSUDO_TEST_REOPEN").ok().and_then(|v| v.parse().ok()) {
+                    std::thread::sleep(std::time::Duration::from_secs(secs));
+                    show_main(&app);
+                }
+            }
+        }
+    });
 }
 
 /// `katsudo import <manictime|whatpulse> <source path> <katsudo.db>`: a headless import,
@@ -1139,6 +1200,7 @@ fn main() {
             let db_path = data_dir.join("katsudo.db");
             let write = db::open(&db_path)?;
             db::migrate(&write)?;
+            let _ = write.execute_batch("PRAGMA optimize;");
             let read = db::open(&db_path)?;
             let control = Arc::new(tracker::Control::from_settings(&read));
             let write = Arc::new(Mutex::new(write));
@@ -1146,7 +1208,7 @@ fn main() {
 
             default_autostart(app.handle(), &write);
             listen_for_quit(app.handle().clone());
-            // The window is created hidden; show it unless we were started at sign-in.
+            // Started at sign-in, the window isn't made at all until it is opened; otherwise show it.
             if !std::env::args().any(|a| a == MINIMIZED_ARG) {
                 show_main(app.handle());
             }
@@ -1210,9 +1272,22 @@ fn main() {
         .on_window_event(|window, event| {
             // Closing the main window keeps tracking in the tray; Quit is in the tray menu. Other
             // windows (the break nudge) really close.
-            if let (WindowEvent::CloseRequested { api, .. }, "main") = (event, window.label()) {
-                api.prevent_close();
-                let _ = window.hide();
+            if window.label() != "main" {
+                return;
+            }
+            match event {
+                WindowEvent::CloseRequested { api, .. } => {
+                    api.prevent_close();
+                    hide_main(window);
+                }
+                // Restored from the taskbar: opened again.
+                WindowEvent::Resized(_) | WindowEvent::Focused(_) => {
+                    let min = window.is_minimized().unwrap_or(false);
+                    if MINIMIZED.swap(min, Ordering::SeqCst) && !min {
+                        let _ = window.emit("katsudo-opened", ());
+                    }
+                }
+                _ => {}
             }
         })
         .invoke_handler(tauri::generate_handler![
@@ -1229,6 +1304,7 @@ fn main() {
             tag_report,
             flow_report,
             get_app_keys,
+            get_launch,
             get_nudge,
             nudge_respond,
             nudge_preview,
@@ -1261,6 +1337,13 @@ fn main() {
             backup_now,
             restore_backup
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running Katsudō");
+        .build(tauri::generate_context!())
+        .expect("error while building Katsudō")
+        .run(|_app, event| {
+            // With the window unloaded there may be no window at all: keep running in the tray.
+            // Quit (app.exit) passes a code and still exits.
+            if let tauri::RunEvent::ExitRequested { api, code: None, .. } = event {
+                api.prevent_exit();
+            }
+        });
 }

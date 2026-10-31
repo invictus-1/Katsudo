@@ -94,10 +94,14 @@ pub fn start_kps_sampler() {
             use std::time::{Duration, Instant};
             let mut window: VecDeque<(Instant, u64)> = VecDeque::with_capacity(64);
             let mut day = crate::db::today();
+            let mut last_total = KEYS_TOTAL.load(Ordering::Relaxed);
             loop {
-                std::thread::sleep(Duration::from_millis(20));
+                // Every 20 ms while keys are going; four times a second when the keyboard is still.
+                let still = KPS.load(Ordering::Relaxed) == 0 && KEYS_TOTAL.load(Ordering::Relaxed) == last_total;
+                std::thread::sleep(Duration::from_millis(if still { 250 } else { 20 }));
                 let now = Instant::now();
                 let total = KEYS_TOTAL.load(Ordering::Relaxed);
+                last_total = total;
                 window.push_back((now, total));
                 while window.front().is_some_and(|(t, _)| now.duration_since(*t) > Duration::from_secs(1)) {
                     window.pop_front();

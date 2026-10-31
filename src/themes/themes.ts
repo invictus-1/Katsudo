@@ -1,5 +1,5 @@
 export type ThemeId = 'ronin' | 'ukiyoe' | 'steampunk' | 'ramen' | 'phosphor' | 'arcade' | 'synthwave' | 'anime' | 'beige' | 'cyberpunk' | 'starship' | 'signal' | 'dark' | 'light' | 'vapor' | 'vapornight';
-export type ThemeChoice = ThemeId | 'mixtape';
+export type ThemeChoice = ThemeId | 'mixtape' | 'shuffle';
 
 export interface ThemeInfo {
   id: ThemeId;
@@ -31,7 +31,21 @@ export const THEMES: ThemeInfo[] = [
 ];
 
 /** Mixtape plays a different era each local day. */
+const LAST_SHUFFLE = 'katsudo.shuffle-last';
+let shuffled: ThemeId | null = null;
+
+/** Shuffle: pick another era at random (not the one showing, nor the last one picked). */
+export function reshuffle(): ThemeId {
+  let last: string | null = null;
+  try { last = localStorage.getItem(LAST_SHUFFLE); } catch { /* storage unavailable */ }
+  const pool = THEMES.map((t) => t.id).filter((id) => id !== (shuffled ?? last));
+  shuffled = pool[Math.floor(Math.random() * pool.length)];
+  try { localStorage.setItem(LAST_SHUFFLE, shuffled); } catch { /* storage unavailable */ }
+  return shuffled;
+}
+
 export function resolveTheme(choice: string): ThemeId {
+  if (choice === 'shuffle') return shuffled ?? reshuffle();
   if (choice === 'mixtape') {
     const d = new Date();
     const dayNumber = Math.floor((d.getTime() - d.getTimezoneOffset() * 60_000) / 86_400_000);

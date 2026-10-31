@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
+import { listen } from '@tauri-apps/api/event';
 import { api } from './api';
 import { Button, Icon, NavItem, StatusBar } from './ds/katsudo';
 import type { IconName } from './ds/katsudo';
 import { bytesText, dateTime, todayIso, useData } from './lib';
 import { LiveProvider, useLive } from './live';
-import { applyMotion, applyScale, applyTheme, resolveTheme, THEMES, type ThemeId } from './themes/themes';
+import { applyMotion, applyScale, applyTheme, reshuffle, resolveTheme, THEMES, type ThemeId } from './themes/themes';
 import { Welcome } from './themes/Welcome';
 import { transitionEra } from './themes/transitions';
 import { Today } from './views/Today';
@@ -56,6 +57,9 @@ export interface Appearance {
 
 export function App() {
   const [appearance, setAppearance] = useState<Appearance | null>(null);
+  const [shuffles, setShuffles] = useState(0);
+  const latest = useRef<Appearance | null>(null);
+  latest.current = appearance;
 
   useEffect(() => {
     api.settings().then(
@@ -66,7 +70,22 @@ export function App() {
     const vis = () => document.documentElement.classList.toggle('is-hidden', document.hidden);
     vis();
     document.addEventListener('visibilitychange', vis);
-    return () => document.removeEventListener('visibilitychange', vis);
+    // Opened again (from the tray or the taskbar) with Shuffle on: a new era, with its transition.
+    // A fresh page (after the window was unloaded) has already picked one.
+    const opened = listen('katsudo-opened', () => {
+      const a = latest.current;
+      if (a?.theme !== 'shuffle') return;
+      const from = resolveTheme('shuffle');
+      const to = reshuffle();
+      window.setTimeout(() => transitionEra(from, to, a.motion, () => {
+        applyTheme('shuffle');
+        flushSync(() => setShuffles((n) => n + 1));
+      }), 120);
+    });
+    return () => {
+      document.removeEventListener('visibilitychange', vis);
+      opened.then((off) => off());
+    };
   }, []);
 
   useEffect(() => {
@@ -76,7 +95,7 @@ export function App() {
     api.setOverlayEra(resolveTheme(appearance.theme)).catch(() => {});
     applyScale(appearance.scale);
     applyMotion(appearance.motion);
-  }, [appearance]);
+  }, [appearance, shuffles]);
 
   // A new era plays its transition: the update has to land in the DOM before the browser
   // captures the new look, so render synchronously and set the era straight away.
@@ -160,6 +179,7 @@ function Shell({ appearance, onAppearance }: { appearance: Appearance; onAppeara
       id: `era-${t.id}`, icon: 'star' as const, label: `Era: ${t.name}`, hint: t.era, keywords: `theme look ${t.id} ${t.blurb}`, run: () => setEra(t.id),
     })),
     { id: 'era-mixtape', icon: 'star', label: 'Era: Mixtape', hint: 'a different era each day', keywords: 'theme look random daily', run: () => setEra('mixtape') },
+    { id: 'era-shuffle', icon: 'star', label: 'Era: Shuffle', hint: 'a new era every time you open Katsudō', keywords: 'theme look random cycle shuffle', run: () => setEra('shuffle') },
     {
       id: 'motion', icon: 'play', label: appearance.motion ? 'Turn animations off' : 'Turn animations on', keywords: 'motion reduce',
       run: () => { onAppearance({ ...appearance, motion: !appearance.motion }); api.setSetting('motion', String(!appearance.motion)); },

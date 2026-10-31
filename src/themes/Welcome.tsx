@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import type { ThemeId } from './themes';
 import { SynthFloor } from './Hero';
 import { Hanko, NAME } from '../kanji';
@@ -25,14 +26,22 @@ export function Welcome({ theme, enabled }: { theme: ThemeId; enabled: boolean }
 
   useEffect(() => {
     if (phase !== 'wait') return;
+    let cancelled = false;
     const start = () => {
       if (document.hidden) return;
       document.removeEventListener('visibilitychange', start);
       setPhase(window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'done' : 'play');
     };
-    start();
-    document.addEventListener('visibilitychange', start);
-    return () => document.removeEventListener('visibilitychange', start);
+    // Once per run: the window's page is unloaded in the tray and loads again when opened.
+    invoke<number>('get_launch').then((launch) => {
+      if (cancelled) return;
+      let seen: string | null = null;
+      try { seen = localStorage.getItem('katsudo.welcomed'); localStorage.setItem('katsudo.welcomed', String(launch)); } catch { /* storage unavailable */ }
+      if (seen === String(launch)) return setPhase('done');
+      start();
+      document.addEventListener('visibilitychange', start);
+    }, () => setPhase('done'));
+    return () => { cancelled = true; document.removeEventListener('visibilitychange', start); };
   }, [phase]);
 
   useEffect(() => {

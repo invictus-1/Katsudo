@@ -210,7 +210,8 @@ pub fn start() {
                             });
                         }
                     }
-                    _ => std::thread::sleep(Duration::from_millis(100)),
+                    // Waiting for OBS to connect, or switched off (then it only checks once a second).
+                    _ => std::thread::sleep(Duration::from_millis(if listener.is_some() { 100 } else { 1000 })),
                 }
             }
         })
