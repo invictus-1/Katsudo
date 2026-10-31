@@ -377,6 +377,19 @@ fn set_autostart(app: AppHandle, enabled: bool) -> CmdResult<()> {
 /// Turn "start with Windows" on once, on the first run of an installed copy. Builds run
 /// from the source tree (target\) never register themselves.
 fn default_autostart(app: &AppHandle, write: &Mutex<Connection>) {
+    // Test, portable and demo copies (and anything a test installer starts) never touch
+    // autostart: it is one entry per user, and it belongs to the installed copy.
+    if ["KATSUDO_DATA_DIR", "KATSUDO_SETUP_TEST", "KATSUDO_DEMO"].iter().any(|v| std::env::var_os(v).is_some()) {
+        return;
+    }
+    let installed = std::env::current_exe()
+        .map(|p| !p.components().any(|c| c.as_os_str().eq_ignore_ascii_case("target")))
+        .unwrap_or(false)
+        && !cfg!(debug_assertions);
+    // An entry left pointing at a moved or removed copy is rewritten to point at this one.
+    if installed && app.autolaunch().is_enabled().unwrap_or(false) {
+        let _ = app.autolaunch().enable();
+    }
     let Ok(conn) = write.lock() else { return };
     if db::get_setting(&conn, "autostart_initialized").is_some() {
         return;
@@ -392,10 +405,7 @@ fn default_autostart(app: &AppHandle, write: &Mutex<Connection>) {
         let _ = db::set_setting(&conn, "autostart_initialized", "true");
         return;
     }
-    let installed = std::env::current_exe()
-        .map(|p| !p.components().any(|c| c.as_os_str().eq_ignore_ascii_case("target")))
-        .unwrap_or(false);
-    if installed && !cfg!(debug_assertions) {
+    if installed {
         if let Err(e) = app.autolaunch().enable() {
             eprintln!("katsudo: could not enable autostart: {e}");
         }
