@@ -194,6 +194,7 @@ function Shell({ appearance, onAppearance }: { appearance: Appearance; onAppeara
 
   return (
     <div className="shell">
+      <a className="skip-link" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to content</a>
       <aside className="sidebar">
         <div className="brand"><Hanko /><span>Katsudō</span></div>
         <button className="nav-search" onClick={() => setPalette(true)}>
@@ -217,7 +218,7 @@ function Shell({ appearance, onAppearance }: { appearance: Appearance; onAppeara
         </div>
       </aside>
       {palette && <Palette commands={commands} onClose={() => setPalette(false)} onDay={openDay} />}
-      <main className="main" style={{ ['--page-kanji' as string]: `"${PAGE_KANJI[view] ?? ''}"` }}>
+      <main id="main" tabIndex={-1} className="main" style={{ ['--page-kanji' as string]: `"${PAGE_KANJI[view] ?? ''}"` }}>
         {view === 'today' && <Today theme={theme} />}
         {view === 'timeline' && <TimelineView key={timelineDay ?? 'today'} initialDay={timelineDay ?? undefined} />}
         {view === 'apps' && <Applications firstDay={s?.first_day ?? null} />}

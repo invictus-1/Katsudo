@@ -108,10 +108,11 @@ function Sessions({ sessions, threshold }: { sessions: RhythmSession[]; threshol
           {sessions.map((s) => {
             const secs = s.end - s.start;
             return [
-              <tr key={s.id} className={open === s.id ? 'is-open' : undefined} onClick={() => setOpen(open === s.id ? null : s.id)}
-                tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(open === s.id ? null : s.id); } }}
-                aria-expanded={open === s.id}>
-                <td className="data-md">{dateTime(s.start)}</td>
+              <tr key={s.id} className={open === s.id ? 'is-open' : undefined} onClick={() => setOpen(open === s.id ? null : s.id)}>
+                <td className="data-md">
+                  <button type="button" className="rh-row-btn" aria-expanded={open === s.id} aria-label={`${dateTime(s.start)}: show this session second by second`}
+                    onClick={(e) => { e.stopPropagation(); setOpen(open === s.id ? null : s.id); }}>{dateTime(s.start)}</button>
+                </td>
                 <td className="text-strong">{s.app}</td>
                 <td className="data-md">{clock(secs)}</td>
                 <td className="data-md">{formatCount(s.keys)}</td>

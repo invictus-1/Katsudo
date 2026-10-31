@@ -205,7 +205,7 @@
             (l.segments || []).map(function (g, j) {
               var label = (g.title ? g.title + ' · ' : '') + formatClock(g.from) + '–' + formatClock(g.to);
               return h('span', {
-                key: j, className: 'kt-tl-seg kt-fill-' + (g.tone || 'amber'), title: label, 'aria-label': label,
+                key: j, className: 'kt-tl-seg kt-fill-' + (g.tone || 'amber'), title: label, role: 'img', 'aria-label': label,
                 style: { left: pct(g.from), width: ((Math.min(e, g.to) - Math.max(s, g.from)) / span * 100) + '%' }
               });
             }),
@@ -234,7 +234,7 @@
           return h('div', { key: wi, className: 'kt-cal-week' }, w.map(function (v, di) {
             return v === null
               ? h('span', { key: di, className: 'kt-cal-cell is-pad' })
-              : h('span', { key: di, className: 'kt-cal-cell kt-heat-' + heatLevel(v, max), 'data-tip': fmt(v), 'aria-label': fmt(v) });
+              : h('span', { key: di, className: 'kt-cal-cell kt-heat-' + heatLevel(v, max), 'data-tip': fmt(v), role: 'img', 'aria-label': fmt(v) });
           }));
         }))),
       p.legend !== false ? h('div', { className: 'kt-cal-legend data-sm' },
@@ -297,7 +297,7 @@
     for (var k in counts) if (counts[k] > max) max = counts[k];
     var compact = layout === 'compact';
     var rows = compact ? 'repeat(5, var(--kt-kb-row))' : 'var(--kt-kb-row) var(--kt-kb-fgap) repeat(5, var(--kt-kb-row))';
-    return h('div', { className: cx('kt-kb', 'kt-kb-' + layout, p.className), role: 'img', 'aria-label': p.label || 'Keyboard heatmap' },
+    return h('div', { className: cx('kt-kb', 'kt-kb-' + layout, p.className), role: 'group', 'aria-label': p.label || 'Keyboard heatmap' },
       h('div', { className: 'kt-kb-rows', style: { '--kt-kb-units': units, gridTemplateColumns: 'repeat(' + units * 4 + ', 1fr)', gridTemplateRows: rows } },
         kbKeys(layout).map(function (key, i) {
           var n = counts[key.id] || 0, lv = heatLevel(n, max, true);
@@ -307,7 +307,7 @@
           return h('span', {
             key: i, className: cx('kt-kb-key', 'kt-heat-' + lv, 'data-sm', top && 'is-top'),
             style: { gridColumn: (Math.round(key.x * 4) + 1) + ' / span ' + Math.round(key.w * 4), gridRow: row + ' / span ' + key.h },
-            'data-tip': key.tip + ' \u00b7 ' + formatCount(n), 'aria-label': key.tip + ': ' + formatCount(n)
+            'data-tip': key.tip + ' \u00b7 ' + formatCount(n), role: 'img', 'aria-label': key.tip + ': ' + formatCount(n)
           }, key.label);
         })));
   }

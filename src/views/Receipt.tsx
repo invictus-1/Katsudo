@@ -166,13 +166,17 @@ function ReceiptBody({ day, firstDay, onClose }: { day: string; firstDay: string
   const tags = useData(api.tags, []);
   const slip = useRef<HTMLDivElement>(null);
   const [error, setError] = useState('');
+  const dialog = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    const back = document.activeElement as HTMLElement | null;
+    dialog.current?.focus();
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
     document.body.classList.add('rc-open');
     return () => {
       window.removeEventListener('keydown', onKey);
       document.body.classList.remove('rc-open');
+      back?.focus?.();
     };
   }, [onClose]);
 
@@ -192,7 +196,7 @@ function ReceiptBody({ day, firstDay, onClose }: { day: string; firstDay: string
   // On <body>, outside the app, so printing can leave everything else out.
   return createPortal(
     <div className="rc-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="rc-dialog" role="dialog" aria-modal="true" aria-label={`Receipt for ${day}`}>
+      <div className="rc-dialog" role="dialog" aria-modal="true" aria-label={`Receipt for ${day}`} ref={dialog} tabIndex={-1}>
         <div className="rc-tools">
           <Button size="sm" icon="export" onClick={() => window.print()} disabled={!data.data}>Print</Button>
           <Button size="sm" icon="export" onClick={saveImage} disabled={!data.data}>Save image</Button>

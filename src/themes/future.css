@@ -12,7 +12,7 @@
 [data-theme="anime"] .kt-panel-head { border-bottom: 2px solid var(--cel); }
 [data-theme="anime"] .kt-panel-head .kt-label { font-family: var(--font-display); font-size: 15px; letter-spacing: .06em; color: var(--cel); }
 [data-theme="anime"] .kt-btn { border: 2px solid var(--cel); box-shadow: 2px 2px 0 var(--cel); }
-[data-theme="anime"] .kt-btn-primary { color: #fff; }
+[data-theme="anime"] .kt-btn-primary { color: var(--on-data); }
 [data-theme="anime"] .sidebar { background: linear-gradient(180deg, #ffd6a5, #ffc2d1); border-right: 2px solid var(--cel); }
 .hero.hero-anime { background: linear-gradient(180deg, #7fd0ff 0%, #bfe6ff 40%, #ffd1e0 78%, #ffe8c9 100%); border: 2px solid var(--cel); box-shadow: 4px 4px 0 var(--cel); }
 .hero-anime .hero-live { background: #fffaf2; border: 2px solid var(--cel); box-shadow: 3px 3px 0 var(--cel); }

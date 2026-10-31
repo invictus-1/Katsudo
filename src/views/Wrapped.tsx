@@ -145,7 +145,7 @@ function Cards({ y, hidden, onHide, onSave }: { y: Year; hidden: Set<string>; on
       <Card id="day" kicker="Your day" onSave={onSave}>
         <div className="wr-headline"><em>{who.title}</em></div>
         <p className="wr-line">{who.line} Peak hour: {clockHour(who.peak)}.</p>
-        <div className="wr-hours" aria-label="Keys per hour of the day">
+        <div className="wr-hours" role="img" aria-label="Keys per hour of the day">
           {y.hours.map((v, i) => <span key={i} className={i === who.peak ? 'is-peak' : ''} style={{ height: `${Math.max(2, (v / topHour) * 100)}%` }} />)}
         </div>
         <div className="wr-hours-axis"><span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>11 PM</span></div>
