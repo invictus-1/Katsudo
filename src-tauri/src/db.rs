@@ -91,6 +91,12 @@ CREATE TABLE IF NOT EXISTS tag_rule (
   tag_id INTEGER NOT NULL REFERENCES tag(id) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS tag_day (day TEXT NOT NULL, tag_id INTEGER NOT NULL, secs INTEGER NOT NULL, PRIMARY KEY (day, tag_id)) WITHOUT ROWID;
+-- Flow sessions (see flow.rs), by the local day they started; task > 0 is a tag, < 0 minus an app.
+CREATE TABLE IF NOT EXISTS flow_session (
+  start INTEGER PRIMARY KEY, end INTEGER NOT NULL, day TEXT NOT NULL, task INTEGER NOT NULL,
+  app_id INTEGER NOT NULL, focus INTEGER NOT NULL, breaks INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS flow_session_day ON flow_session (day);
 -- How the monitors were arranged on a day (JSON list of {x, y, w, h, primary}).
 CREATE TABLE IF NOT EXISTS mouse_layout (day TEXT PRIMARY KEY, screens TEXT NOT NULL);
 -- Lifetime amounts a source knows but can't date (WhatPulse totals beyond the pulses it still

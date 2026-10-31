@@ -33,6 +33,7 @@ Each import shows what it found first, backs up Katsudō, runs in one transactio
 | ![Year in review](docs/screenshots/year-in-review.png) | **Year in review.** A Spotify-Wrapped-style set of cards for any year: hours, top apps and sites, keys, your peak hour, rhythm games, vs last year. Hide anything, save as images. |
 | ![Compare periods](docs/screenshots/compare.png) | **Compare periods.** This week vs last, this month vs a year ago, or any two ranges: totals or per day, day by day, hour of day, apps and sites. |
 | ![Command palette](docs/screenshots/palette.png) | **Ctrl K everything.** Jump anywhere, switch era, or search every app, window and site in your whole history, with total time, first and last seen and busiest days, in milliseconds. |
+| ![Flow](docs/screenshots/flow.png) | **Flow and tags.** Deep-work stretches found for you (one task, no long breaks or switching), with your best hours and longest sessions. Tag time by app, window or site with rules that re-tag your whole history in seconds; export to CSV. |
 | ![Timeline](docs/screenshots/timeline.png) | **Timeline.** Activity, apps, documents and keys per hour for any day, ManicTime style. |
 | ![Stream overlay](docs/screenshots/overlay.png) | **Stream overlay for OBS.** Keys per second and a key viewer with rising trails, in any era, from a local page. |
 
@@ -90,7 +91,7 @@ Useful switches: `KATSUDO_DATA_DIR=<folder>` runs a separate copy on its own dat
 
 ## Roadmap
 
-The plan lives inside the app (Roadmap in the sidebar), where you can star what you want next. Coming up: tags and auto-rules, flow (deep-work) detection, daily receipts, era transitions, more eras, gentle break nudges, meeting and media awareness, merging several PCs, an optional fully-local "ask your history" model, hand and finger balance, per-app keyboard heatmaps, ISO layouts, signed releases and an optimization pass before 1.0.
+The plan lives inside the app (Roadmap in the sidebar), where you can star what you want next. Coming up: daily receipts, era transitions, more eras, gentle break nudges, meeting and media awareness, merging several PCs, an optional fully-local "ask your history" model, hand and finger balance, per-app keyboard heatmaps, ISO layouts, signed releases and an optimization pass before 1.0.
 
 ## Layout
 

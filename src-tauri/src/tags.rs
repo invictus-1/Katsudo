@@ -45,7 +45,7 @@ pub struct Setup {
     pub building: bool,
 }
 
-fn meta_i64(conn: &Connection, key: &str) -> i64 {
+pub(crate) fn meta_i64(conn: &Connection, key: &str) -> i64 {
     conn.query_row("SELECT value FROM meta WHERE key = ?1", [key], |r| r.get::<_, String>(0))
         .optional()
         .ok()
@@ -54,7 +54,7 @@ fn meta_i64(conn: &Connection, key: &str) -> i64 {
         .unwrap_or(0)
 }
 
-fn set_meta(conn: &Connection, key: &str, value: i64) -> Result<()> {
+pub(crate) fn set_meta(conn: &Connection, key: &str, value: i64) -> Result<()> {
     conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?1, ?2)", params![key, value.to_string()])?;
     Ok(())
 }
@@ -139,7 +139,8 @@ impl Matcher {
         self.rules.is_empty()
     }
 
-    fn app(&mut self, conn: &Connection, id: i64) -> &(String, String) {
+    /// An app's (key, name), lower-case.
+    pub(crate) fn app(&mut self, conn: &Connection, id: i64) -> &(String, String) {
         self.apps.entry(id).or_insert_with(|| {
             conn.query_row("SELECT key, name FROM app WHERE id = ?1", [id], |r| Ok((r.get::<_, String>(0)?.to_lowercase(), r.get::<_, String>(1)?.to_lowercase())))
                 .unwrap_or_default()
@@ -183,22 +184,18 @@ impl Matcher {
     }
 }
 
-/// Tagged pieces of time: app segments split where window titles change.
-pub fn pieces(conn: &Connection, m: &mut Matcher, apps: &[Row], docs: &[Row]) -> Vec<Row> {
+/// App segments split where window titles change: (start, end, app, title or 0), in order.
+pub fn split(apps: &[Row], docs: &[Row]) -> Vec<(i64, i64, i64, i64)> {
     let mut docs: Vec<Row> = docs.to_vec();
     docs.sort_by_key(|d| d.start);
-    let mut out: Vec<Row> = Vec::new();
-    let push = |out: &mut Vec<Row>, start: i64, end: i64, tag: i64| {
-        if end <= start {
-            return;
-        }
-        match out.last_mut() {
-            Some(last) if last.ref_id == tag && last.end == start => last.end = end,
-            _ => out.push(Row { start, end, ref_id: tag, source: 0 }),
-        }
-    };
     let mut apps: Vec<Row> = apps.to_vec();
     apps.sort_by_key(|a| a.start);
+    let mut out = Vec::new();
+    let mut push = |start: i64, end: i64, app: i64, title: i64| {
+        if end > start {
+            out.push((start, end, app, title));
+        }
+    };
     let mut first = 0;
     for a in &apps {
         while first < docs.len() && docs[first].end <= a.start {
@@ -210,11 +207,24 @@ pub fn pieces(conn: &Connection, m: &mut Matcher, apps: &[Row], docs: &[Row]) ->
             if e <= cur {
                 continue;
             }
-            push(&mut out, cur, s.max(cur), m.tag(conn, a.ref_id, 0));
-            push(&mut out, s.max(cur), e, m.tag(conn, a.ref_id, d.ref_id));
+            push(cur, s.max(cur), a.ref_id, 0);
+            push(s.max(cur), e, a.ref_id, d.ref_id);
             cur = e;
         }
-        push(&mut out, cur, a.end, m.tag(conn, a.ref_id, 0));
+        push(cur, a.end, a.ref_id, 0);
+    }
+    out
+}
+
+/// Tagged pieces of time: app segments split where window titles change.
+pub fn pieces(conn: &Connection, m: &mut Matcher, apps: &[Row], docs: &[Row]) -> Vec<Row> {
+    let mut out: Vec<Row> = Vec::new();
+    for (start, end, app, title) in split(apps, docs) {
+        let tag = m.tag(conn, app, title);
+        match out.last_mut() {
+            Some(last) if last.ref_id == tag && last.end == start => last.end = end,
+            _ => out.push(Row { start, end, ref_id: tag, source: 0 }),
+        }
     }
     out
 }
@@ -288,6 +298,10 @@ pub fn refresh_soon(db_path: std::path::PathBuf, write: Arc<Mutex<Connection>>) 
             eprintln!("katsudo: tag rollup: {e}");
         }
         BUILDING.store(false, Ordering::SeqCst);
+        // Flow sessions follow the tags.
+        if let Err(e) = crate::flow::refresh(&db_path, &write) {
+            eprintln!("katsudo: flow rollup: {e}");
+        }
     });
 }
 

@@ -28,6 +28,44 @@ export interface DayView {
   apps: AppTotal[];
   hourly: { hour: number; keys: number; clicks: number }[];
   week: DaySummary[];
+  flow: DayFlow;
+}
+export interface FlowSession {
+  start: number;
+  end: number;
+  /** A tag id (> 0), or minus an app id. */
+  task: number;
+  app_id: number;
+  focus: number;
+  breaks: number;
+  /** The tag's name or the app's. */
+  label: string;
+  /** The tag's colour; null for an app. */
+  color: string | null;
+  /** The app used most. */
+  app: string;
+}
+export interface DayFlow {
+  /** from/to in hours from the day's midnight. */
+  sessions: (FlowSession & { from: number; to: number })[];
+  /** Flow seconds on each of the seven days ending with this one. */
+  week: number[];
+  /** The session you're in right now. */
+  now: FlowSession | null;
+}
+export interface FlowTask { task: number; label: string; color: string | null; secs: number; sessions: number }
+export interface FlowReport {
+  minutes: number;
+  total: number;
+  count: number;
+  active: number;
+  days: [string, number][];
+  /** [weekday, Monday first][hour]: seconds in flow. */
+  week_hours: number[][];
+  tasks: FlowTask[];
+  skipped: FlowTask[];
+  longest: FlowSession[];
+  untagged: boolean;
 }
 export interface RangeView { days: DaySummary[]; apps: AppTotal[] }
 export interface Stat { label: string; value: string }
@@ -67,6 +105,8 @@ export interface ComparePeriod {
   hours: number[];
   apps: WrappedNamed[];
   sites: WrappedNamed[];
+  flow_secs: number;
+  flow_sessions: number;
 }
 export interface Wrapped {
   year: number;
@@ -157,6 +197,10 @@ export interface Settings {
   motion: boolean;
   /** JSON: { starred: string[], mine: { id, title, created }[] } */
   roadmap: string;
+  /** Shortest flow session, in minutes. */
+  flow_minutes: number;
+  /** Write-only: JSON list of flow tasks that don't count (the Flow page reads them from its report). */
+  flow_skip?: string;
 }
 export interface Live { keys_today: number; clicks_today: number; kps: number; peak_kps: number }
 export interface ScanResult {
@@ -207,6 +251,7 @@ export const api = {
   tags: () => invoke<{ tags: Tag[]; rules: TagRule[]; building: boolean }>('get_tags'),
   saveTags: (tags: Tag[], rules: TagRule[]) => invoke<{ tags: Tag[]; rules: TagRule[]; building: boolean }>('save_tags', { tags, rules }),
   tagReport: (from: string, to: string) => invoke<TagReport>('tag_report', { from, to }),
+  flowReport: (from: string, to: string) => invoke<FlowReport>('flow_report', { from, to }),
   wrapped: (year: number | null) => invoke<Wrapped>('get_wrapped', { year }),
   compare: (a: { from: string; to: string }, b: { from: string; to: string }) =>
     invoke<{ a: ComparePeriod; b: ComparePeriod }>('get_compare', { aFrom: a.from, aTo: a.to, bFrom: b.from, bTo: b.to }),

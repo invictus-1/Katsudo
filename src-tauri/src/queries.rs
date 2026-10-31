@@ -71,6 +71,8 @@ pub struct DayView {
     pub tags_lane: Vec<LaneSeg>,
     /// Time tagged by your rules (ref = tag id).
     pub rule_tags: Vec<LaneSeg>,
+    /// Flow sessions touching the day, live.
+    pub flow: crate::flow::DayFlow,
     pub names: HashMap<i64, String>,
     pub titles: HashMap<i64, String>,
     pub apps: Vec<AppTotal>,
@@ -318,6 +320,7 @@ pub fn day(conn: &Connection, day: &str, live: &[Seg]) -> Result<DayView> {
         docs_lane: to_hours(docs_lane),
         tags_lane: to_hours(tags_lane),
         rule_tags: to_hours(rule_tags),
+        flow: crate::flow::day(conn, day, live)?,
         names,
         titles,
         apps: apps(conn, day, day, live)?,

@@ -49,6 +49,9 @@ function TodayBody({ data, theme, keys }: { data: DayView; theme: ThemeId; keys:
         <StatTile label="Keystrokes" icon="keyboard" tone="cyan" value={formatCount(keysNow)} data={series((d) => d.keys)} />
         <StatTile label="Clicks" icon="mouse" tone="rose" value={formatCount(clicksNow)} data={series((d) => d.clicks)} />
         <StatTile label="Downloaded" icon="network" tone="lime" value={down} unit={downUnit} data={series((d) => d.download)} />
+        <StatTile label={data.flow.now ? `In flow · ${data.flow.now.label}` : `Flow${data.flow.sessions.length ? ` · ${data.flow.sessions.length} ${data.flow.sessions.length === 1 ? 'session' : 'sessions'}` : ''}`}
+          icon="star" tone="lime" value={formatDuration(data.flow.week[6] ?? 0)} data={data.flow.week}
+          unit={data.flow.now ? `now ${formatDuration(data.flow.now.end - data.flow.now.start)}` : undefined} />
         <StatTile label="Uptime" icon="clock" tone="sky" value={(t.uptime_ms / 3_600_000).toFixed(1)} unit="h" data={series((d) => d.uptime_ms)} />
       </div>
       {empty ? (

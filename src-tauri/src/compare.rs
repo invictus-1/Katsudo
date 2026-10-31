@@ -26,6 +26,9 @@ pub struct Period {
     pub apps: Vec<Named>,
     /// Domains only.
     pub sites: Vec<Named>,
+    /// Seconds in flow, and flow sessions.
+    pub flow_secs: i64,
+    pub flow_sessions: i64,
 }
 
 fn period(conn: &Connection, from: &str, to: &str) -> Result<Period> {
@@ -42,7 +45,8 @@ fn period(conn: &Connection, from: &str, to: &str) -> Result<Period> {
         .take(15)
         .map(|(_, n, _, secs)| Named { name: n.trim_start_matches("www.").to_string(), secs })
         .collect();
-    Ok(Period { from: from.into(), to: to.into(), totals, active_days, days, hours: wrapped::hour_profile(conn, from, to)?, apps, sites })
+    let (flow_secs, flow_sessions) = crate::flow::totals(conn, from, to)?;
+    Ok(Period { from: from.into(), to: to.into(), totals, active_days, days, hours: wrapped::hour_profile(conn, from, to)?, apps, sites, flow_secs, flow_sessions })
 }
 
 #[derive(Serialize)]

@@ -20,9 +20,10 @@ import { Palette, type Command } from './views/Palette';
 import { WrappedView } from './views/Wrapped';
 import { CompareView } from './views/Compare';
 import { TagsView } from './views/Tags';
+import { FlowView } from './views/Flow';
 import { Hanko, PAGE_KANJI } from './kanji';
 
-type View = 'today' | 'timeline' | 'apps' | 'input' | 'rhythm' | 'network' | 'wrapped' | 'compare' | 'tags' | 'import' | 'backups' | 'roadmap' | 'settings';
+type View = 'today' | 'timeline' | 'apps' | 'input' | 'rhythm' | 'network' | 'wrapped' | 'compare' | 'tags' | 'flow' | 'import' | 'backups' | 'roadmap' | 'settings';
 
 const NAV: { id: View; label: string; icon: IconName; kbd?: string }[] = [
   { id: 'today', label: 'Today', icon: 'clock', kbd: '1' },
@@ -34,6 +35,7 @@ const NAV: { id: View; label: string; icon: IconName; kbd?: string }[] = [
   { id: 'wrapped', label: 'Year in review', icon: 'calendar' },
   { id: 'compare', label: 'Compare', icon: 'timeline' },
   { id: 'tags', label: 'Tags', icon: 'tag' },
+  { id: 'flow', label: 'Flow', icon: 'star' },
 ];
 const NAV_DATA: { id: View; label: string; icon: IconName }[] = [
   { id: 'import', label: 'Import', icon: 'import' },
@@ -186,6 +188,7 @@ function Shell({ appearance, onAppearance }: { appearance: Appearance; onAppeara
         {view === 'wrapped' && <WrappedView />}
         {view === 'compare' && <CompareView />}
         {view === 'tags' && <TagsView firstDay={s?.first_day ?? null} />}
+        {view === 'flow' && <FlowView firstDay={s?.first_day ?? null} />}
         {view === 'network' && <Network firstDay={s?.first_day ?? null} undated={s?.undated ?? null} />}
         {view === 'import' && <Import onImported={status.reload} sources={s?.sources ?? []} />}
         {view === 'backups' && <Backups dataDir={s?.data_dir ?? ''} />}

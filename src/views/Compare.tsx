@@ -201,6 +201,17 @@ export function CompareView() {
                 <Delta a={value(c.a, m.key)} b={value(c.b, m.key)} />
               </div>
             ))}
+            {(c.a.flow_secs > 0 || c.b.flow_secs > 0) && (() => {
+              const f = (p: ComparePeriod) => (perDay ? p.flow_secs / Math.max(1, p.active_days) : p.flow_secs);
+              return (
+                <div className="kt-stat cmp-metric">
+                  <div className="kt-label">Time in flow{perDay ? ' · a day' : ''}</div>
+                  <div className="cmp-metric-a">{METRICS[0].fmt(f(c.a))}</div>
+                  <div className="cmp-metric-b data-sm">vs {METRICS[0].fmt(f(c.b))}</div>
+                  <Delta a={f(c.a)} b={f(c.b)} />
+                </div>
+              );
+            })()}
           </div>
 
           <Panel title="Day by day" action={<Segmented size="sm" label="Metric" options={CHART_METRICS} value={chart} onChange={(v) => setChart(v as MetricKey)} />}>

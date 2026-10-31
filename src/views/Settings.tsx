@@ -86,6 +86,15 @@ export function SettingsView({ status, appearance, onAppearance }: {
                 options={['2', '5', '10', '15'].map((m) => ({ value: m, label: `${m} min` }))}
                 onChange={(v) => api.setSetting('idle_minutes', v)} />
             </div>
+            <div className="setting-row">
+              <div>
+                <div className="text-body">Flow needs at least</div>
+                <div className="text-small faint">The shortest stretch on one task that counts as a flow session.</div>
+              </div>
+              <Segmented label="Flow needs at least" defaultValue={String(data.flow_minutes)}
+                options={['15', '25', '45', '60'].map((m) => ({ value: m, label: `${m} min` }))}
+                onChange={(v) => api.setSetting('flow_minutes', v)} />
+            </div>
           </div>
         </Panel>
       </div>

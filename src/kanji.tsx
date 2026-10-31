@@ -13,6 +13,7 @@ export const PAGE_KANJI: Record<string, string> = {
   wrapped: '年間',
   compare: '比較',
   tags: 'タグ',
+  flow: '集中',
   import: '取込',
   backups: '保存',
   roadmap: '道標',

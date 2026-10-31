@@ -1,0 +1,30 @@
+/* Flow page. Shares the bar and list styles of the Tags page (tags.css). */
+
+.fl-hint { margin: 0; padding: var(--space-3) var(--space-4); color: var(--ink-muted); background: var(--surface-100);
+  border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.fl-best { margin: var(--space-4) 0 0; color: var(--ink-muted); }
+.fl-best strong { color: var(--ink); font-weight: 600; }
+
+.fl-grid { display: grid; gap: 3px; }
+.fl-grid-row { display: grid; grid-template-columns: 36px repeat(24, minmax(0, 1fr)); gap: 3px; align-items: center; }
+.fl-grid-day { color: var(--ink-faint); }
+.fl-cell { position: relative; aspect-ratio: 1; min-height: 10px; border-radius: 2px;
+  background: color-mix(in srgb, var(--lime) calc(var(--v) * 100%), color-mix(in srgb, var(--ink) 6%, transparent)); }
+.fl-cell[data-tip]:hover { outline: 1px solid var(--ink); outline-offset: 1px; }
+.fl-cell[data-tip]:hover::after {
+  content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translateX(-50%); z-index: 30; padding: 4px 8px;
+  white-space: nowrap; pointer-events: none; font: 500 13px/18px var(--font-mono); color: var(--ink); background: var(--surface-000);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm); box-shadow: var(--shadow-pop); }
+.fl-grid-axis span { color: var(--ink-faint); text-align: left; white-space: nowrap; }
+
+.fl-tasks, .fl-sessions { list-style: none; margin: 0; padding: 0; }
+.fl-tasks li { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto 44px auto; align-items: center; gap: var(--space-3);
+  padding: 6px var(--space-4); border-bottom: 1px solid var(--line); }
+.fl-tasks li button { opacity: 0; transition: opacity .12s; }
+.fl-tasks li:hover button, .fl-tasks li button:focus-visible, .fl-tasks.is-skipped li button { opacity: 1; }
+.fl-tasks.is-skipped li { color: var(--ink-muted); }
+.fl-skip-head { padding: var(--space-4) var(--space-4) var(--space-2); }
+.fl-sessions li { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3);
+  padding: 10px var(--space-4); border-bottom: 1px solid var(--line); }
+.fl-session-main { min-width: 0; }
+.fl-empty { padding: var(--space-4); margin: 0; }

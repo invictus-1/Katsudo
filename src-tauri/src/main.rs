@@ -3,6 +3,7 @@
 mod backup;
 mod compare;
 mod db;
+mod flow;
 mod hooks;
 mod import;
 mod keys;
@@ -62,6 +63,8 @@ fn live(state: &Inner) -> Vec<tracker::Seg> {
 
 #[tauri::command]
 fn get_day(state: State<AppState>, day: String) -> CmdResult<queries::DayView> {
+    // Keep the stored flow sessions (the week's sparkline) caught up, at most every five minutes.
+    flow::refresh_soon(state.0.db_path.clone(), state.0.write.clone(), 300);
     let conn = state.0.read.lock().map_err(err)?;
     queries::day(&conn, &day, &live(&state.0)).map_err(err)
 }
@@ -197,6 +200,23 @@ async fn tag_report(state: State<'_, AppState>, from: String, to: String) -> Cmd
     .map_err(err)
 }
 
+/// Flow sessions over a range, with tags and sessions brought up to date first.
+#[tauri::command]
+async fn flow_report(state: State<'_, AppState>, from: String, to: String) -> CmdResult<flow::Report> {
+    let s = state.0.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        if !tags::is_building() {
+            tags::refresh(&s.db_path, &s.write)?;
+        }
+        flow::refresh(&s.db_path, &s.write)?;
+        let conn = db::open(&s.db_path)?;
+        flow::report(&conn, &from, &to)
+    })
+    .await
+    .map_err(err)?
+    .map_err(err)
+}
+
 /// Write a CSV the page built (a tag report) to the path the user chose.
 #[tauri::command]
 fn save_csv(path: String, data: String) -> CmdResult<()> {
@@ -214,6 +234,10 @@ async fn get_compare(state: State<'_, AppState>, a_from: String, a_to: String, b
     let s = state.0.clone();
     tauri::async_runtime::spawn_blocking(move || {
         search::refresh(&s.db_path, &s.write)?;
+        if !tags::is_building() {
+            tags::refresh(&s.db_path, &s.write)?;
+        }
+        flow::refresh(&s.db_path, &s.write)?;
         let conn = db::open(&s.db_path)?;
         compare::compare(&conn, (&a_from, &a_to), (&b_from, &b_to))
     })
@@ -376,6 +400,7 @@ struct Settings {
     welcome: bool,
     motion: bool,
     roadmap: String,
+    flow_minutes: i64,
 }
 
 #[tauri::command]
@@ -391,6 +416,7 @@ fn get_settings(state: State<AppState>) -> CmdResult<Settings> {
         welcome: db::get_bool(&conn, "welcome", true),
         motion: db::get_bool(&conn, "motion", true),
         roadmap: db::get_setting(&conn, "roadmap").unwrap_or_else(|| "{}".into()),
+        flow_minutes: flow::min_secs(&conn) / 60,
     })
 }
 
@@ -404,6 +430,12 @@ fn set_setting(state: State<AppState>, key: String, value: String) -> CmdResult<
         }
         "track_titles" => c.track_titles.store(value == "true", Ordering::Relaxed),
         "track_input" => c.track_input.store(value == "true", Ordering::Relaxed),
+        "flow_minutes" => {
+            value.parse::<i64>().ok().filter(|m| (5..=240).contains(m)).ok_or("Flow needs 5 to 240 minutes.")?;
+        }
+        "flow_skip" => {
+            serde_json::from_str::<Vec<i64>>(&value).map_err(err)?;
+        }
         "nightly_backup" | "theme" | "ui_scale" | "welcome" | "motion" | "roadmap" => {}
         _ => return Err(format!("unknown setting {key}")),
     }
@@ -879,6 +911,32 @@ fn main() {
         println!("catch-up with nothing new in {:?}", started.elapsed());
         return;
     }
+    if args.get(1).map(String::as_str) == Some("flowtest") {
+        // `katsudo flowtest <db> [from to]`: rebuild every flow session, timed, then a report.
+        let Some(db_file) = args.get(2) else { std::process::exit(2) };
+        let path = PathBuf::from(db_file);
+        let conn = db::open(&path).expect("open");
+        db::migrate(&conn).expect("migrate");
+        conn.execute("DELETE FROM meta WHERE key = 'flow_rollup_key'", []).expect("reset");
+        let write = Mutex::new(conn);
+        tags::refresh(&path, &write).expect("tags");
+        let started = std::time::Instant::now();
+        flow::refresh(&path, &write).expect("refresh");
+        println!("full flow rebuild in {:?}", started.elapsed());
+        let conn = write.lock().unwrap();
+        let (from, to) = (args.get(3).map_or("2000-01-01", |s| s.as_str()), args.get(4).map_or("2030-12-31", |s| s.as_str()));
+        let rep = flow::report(&conn, from, to).expect("report");
+        println!("{} sessions, {:.1} h in flow of {:.1} h active, min {} min", rep.count, rep.total as f64 / 3600.0, rep.active as f64 / 3600.0, rep.minutes);
+        for t in &rep.tasks { println!("  task {} {}: {:.1} h in {} sessions", t.task, t.label, t.secs as f64 / 3600.0, t.sessions); }
+        for l in &rep.longest { println!("  longest {} min: {} ({}), {} breaks", (l.session.end - l.session.start) / 60, l.label, l.app, l.session.breaks); }
+        let hours: Vec<i64> = (0..24).map(|h| rep.week_hours.iter().map(|d| d[h]).sum::<i64>() / 3600).collect();
+        println!("  hours of day: {hours:?}");
+        drop(conn);
+        let started = std::time::Instant::now();
+        flow::refresh(&path, &write).expect("refresh");
+        println!("catch-up with nothing new in {:?}", started.elapsed());
+        return;
+    }
     if args.get(1).map(String::as_str) == Some("wrapped") {
         // `katsudo wrapped <db> <year>`: the year in review as JSON, timed.
         let (Some(db_file), Some(year)) = (args.get(2), args.get(3).and_then(|y| y.parse().ok())) else {
@@ -1128,6 +1186,7 @@ fn main() {
             get_tags,
             save_tags,
             tag_report,
+            flow_report,
             save_csv,
             save_png,
             search_history,

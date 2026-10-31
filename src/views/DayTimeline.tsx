@@ -1,7 +1,7 @@
 import { api, type DayView } from '../api';
 import { Timeline } from '../ds/katsudo';
 import type { TimelineLane } from '../ds/katsudo';
-import { rankRefs, toSegments, useData } from '../lib';
+import { formatDuration, rankRefs, toSegments, useData } from '../lib';
 
 /** The day's lanes, in the design system's fixed order. */
 export function DayTimeline({ data, live, full }: { data: DayView; live?: boolean; full?: boolean }) {
@@ -29,6 +29,17 @@ export function DayTimeline({ data, live, full }: { data: DayView; live?: boolea
     lanes.push({
       label: 'Tags',
       segments: toSegments(data.rule_tags, (s) => (tag(s.ref)?.color ?? 'sky') as 'amber', (s) => tag(s.ref)?.name ?? 'Tag'),
+    });
+  }
+  if (data.flow.sessions.length) {
+    lanes.push({
+      label: 'Flow',
+      segments: data.flow.sessions.map((s) => ({
+        from: Math.max(0, s.from),
+        to: Math.min(24, s.to),
+        tone: (s.color ?? 'lime') as 'lime',
+        title: `${s.label} · ${formatDuration(s.end - s.start)}${s.breaks ? ` · ${s.breaks} short ${s.breaks === 1 ? 'detour' : 'detours'}` : ''}`,
+      })),
     });
   }
   if (data.tags_lane.length) {
