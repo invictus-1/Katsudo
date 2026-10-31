@@ -1,6 +1,6 @@
 [package]
 name = "katsudo"
-version = "0.14.0"
+version = "0.15.0"
 description = "Local-first activity and input tracker"
 edition = "2021"
 
@@ -34,6 +34,7 @@ windows = { version = "0.58", features = [
   "Win32_UI_WindowsAndMessaging",
   "Win32_UI_Input_KeyboardAndMouse",
   "Win32_UI_HiDpi",
+  "Win32_UI_Shell",
   "Win32_NetworkManagement_IpHelper",
   "Win32_NetworkManagement_Ndis",
   "Win32_Networking_WinSock",

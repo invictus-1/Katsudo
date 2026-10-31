@@ -35,6 +35,7 @@ export const ROADMAP: RoadmapItem[] = [
   { id: 'roadmap', stage: 'done', area: 'Polish', version: '0.2', title: 'This roadmap', blurb: 'Planned work and ideas inside the app, with stars and your own notes.' },
   { id: 'layouts', stage: 'done', area: 'Rhythm', version: '0.5', title: 'Full keyboard layouts', blurb: '60%, TKL and full size with the F-row, navigation keys, arrows and numpad. Native tracking tells numpad keys apart from their twins.' },
   { id: 'net-ranges', stage: 'done', area: 'Insight', version: '0.5', title: 'Network by day, week, month, year and all time', blurb: 'The same ranges as Input, with busiest days per range.' },
+  { id: 'breaks', stage: 'done', area: 'Tracking', version: '0.15', title: 'Gentle break nudges', blurb: 'Opt-in: after a long stretch without a break, a small note above the tray. Waits out flow, games and fullscreen, comes sooner after hard typing, never repeats until you have had a break.' },
   { id: 'transitions', stage: 'done', area: 'Look & feel', version: '0.14', title: 'Era transitions', blurb: 'Switching era plays a piece of the one you pick: CRT power-off, pixel dissolve, VHS tracking roll, a Windows 95 window zoom, or a reveal from your click.' },
   { id: 'receipt', stage: 'done', area: 'Look & feel', version: '0.13', title: 'Daily receipt', blurb: 'A thermal-receipt slip for any day, itemised by app with keys per minute, departments from your tags, flow and a real barcode; print it or save it as an image.' },
   { id: 'flow', stage: 'done', area: 'Insight', version: '0.12', title: 'Flow detection', blurb: 'Deep-work stretches found automatically (one task, no long breaks or switching), with your best hours, longest sessions and a Flow lane on the timeline.' },
@@ -57,7 +58,6 @@ export const ROADMAP: RoadmapItem[] = [
 
   // ---- planned: every idea approved for the road to 1.0 (Oct 2026) ----
   { id: 'more-eras', stage: 'planned', area: 'Look & feel', title: 'More eras', blurb: '1992 Vaporwave, 2003 Glass, 2008 Gloss, a print-magazine era. Community eras as simple theme files.' },
-  { id: 'breaks', stage: 'planned', area: 'Tracking', title: 'Gentle break nudges', blurb: 'Opt-in: after long unbroken typing or clicking, a quiet tray hint to stretch. Never a nag, off by default.' },
   { id: 'aware', stage: 'planned', area: 'Tracking', title: 'Meeting and media awareness', blurb: 'Microphone or camera in use, or video playing, counts as present rather than away.' },
   { id: 'multi-pc', stage: 'planned', area: 'Data', title: 'Several PCs, one history', blurb: 'Merge databases from your other machines through a shared folder or the LAN. Still no cloud.' },
   { id: 'ask', stage: 'planned', area: 'Insight', title: 'Ask your history', blurb: 'Optional local model through Ollama: "what did I work on Tuesday afternoon?" answered on your machine only.' },

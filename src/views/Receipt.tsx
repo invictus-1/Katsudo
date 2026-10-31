@@ -5,7 +5,7 @@ import { save } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { api, type DayView, type Tag } from '../api';
 import { Button } from '../ds/katsudo';
-import { parseDay, todayIso, useData } from '../lib';
+import { longestStretch, parseDay, todayIso, useData } from '../lib';
 import './receipt.css';
 
 const OPEN_EVENT = 'katsudo:receipt';
@@ -121,6 +121,7 @@ function ReceiptSlip({ data, firstDay, tags }: { data: DayView; firstDay: string
       )}
       <Line left="SUBTOTAL (ACTIVE)" right={hm(t.active_secs)} />
       <Line left="AWAY (NOT CHARGED)" right={hm(away)} />
+      {present.length > 0 && <Line left="LONGEST STRETCH" right={hm(longestStretch(data.activity))} />}
       {flowSecs > 0 && <Line left={`IN FLOW (${data.flow.sessions.length}×)`} right={hm(flowSecs)} />}
       {longest && <Line sub left={`  LONGEST: ${longest.label.toUpperCase()}`} right={hm(longest.end - longest.start)} />}
       <Rule />

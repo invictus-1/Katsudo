@@ -80,6 +80,13 @@ mod imp {
         }
     }
 
+    /// Windows' own answer to "is now a bad time for a notification": a fullscreen app or game,
+    /// or presentation mode.
+    pub fn fullscreen_busy() -> bool {
+        use windows::Win32::UI::Shell::{SHQueryUserNotificationState, QUNS_BUSY, QUNS_PRESENTATION_MODE, QUNS_RUNNING_D3D_FULL_SCREEN};
+        unsafe { SHQueryUserNotificationState().is_ok_and(|s| s == QUNS_BUSY || s == QUNS_RUNNING_D3D_FULL_SCREEN || s == QUNS_PRESENTATION_MODE) }
+    }
+
     /// Seconds since the last keyboard or mouse input anywhere in the session.
     pub fn idle_secs() -> u64 {
         unsafe {
@@ -155,3 +162,5 @@ pub fn app_display_name(_: &str) -> Option<String> { None }
 pub fn net_totals() -> Option<(u64, u64)> { None }
 #[cfg(not(windows))]
 pub fn screens() -> Vec<Screen> { Vec::new() }
+#[cfg(not(windows))]
+pub fn fullscreen_busy() -> bool { false }

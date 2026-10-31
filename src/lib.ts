@@ -4,6 +4,20 @@ import type { DataTone, TimelineSegment } from './ds/katsudo';
 
 export { formatClock, formatCount, formatDuration } from './ds/katsudo';
 
+/** The longest run of activity without a break (gaps under two minutes don't count), in seconds. */
+export function longestStretch(activity: { from: number; to: number; ref: number }[]): number {
+  const runs = activity.filter((s) => s.ref === 1).sort((a, b) => a.from - b.from);
+  let best = 0;
+  let start = -1;
+  let end = -1;
+  for (const s of runs) {
+    if (start < 0 || s.from - end > 2 / 60) [start, end] = [s.from, s.to];
+    else end = Math.max(end, s.to);
+    best = Math.max(best, end - start);
+  }
+  return Math.round(best * 3600);
+}
+
 // ---- dates (local calendar days as "YYYY-MM-DD") ------------------------------
 
 export function isoDay(d: Date): string {

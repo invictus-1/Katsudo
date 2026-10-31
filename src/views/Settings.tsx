@@ -95,6 +95,18 @@ export function SettingsView({ status, appearance, onAppearance }: {
                 options={['15', '25', '45', '60'].map((m) => ({ value: m, label: `${m} min` }))}
                 onChange={(v) => api.setSetting('flow_minutes', v)} />
             </div>
+            <Switch defaultChecked={data.break_nudges} label="Break nudges"
+              hint="After a long stretch without a break, a small note above the tray suggests one. Never during a flow session, a game or anything fullscreen; sooner after hard typing. Going away for a few minutes resets it."
+              onChange={(v) => api.setSetting('break_nudges', String(v))} />
+            <div className="setting-row">
+              <div>
+                <div className="text-body">Nudge after</div>
+                <div className="text-small faint">Unbroken time at the computer. <button className="link-button" onClick={() => api.nudgePreview()}>Show me one</button></div>
+              </div>
+              <Segmented label="Nudge after" defaultValue={String(data.break_minutes)}
+                options={['45', '60', '90', '120'].map((m) => ({ value: m, label: Number(m) < 60 ? `${m} min` : `${Number(m) / 60} h`.replace('1.5 h', '1½ h') }))}
+                onChange={(v) => api.setSetting('break_minutes', v)} />
+            </div>
           </div>
         </Panel>
       </div>

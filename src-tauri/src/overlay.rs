@@ -143,6 +143,11 @@ pub fn set(conn: &Connection, config: Config) -> Result<()> {
     Ok(())
 }
 
+/// The era Katsudō itself is showing (Mixtape resolved).
+pub fn app_era() -> String {
+    state().lock().unwrap().app_era.clone()
+}
+
 /// The era Katsudō itself is showing (Mixtape resolved), for overlays set to follow it.
 pub fn set_app_era(era: &str) {
     let mut st = state().lock().unwrap();

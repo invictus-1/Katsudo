@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod backup;
+mod breaks;
 mod compare;
 mod db;
 mod flow;
@@ -217,6 +218,24 @@ async fn flow_report(state: State<'_, AppState>, from: String, to: String) -> Cm
     .map_err(err)
 }
 
+/// The break nudge the nudge window should show.
+#[tauri::command]
+fn get_nudge() -> Option<breaks::Nudge> {
+    breaks::current_nudge()
+}
+
+/// The nudge window's answer: "snooze", "today", or "break" / "ignored".
+#[tauri::command]
+fn nudge_respond(app: AppHandle, action: String) {
+    breaks::respond(&app, &action);
+}
+
+/// Show the nudge now, to see what it looks like. Async, so it isn't on the main thread.
+#[tauri::command]
+async fn nudge_preview(app: AppHandle) {
+    breaks::preview(&app);
+}
+
 /// Write a CSV the page built (a tag report) to the path the user chose.
 #[tauri::command]
 fn save_csv(path: String, data: String) -> CmdResult<()> {
@@ -401,6 +420,8 @@ struct Settings {
     motion: bool,
     roadmap: String,
     flow_minutes: i64,
+    break_nudges: bool,
+    break_minutes: i64,
 }
 
 #[tauri::command]
@@ -417,6 +438,8 @@ fn get_settings(state: State<AppState>) -> CmdResult<Settings> {
         motion: db::get_bool(&conn, "motion", true),
         roadmap: db::get_setting(&conn, "roadmap").unwrap_or_else(|| "{}".into()),
         flow_minutes: flow::min_secs(&conn) / 60,
+        break_nudges: db::get_bool(&conn, "break_nudges", false),
+        break_minutes: breaks::minutes(&conn),
     })
 }
 
@@ -433,6 +456,10 @@ fn set_setting(state: State<AppState>, key: String, value: String) -> CmdResult<
         "flow_minutes" => {
             value.parse::<i64>().ok().filter(|m| (5..=240).contains(m)).ok_or("Flow needs 5 to 240 minutes.")?;
         }
+        "break_minutes" => {
+            value.parse::<i64>().ok().filter(|m| (15..=240).contains(m)).ok_or("Nudges need 15 to 240 minutes.")?;
+        }
+        "break_nudges" => {}
         "flow_skip" => {
             serde_json::from_str::<Vec<i64>>(&value).map_err(err)?;
         }
@@ -1123,6 +1150,7 @@ fn main() {
                 rhythm::start(write.clone());
                 overlay::start();
                 tracker::start(write.clone(), control.clone());
+                breaks::start(app.handle().clone(), control.clone(), read.clone());
                 backup::start_scheduler(db_path.clone(), data_dir.clone(), read.clone());
             }
 
@@ -1168,8 +1196,9 @@ fn main() {
             Ok(())
         })
         .on_window_event(|window, event| {
-            // Closing the window keeps tracking in the tray; Quit is in the tray menu.
-            if let WindowEvent::CloseRequested { api, .. } = event {
+            // Closing the main window keeps tracking in the tray; Quit is in the tray menu. Other
+            // windows (the break nudge) really close.
+            if let (WindowEvent::CloseRequested { api, .. }, "main") = (event, window.label()) {
                 api.prevent_close();
                 let _ = window.hide();
             }
@@ -1187,6 +1216,9 @@ fn main() {
             save_tags,
             tag_report,
             flow_report,
+            get_nudge,
+            nudge_respond,
+            nudge_preview,
             save_csv,
             save_png,
             search_history,

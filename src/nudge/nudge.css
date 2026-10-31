@@ -1,0 +1,26 @@
+/* The break nudge window: a transparent window holding one card, in the current era. */
+html, body.nudge-body { margin: 0; height: 100%; background: transparent !important; overflow: hidden; }
+#nudge { position: absolute; inset: 6px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start;
+  padding: 16px 16px 18px; box-sizing: border-box; background: var(--surface-100); color: var(--ink);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-lg, 10px); box-shadow: 0 6px 18px rgba(0, 0, 0, .35);
+  font-family: var(--font-sans); opacity: 0; transform: translateY(10px); transition: opacity .25s ease, transform .25s ease; }
+#nudge.is-in { opacity: 1; transform: none; }
+.no-motion #nudge, #nudge.is-in { transition-duration: .25s; }
+.nudge-seal { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 34px; height: 34px;
+  font: 900 13px/1 "Katsudo Seal", serif; color: #fff; background: var(--rose); border-radius: 6px; transform: rotate(-4deg); }
+.nudge-title { font: 600 15px/1.3 var(--font-sans); }
+.nudge-sub { margin-top: 3px; font: 400 13px/1.4 var(--font-sans); color: var(--ink-muted); }
+.nudge-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+/* How long until it closes itself. */
+.nudge-timer { position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; background: var(--amber); opacity: .6; transform-origin: left;
+  animation: nudge-timer 45s linear forwards; border-radius: 0 0 0 var(--radius-lg, 10px); }
+@keyframes nudge-timer { to { transform: scaleX(0); } }
+
+[data-theme="phosphor"] #nudge { font-family: "VT323", var(--font-mono); border-radius: 2px; box-shadow: 0 0 18px color-mix(in srgb, var(--amber) 30%, transparent); }
+[data-theme="phosphor"] .nudge-title { font: 400 22px/1.1 "VT323", var(--font-mono); color: var(--amber-ink); }
+[data-theme="phosphor"] .nudge-sub { font: 400 17px/1.2 "VT323", var(--font-mono); }
+[data-theme="arcade"] #nudge { border-radius: 0; box-shadow: 4px 4px 0 var(--cyan); }
+[data-theme="arcade"] .nudge-title { font: 400 11px/1.6 "Press Start 2P", var(--font-mono); color: var(--amber-ink); }
+[data-theme="synthwave"] #nudge { border-color: #ff6ec7; box-shadow: 0 0 22px color-mix(in srgb, #ff6ec7 40%, transparent); }
+[data-theme="synthwave"] .nudge-title { font: 700 14px/1.3 "Orbitron", var(--font-sans); letter-spacing: .03em; }
+[data-theme="beige"] #nudge { border-radius: 0; border: 2px outset #fff; box-shadow: 1px 1px 0 #000; }

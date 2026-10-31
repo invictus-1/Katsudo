@@ -199,6 +199,10 @@ export interface Settings {
   roadmap: string;
   /** Shortest flow session, in minutes. */
   flow_minutes: number;
+  /** Break nudges: off by default. */
+  break_nudges: boolean;
+  /** Minutes of unbroken activity before a nudge. */
+  break_minutes: number;
   /** Write-only: JSON list of flow tasks that don't count (the Flow page reads them from its report). */
   flow_skip?: string;
 }
@@ -269,6 +273,7 @@ export const api = {
   setSetting: (key: keyof Settings, value: string) => invoke<void>('set_setting', { key, value }),
   autostart: () => invoke<boolean>('get_autostart'),
   setAutostart: (enabled: boolean) => invoke<void>('set_autostart', { enabled }),
+  nudgePreview: () => invoke<void>('nudge_preview'),
   detect: () => invoke<[string, string][]>('import_detect'),
   scan: (kind: string, path: string) => invoke<ScanResult>('import_scan', { kind, path }),
   runImport: (kind: string, path: string) => invoke<Stat[]>('import_run', { kind, path }),

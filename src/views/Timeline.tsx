@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { api } from '../api';
 import { Button, Panel, UsageList } from '../ds/katsudo';
-import { formatDuration, longDay, rankRefs, shiftDay, todayIso, useData } from '../lib';
+import { formatDuration, longDay, longestStretch, rankRefs, shiftDay, todayIso, useData } from '../lib';
 import { DayTimeline } from './DayTimeline';
 import { openReceipt } from './Receipt';
 
@@ -20,7 +20,12 @@ export function TimelineView({ initialDay }: { initialDay?: string }) {
       <div className="page-head">
         <div>
           <h1 className="display-lg">{longDay(day)}</h1>
-          {data && <p className="text-body">Active {formatDuration(data.totals.active_secs)}</p>}
+          {data && (
+            <p className="text-body">
+              Active {formatDuration(data.totals.active_secs)}
+              {data.activity.length > 0 && ` · longest stretch without a break ${formatDuration(longestStretch(data.activity))}`}
+            </p>
+          )}
         </div>
         <div className="page-tools">
           <Button size="sm" icon="export" onClick={() => openReceipt(day)}>Receipt</Button>
