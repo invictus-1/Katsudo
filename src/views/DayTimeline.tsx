@@ -1,10 +1,11 @@
-import type { DayView } from '../api';
+import { api, type DayView } from '../api';
 import { Timeline } from '../ds/katsudo';
 import type { TimelineLane } from '../ds/katsudo';
-import { rankRefs, toSegments } from '../lib';
+import { rankRefs, toSegments, useData } from '../lib';
 
 /** The day's lanes, in the design system's fixed order. */
 export function DayTimeline({ data, live, full }: { data: DayView; live?: boolean; full?: boolean }) {
+  const tagSetup = useData(api.tags, []);
   const appTone = rankRefs(data.apps_lane);
   const docTone = rankRefs(data.docs_lane);
   const lanes: TimelineLane[] = [
@@ -23,8 +24,15 @@ export function DayTimeline({ data, live, full }: { data: DayView; live?: boolea
       segments: toSegments(data.docs_lane, (s) => docTone.get(s.ref) ?? 'sky', (s) => data.titles[s.ref] ?? 'Document'),
     });
   }
+  if (data.rule_tags.length) {
+    const tag = (id: number) => tagSetup.data?.tags.find((t) => t.id === id);
+    lanes.push({
+      label: 'Tags',
+      segments: toSegments(data.rule_tags, (s) => (tag(s.ref)?.color ?? 'sky') as 'amber', (s) => tag(s.ref)?.name ?? 'Tag'),
+    });
+  }
   if (data.tags_lane.length) {
-    lanes.push({ label: 'Tags', segments: toSegments(data.tags_lane, () => 'amber', (s) => data.titles[s.ref] ?? 'Tag') });
+    lanes.push({ label: 'ManicTime tags', segments: toSegments(data.tags_lane, () => 'amber', (s) => data.titles[s.ref] ?? 'Tag') });
   }
   const peak = Math.max(1, ...data.hourly.map((h) => h.keys));
   const keyLane = data.hourly

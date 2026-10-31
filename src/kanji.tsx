@@ -12,6 +12,7 @@ export const PAGE_KANJI: Record<string, string> = {
   network: '通信',
   wrapped: '年間',
   compare: '比較',
+  tags: 'タグ',
   import: '取込',
   backups: '保存',
   roadmap: '道標',

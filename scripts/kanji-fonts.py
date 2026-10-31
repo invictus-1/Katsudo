@@ -11,7 +11,7 @@ from fontTools import subset
 from fontTools.ttLib import TTFont
 
 # Every character any kanji text in the app uses. Keep in sync with src/kanji.ts.
-KANJI = "活動今日時間軸アプリ入力律通信年取込保存道標設定比較"
+KANJI = "活動今日時間軸アプリ入力律通信年取込保存道標設定比較タグ"
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "src", "fonts", "kanji")

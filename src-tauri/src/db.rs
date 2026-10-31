@@ -83,6 +83,14 @@ CREATE TABLE IF NOT EXISTS ref_day (
 ) WITHOUT ROWID;
 -- The app a title was first seen in.
 CREATE TABLE IF NOT EXISTS title_app (title INTEGER PRIMARY KEY, app_id INTEGER NOT NULL);
+-- Tags and the rules that apply them (first matching rule wins), and seconds per tag per
+-- day (tag 0 = untagged), rebuilt when the rules change.
+CREATE TABLE IF NOT EXISTS tag (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE, color TEXT NOT NULL, ord INTEGER NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS tag_rule (
+  id INTEGER PRIMARY KEY, ord INTEGER NOT NULL, field TEXT NOT NULL, op TEXT NOT NULL, value TEXT NOT NULL,
+  tag_id INTEGER NOT NULL REFERENCES tag(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS tag_day (day TEXT NOT NULL, tag_id INTEGER NOT NULL, secs INTEGER NOT NULL, PRIMARY KEY (day, tag_id)) WITHOUT ROWID;
 -- How the monitors were arranged on a day (JSON list of {x, y, w, h, primary}).
 CREATE TABLE IF NOT EXISTS mouse_layout (day TEXT PRIMARY KEY, screens TEXT NOT NULL);
 -- Lifetime amounts a source knows but can't date (WhatPulse totals beyond the pulses it still

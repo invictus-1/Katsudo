@@ -10,11 +10,11 @@ use serde::Serialize;
 use std::collections::{BTreeMap, HashMap};
 
 #[derive(Clone, Copy, Debug)]
-struct Row {
-    start: i64,
-    end: i64,
-    ref_id: i64,
-    source: i64,
+pub struct Row {
+    pub start: i64,
+    pub end: i64,
+    pub ref_id: i64,
+    pub source: i64,
 }
 
 #[derive(Serialize, Default, Clone)]
@@ -69,6 +69,8 @@ pub struct DayView {
     pub apps_lane: Vec<LaneSeg>,
     pub docs_lane: Vec<LaneSeg>,
     pub tags_lane: Vec<LaneSeg>,
+    /// Time tagged by your rules (ref = tag id).
+    pub rule_tags: Vec<LaneSeg>,
     pub names: HashMap<i64, String>,
     pub titles: HashMap<i64, String>,
     pub apps: Vec<AppTotal>,
@@ -82,7 +84,7 @@ pub struct RangeView {
     pub apps: Vec<AppTotal>,
 }
 
-fn rows(conn: &Connection, lane: i64, start: i64, end: i64, live: &[Seg]) -> Result<Vec<Row>> {
+pub fn rows(conn: &Connection, lane: i64, start: i64, end: i64, live: &[Seg]) -> Result<Vec<Row>> {
     let mut stmt = conn.prepare_cached(
         "SELECT start, end, ref, source FROM segment WHERE lane = ?1 AND start >= ?2 AND start < ?3",
     )?;
@@ -286,6 +288,7 @@ pub fn day(conn: &Connection, day: &str, live: &[Seg]) -> Result<DayView> {
     let apps_lane = rows(conn, LANE_APP, start, end, live)?;
     let docs_lane = rows(conn, LANE_DOC, start, end, live)?;
     let tags_lane = rows(conn, LANE_TAG, start, end, live)?;
+    let rule_tags = crate::tags::lane(conn, &apps_lane, &docs_lane)?;
     let names = app_names(conn, apps_lane.iter().map(|r| r.ref_id))?;
     let titles = titles(conn, docs_lane.iter().chain(tags_lane.iter()).map(|r| r.ref_id))?;
 
@@ -314,6 +317,7 @@ pub fn day(conn: &Connection, day: &str, live: &[Seg]) -> Result<DayView> {
         apps_lane: to_hours(apps_lane),
         docs_lane: to_hours(docs_lane),
         tags_lane: to_hours(tags_lane),
+        rule_tags: to_hours(rule_tags),
         names,
         titles,
         apps: apps(conn, day, day, live)?,

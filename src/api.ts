@@ -21,6 +21,8 @@ export interface DayView {
   apps_lane: LaneSeg[];
   docs_lane: LaneSeg[];
   tags_lane: LaneSeg[];
+  /** Time tagged by your rules (ref = tag id). */
+  rule_tags: LaneSeg[];
   names: Record<string, string>;
   titles: Record<string, string>;
   apps: AppTotal[];
@@ -46,6 +48,14 @@ export interface Status {
   last_backup: BackupInfo | null;
   sources: SourceInfo[];
   version: string;
+}
+export interface Tag { id: number; name: string; color: 'amber' | 'cyan' | 'rose' | 'lime' | 'sky' | string }
+export interface TagRule { field: 'app' | 'title'; op: 'is' | 'contains'; value: string; tag_id: number }
+export interface TagReport {
+  totals: Record<string, number>;
+  days: [string, Record<string, number>][];
+  untagged_apps: [string, number][];
+  untagged_sites: [string, number][];
 }
 export interface WrappedNamed { name: string; secs: number }
 export interface ComparePeriod {
@@ -194,6 +204,9 @@ export const api = {
   rhythm: () => invoke<RhythmOverview>('get_rhythm'),
   overlay: () => invoke<OverlayStatus>('get_overlay'),
   searchPrepare: () => invoke<void>('search_prepare'),
+  tags: () => invoke<{ tags: Tag[]; rules: TagRule[]; building: boolean }>('get_tags'),
+  saveTags: (tags: Tag[], rules: TagRule[]) => invoke<{ tags: Tag[]; rules: TagRule[]; building: boolean }>('save_tags', { tags, rules }),
+  tagReport: (from: string, to: string) => invoke<TagReport>('tag_report', { from, to }),
   wrapped: (year: number | null) => invoke<Wrapped>('get_wrapped', { year }),
   compare: (a: { from: string; to: string }, b: { from: string; to: string }) =>
     invoke<{ a: ComparePeriod; b: ComparePeriod }>('get_compare', { aFrom: a.from, aTo: a.to, bFrom: b.from, bTo: b.to }),

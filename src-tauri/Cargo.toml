@@ -1,6 +1,6 @@
 [package]
 name = "katsudo"
-version = "0.10.1"
+version = "0.11.0"
 description = "Local-first activity and input tracker"
 edition = "2021"
 

@@ -10,6 +10,7 @@ mod queries;
 mod overlay;
 mod rhythm;
 mod search;
+mod tags;
 mod wrapped;
 mod tracker;
 mod win;
@@ -158,6 +159,53 @@ fn save_png(path: String, data: String) -> CmdResult<()> {
         return Err("That isn't a PNG image.".into());
     }
     std::fs::write(&path, bytes).map_err(err)
+}
+
+#[tauri::command]
+fn get_tags(state: State<AppState>) -> CmdResult<tags::Setup> {
+    let conn = state.0.read.lock().map_err(err)?;
+    tags::setup(&conn).map_err(err)
+}
+
+/// Save every tag and rule, then re-tag history in the background.
+#[tauri::command]
+fn save_tags(state: State<AppState>, tags: Vec<tags::Tag>, rules: Vec<tags::Rule>) -> CmdResult<tags::Setup> {
+    {
+        let conn = state.0.write.lock().map_err(err)?;
+        tags::save(&conn, &tags, &rules).map_err(err)?;
+    }
+    tags::refresh_soon(state.0.db_path.clone(), state.0.write.clone());
+    let conn = state.0.read.lock().map_err(err)?;
+    tags::setup(&conn).map_err(err)
+}
+
+/// Time per tag over a range, with tag totals brought up to date first.
+#[tauri::command]
+async fn tag_report(state: State<'_, AppState>, from: String, to: String) -> CmdResult<tags::Report> {
+    let s = state.0.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        search::refresh(&s.db_path, &s.write)?;
+        // A re-tag already running in the background will finish the job; the page reloads then.
+        if !tags::is_building() {
+            tags::refresh(&s.db_path, &s.write)?;
+        }
+        let conn = db::open(&s.db_path)?;
+        tags::report(&conn, &from, &to)
+    })
+    .await
+    .map_err(err)?
+    .map_err(err)
+}
+
+/// Write a CSV the page built (a tag report) to the path the user chose.
+#[tauri::command]
+fn save_csv(path: String, data: String) -> CmdResult<()> {
+    let path = PathBuf::from(path);
+    if !path.extension().is_some_and(|e| e.eq_ignore_ascii_case("csv")) {
+        return Err("Reports are saved as .csv files.".into());
+    }
+    // A byte-order mark so Excel reads the UTF-8 (app names, kanji) correctly.
+    std::fs::write(&path, [b"\xEF\xBB\xBF".as_slice(), data.as_bytes()].concat()).map_err(err)
 }
 
 /// Two date ranges side by side, with the search rollup brought up to date first.
@@ -524,8 +572,9 @@ fn run_import_job(
     *s.import_last.lock().unwrap() = Some(outcome.clone());
     s.import_busy.store(false, Ordering::SeqCst);
     let _ = app.emit("import-finished", outcome);
-    // Imports replace segments: bring search up to date in the background.
+    // Imports replace segments: bring search and tags up to date in the background.
     search::refresh_soon(s.db_path.clone(), s.write.clone());
+    tags::refresh_soon(s.db_path.clone(), s.write.clone());
     result
 }
 
@@ -807,6 +856,29 @@ fn main() {
         }
         return;
     }
+    if args.get(1).map(String::as_str) == Some("tagtest") {
+        // `katsudo tagtest <db>`: a few rules, a full re-tag of all history, timed.
+        let Some(db_file) = args.get(2) else { std::process::exit(2) };
+        let path = PathBuf::from(db_file);
+        let conn = db::open(&path).expect("open");
+        db::migrate(&conn).expect("migrate");
+        let t = |name: &str, color: &str| tags::Tag { id: 0, name: name.into(), color: color.into() };
+        let r = |field: &str, op: &str, value: &str, tag_id: i64| tags::Rule { field: field.into(), op: op.into(), value: value.into(), tag_id };
+        tags::save(&conn, &[t("Work", "amber"), t("Gaming", "rose"), t("Browsing", "sky")],
+            &[r("title", "contains", "github.com", -1), r("app", "contains", "code", -1), r("app", "is", "osu!", -2), r("app", "contains", "brave", -3), r("app", "contains", "chrome", -3)]).expect("save");
+        let write = Mutex::new(conn);
+        let started = std::time::Instant::now();
+        tags::refresh(&path, &write).expect("refresh");
+        println!("full re-tag in {:?}", started.elapsed());
+        let conn = write.lock().unwrap();
+        let rep = tags::report(&conn, "2000-01-01", "2030-12-31").expect("report");
+        for (tag, secs) in &rep.totals { println!("tag {tag}: {:.0} h", *secs as f64 / 3600.0); }
+        let started = std::time::Instant::now();
+        drop(conn);
+        tags::refresh(&path, &write).expect("refresh");
+        println!("catch-up with nothing new in {:?}", started.elapsed());
+        return;
+    }
     if args.get(1).map(String::as_str) == Some("wrapped") {
         // `katsudo wrapped <db> <year>`: the year in review as JSON, timed.
         let (Some(db_file), Some(year)) = (args.get(2), args.get(3).and_then(|y| y.parse().ok())) else {
@@ -1053,6 +1125,10 @@ fn main() {
             search_prepare,
             get_wrapped,
             get_compare,
+            get_tags,
+            save_tags,
+            tag_report,
+            save_csv,
             save_png,
             search_history,
             search_detail,

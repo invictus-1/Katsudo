@@ -35,6 +35,7 @@ export const ROADMAP: RoadmapItem[] = [
   { id: 'roadmap', stage: 'done', area: 'Polish', version: '0.2', title: 'This roadmap', blurb: 'Planned work and ideas inside the app, with stars and your own notes.' },
   { id: 'layouts', stage: 'done', area: 'Rhythm', version: '0.5', title: 'Full keyboard layouts', blurb: '60%, TKL and full size with the F-row, navigation keys, arrows and numpad. Native tracking tells numpad keys apart from their twins.' },
   { id: 'net-ranges', stage: 'done', area: 'Insight', version: '0.5', title: 'Network by day, week, month, year and all time', blurb: 'The same ranges as Input, with busiest days per range.' },
+  { id: 'tags', stage: 'done', area: 'Tracking', version: '0.11', title: 'Tags and rules', blurb: 'Tag time by app, window title, document or site; rules apply to your whole history in seconds, sites beat their browser, and reports export to CSV for invoices.' },
   { id: 'compare', stage: 'done', area: 'Insight', version: '0.10', title: 'Compare periods', blurb: 'This week against last, this month against last month or a year ago, this year so far, or any two ranges: totals or per day, day by day, hour of day, apps and sites.' },
   { id: 'kanji', stage: 'done', area: 'Look & feel', version: '0.9.1', title: '活動', blurb: 'The name in kanji, in each era\'s own hand: a hanko seal by the logo, a kanji line over every page title, in every welcome and on the year-in-review cards. Fonts cut to just these characters.' },
   { id: 'wrapped', stage: 'done', area: 'Insight', version: '0.9', title: 'Year in review', blurb: 'Any year as era-styled cards: hours, top apps, keys, mouse, rhythm games, sites, your peak hours and last year compared. Hide anything, save them as images.' },
@@ -52,7 +53,6 @@ export const ROADMAP: RoadmapItem[] = [
   { id: 'a11y', stage: 'planned', area: 'Polish', version: 'pre-1.0', title: 'Keyboard and screen-reader pass', blurb: 'Every view usable without a mouse; charts with readable summaries.' },
 
   // ---- planned: every idea approved for the road to 1.0 (Oct 2026) ----
-  { id: 'tags', stage: 'planned', area: 'Tracking', title: 'Tags and rules', blurb: 'Auto-tag time by app, title or site (projects, clients, games), with exportable totals for invoices.' },
   { id: 'flow', stage: 'planned', area: 'Insight', title: 'Flow detection', blurb: 'Spot deep-work stretches automatically (one task, steady input, no switching) and show when your best hours are.' },
   { id: 'receipt', stage: 'planned', area: 'Look & feel', title: 'Daily receipt', blurb: 'A thermal-receipt summary of the day, itemised by app, ready to print or save.' },
   { id: 'transitions', stage: 'planned', area: 'Look & feel', title: 'Era transitions', blurb: 'Switching eras plays a short CRT power-off, VHS tracking roll or pixel dissolve.' },
