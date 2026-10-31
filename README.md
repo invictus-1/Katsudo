@@ -58,7 +58,7 @@ Rust and Tauri, using the WebView already built into Windows instead of shipping
 
 ## Install
 
-Releases are coming. Until then, build it (below) and run `release\Katsudo-Setup-<version>.exe`. It installs per user (no admin prompt), can start with Windows, upgrades in place without losing a count, and uninstalls cleanly (your data stays unless you choose otherwise). It isn't code-signed yet, so SmartScreen will warn the first time (More info → Run anyway).
+**[Download the latest Katsudo-Setup.exe](https://github.com/invictus-1/katsudo/releases/latest)** (Windows 10 and 11, about 10 MB), or build it yourself (below). It installs per user (no admin prompt), can start with Windows, upgrades in place without losing a count, and uninstalls cleanly (your data stays unless you choose otherwise). It isn't code-signed yet, so SmartScreen will warn the first time (More info → Run anyway).
 
 ### Try it with demo data
 
