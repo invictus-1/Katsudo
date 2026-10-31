@@ -4,7 +4,7 @@ import { formatCount } from '../lib';
 import { RamenArt, SteamArt, UkiyoeArt } from './EarlyArt';
 import { AnimeArt, episode, SignalArt, StarshipArt, VaporArt } from './FutureArt';
 import { CyberArt } from './CyberArt';
-import { RoninArt } from './RoninArt';
+import { RoninArt, SlashTitle } from './RoninArt';
 
 interface HeroProps {
   theme: ThemeId;
@@ -57,7 +57,7 @@ export function Hero(p: HeroProps) {
       </div>
       <div className="hero-text">
         <div className="hero-eyebrow">{p.theme === 'anime' ? `Episode ${episode()}` : EYEBROW[p.theme]}</div>
-        <h1 className="hero-title">{p.weekday}</h1>
+        {p.theme === 'ronin' ? <SlashTitle text={p.weekday} /> : <h1 className="hero-title">{p.weekday}</h1>}
         <p className="hero-sub">{p.date} · so far today</p>
       </div>
       <div className="hero-live" aria-live="off">

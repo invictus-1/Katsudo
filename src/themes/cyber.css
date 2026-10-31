@@ -28,19 +28,27 @@
 .cy-spire { position: absolute; left: 50%; bottom: 100%; width: 2px; height: 22px; background: #3a2d66; }
 .cy-spire b { position: absolute; left: -2px; top: -3px; width: 6px; height: 6px; border-radius: 50%; background: #ff3b3b; box-shadow: 0 0 8px #ff3b3b; animation: cy-blink 1.6s steps(1) infinite; }
 @keyframes cy-blink { 50% { opacity: .1; } }
-.cy-board { position: absolute; left: -18%; right: -18%; top: 12%; display: flex; flex-direction: column; align-items: center; padding: 6px 0; z-index: 1;
-  background: linear-gradient(160deg, #ff2a6d, #7a1a6a 60%, #2a0a2e); border: 1px solid #ff9ec0; box-shadow: 0 0 22px #ff2a6d88;
-  font: 400 clamp(13px, 1.3vw, 22px)/1.1 var(--font-kanji); color: #fff3f7; font-synthesis: none; animation: cy-glitch 7s steps(1) infinite; }
-@keyframes cy-glitch { 0%, 100% { transform: none; filter: none; } 62% { transform: translateX(3px); filter: hue-rotate(90deg); } 63% { transform: translateX(-2px); } 64% { transform: none; filter: none; } }
-
-/* Neon signs. */
-.cy-sign { position: absolute; right: calc(var(--cy-right) + 3%); top: 6%; z-index: 2; display: flex; flex-direction: column; padding: 7px 5px; border: 2px solid #ff2a6d;
-  font: 400 clamp(22px, 2.2vw, 38px)/1.05 var(--font-kanji); color: #ffd6e4; font-synthesis: none; background: #07060ccc;
-  box-shadow: 0 0 16px #ff2a6d, inset 0 0 12px #ff2a6d88; text-shadow: 0 0 10px #ff2a6d; animation: cy-flicker 6s steps(1) infinite; }
-.cy-sign-h { position: absolute; left: 44%; top: 10%; z-index: 2; padding: 2px 10px; font: 700 clamp(14px, 1.4vw, 22px)/1.2 "Rajdhani", sans-serif; letter-spacing: .3em; color: #b8fbff;
-  border: 1.5px solid #00f0ff; box-shadow: 0 0 12px #00f0ff; text-shadow: 0 0 8px #00f0ff; background: #07060c99; animation: cy-flicker 9s steps(1) infinite -3s; }
-.cy-sign-s { position: absolute; left: 40%; top: 46%; z-index: 2; width: 1.6em; height: 1.6em; display: grid; place-items: center; border-radius: 50%;
-  font: 400 clamp(13px, 1.2vw, 20px)/1 var(--font-kanji); color: #fff0d0; background: #e8202a; box-shadow: 0 0 14px #e8202a; font-synthesis: none; }
+/* Signs fixed to their buildings, sized to them. */
+.cy-board { position: absolute; left: 10%; right: 10%; top: 9%; height: 42%; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #ff2a6d, #7a1a6a 60%, #2a0a2e); border: 2px solid #2a2440; outline: 1px solid #ff9ec088; box-shadow: 0 0 14px #ff2a6d77;
+  font: 400 clamp(9px, .85vw, 15px)/1.12 var(--font-kanji); color: #fff3f7; font-synthesis: none; animation: cy-glitch 7s steps(1) infinite; }
+.cy-board::before, .cy-board::after { content: ""; position: absolute; top: -6px; width: 2px; height: 6px; background: #3a2d66; }
+.cy-board::before { left: 18%; } .cy-board::after { right: 18%; }
+@keyframes cy-glitch { 0%, 100% { transform: none; filter: none; } 62% { transform: translateX(2px); filter: hue-rotate(90deg); } 63% { transform: translateX(-1px); } 64% { transform: none; filter: none; } }
+.cy-roof { position: absolute; left: -6%; right: -6%; bottom: calc(100% + 9px); z-index: 2; display: grid; place-items: center; padding: 2px 0;
+  border: 1.5px solid #00f0ff; background: #07060ccc; box-shadow: 0 0 10px #00f0ff; animation: cy-flicker 9s steps(1) infinite -3s; }
+.cy-roof span { font: 700 clamp(8px, .72vw, 12px)/1.2 "Rajdhani", sans-serif; letter-spacing: .18em; color: #b8fbff; text-shadow: 0 0 6px #00f0ff; white-space: nowrap; }
+/* Two struts from the roof up to the sign. */
+.cy-roof::before, .cy-roof::after { content: ""; position: absolute; top: 100%; width: 2px; height: 9px; background: #3a2d66; }
+.cy-roof::before { left: 22%; } .cy-roof::after { right: 22%; }
+.cy-blade { position: absolute; right: calc(100% + 5px); top: 10%; z-index: 2; display: flex; flex-direction: column; padding: 4px 3px; border: 1.5px solid #ff2a6d;
+  background: #07060ccc; box-shadow: 0 0 10px #ff2a6d, inset 0 0 8px #ff2a6d66; font: 400 clamp(11px, 1.05vw, 18px)/1.06 var(--font-kanji); color: #ffd6e4;
+  text-shadow: 0 0 6px #ff2a6d; font-synthesis: none; animation: cy-flicker 6s steps(1) infinite; }
+/* Brackets bolting the blade sign to the wall. */
+.cy-blade::before, .cy-blade::after { content: ""; position: absolute; left: 100%; width: 6px; height: 2px; background: #5b4d8a; }
+.cy-blade::before { top: 14%; } .cy-blade::after { bottom: 14%; }
+.cy-lantern { position: absolute; right: calc(100% - 4px); top: 34%; z-index: 2; width: 1.5em; height: 1.7em; display: grid; place-items: center; border-radius: 45%;
+  font: 400 clamp(9px, .8vw, 13px)/1 var(--font-kanji); color: #fff0d0; background: #e8202a; box-shadow: 0 0 10px #e8202a; font-synthesis: none; }
 @keyframes cy-flicker { 0%, 100% { opacity: 1; } 41% { opacity: 1; } 42% { opacity: .3; } 43% { opacity: 1; } 44% { opacity: .5; } 46% { opacity: 1; } }
 
 /* The bay: the skyline again, upside down, blurred and rippling. */

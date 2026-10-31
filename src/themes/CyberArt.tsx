@@ -12,10 +12,11 @@ function rng(seed: number) {
 }
 
 const FAR = Array.from({ length: 18 }, (_, i) => ({ w: 3 + ((i * 37) % 5), h: 40 + ((i * 53) % 44) }));
-const TOWERS = [
-  { w: 7, h: 62, tone: 'warm' }, { w: 5, h: 44, tone: 'cyan' }, { w: 9, h: 94, tone: 'warm', spire: true }, { w: 6, h: 56, tone: 'pink' },
-  { w: 9, h: 74, tone: 'cyan', board: true }, { w: 6, h: 60, tone: 'warm' }, { w: 8, h: 88, tone: 'pink', spire: true }, { w: 5, h: 46, tone: 'cyan' },
-  { w: 7, h: 70, tone: 'warm' }, { w: 5, h: 52, tone: 'pink', spire: true }, { w: 8, h: 80, tone: 'cyan' }, { w: 5, h: 42, tone: 'warm' },
+/** sign: a rooftop sign on struts, a billboard in the facade, a blade sign on the side, a lantern. */
+const TOWERS: { w: number; h: number; tone: string; spire?: boolean; sign?: 'roof' | 'board' | 'blade' | 'lantern' }[] = [
+  { w: 7, h: 62, tone: 'warm' }, { w: 5, h: 44, tone: 'cyan', sign: 'lantern' }, { w: 9, h: 70, tone: 'warm', sign: 'roof' }, { w: 6, h: 56, tone: 'pink' },
+  { w: 9, h: 74, tone: 'cyan', sign: 'board' }, { w: 6, h: 60, tone: 'warm' }, { w: 8, h: 92, tone: 'pink', spire: true }, { w: 5, h: 46, tone: 'cyan' },
+  { w: 7, h: 70, tone: 'warm' }, { w: 5, h: 52, tone: 'pink', spire: true }, { w: 8, h: 80, tone: 'cyan', sign: 'blade' }, { w: 5, h: 42, tone: 'warm' },
 ];
 const LIT: Record<string, string[]> = {
   warm: ['#f5e64b', '#ffd27a', '#ffb066'], cyan: ['#6ff8ff', '#9ab8ff', '#b8fbff'], pink: ['#ff5f90', '#f5e64b', '#d99bff'], dim: ['#5b4d8a', '#7a5cff', '#3a2d66'],
@@ -52,13 +53,13 @@ function City() {
           <div key={i} className={`cy-tower is-${t.tone}`} style={{ width: `${t.w}%`, height: `${t.h}%` }}>
             {t.spire && <span className="cy-spire"><b style={{ animationDelay: `${-i * 0.7}s` }} /></span>}
             <Windows seed={i + 1} tone={t.tone} />
-            {t.board && <div className="cy-board"><span>ネ</span><span>オ</span><span>東</span><span>京</span></div>}
+            {t.sign === 'board' && <div className="cy-board"><span>ネ</span><span>オ</span><span>東</span><span>京</span></div>}
+            {t.sign === 'roof' && <div className="cy-roof"><span>KATSUDO</span></div>}
+            {t.sign === 'blade' && <div className="cy-blade"><span>{NAME[0]}</span><span>{NAME[1]}</span></div>}
+            {t.sign === 'lantern' && <div className="cy-lantern">酒</div>}
           </div>
         ))}
       </div>
-      <div className="cy-sign"><span>{NAME[0]}</span><span>{NAME[1]}</span></div>
-      <div className="cy-sign-h">KATSUDO</div>
-      <div className="cy-sign-s">酒</div>
     </>
   );
 }
