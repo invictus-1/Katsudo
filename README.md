@@ -96,7 +96,7 @@ Useful switches: `KATSUDO_DATA_DIR=<folder>` runs a separate copy on its own dat
 
 ## Roadmap
 
-The plan lives inside the app (Roadmap in the sidebar), where you can star what you want next. Coming up: more eras, meeting and media awareness, merging several PCs, an optional fully-local "ask your history" model, hand and finger balance, ISO layouts, signed releases and an a final polish before 1.0.
+The plan lives inside the app (Roadmap in the sidebar), where you can star what you want next. Coming up: meeting and media awareness, merging several PCs, an optional fully-local "ask your history" model, ISO layouts, an accessibility pass, and signed releases with updates before 1.0.
 
 ## Layout
 
