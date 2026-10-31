@@ -1,5 +1,5 @@
-// 1645 Ronin: the Musashi era as an old notebook, laid out as a calligraphy piece. A sumi brush
-// sweep in grey wash, a large brushed 活 with ink splatter, and a 五輪 column signed with a red
+// 1645 Ronin: the Musashi era as an old notebook. A mountain painted in sumi ink (washes, brushed
+// ridges, axe-cut texture, mist, pines on the near hill) and a 五輪 column signed with a red
 // seal. The day's name can be cut: sweep the pointer through it and it splits along the line of
 // the cut, then settles back (it cuts itself once when Today opens). Styles in ronin.css.
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react';
@@ -41,52 +41,94 @@ export function Enso({ className }: { className?: string }) {
   );
 }
 
-/** A brush sweep along a curve: thin in, swelling, thinning out, with dry streaks at the tail. */
-function sweepShape() {
-  const P = [[30, 210], [380, 40], [960, 150]];
-  const pt = (t: number) => {
-    const u = 1 - t;
-    return [u * u * P[0][0] + 2 * u * t * P[1][0] + t * t * P[2][0], u * u * P[0][1] + 2 * u * t * P[1][1] + t * t * P[2][1]];
-  };
-  const N = 80;
+/**
+ * A brush stroke along a path of points: the width runs from w0 to w1 (with a little wobble), so
+ * a ridge line starts heavy where the brush lands and lifts away thin.
+ */
+function taper(pts: number[][], w0: number, w1: number) {
   const top: string[] = [];
   const bot: string[] = [];
-  for (let i = 0; i <= N; i++) {
-    const t = i / N;
-    const [x, y] = pt(t);
-    const [x2, y2] = pt(Math.min(1, t + 0.01));
-    const len = Math.hypot(x2 - x, y2 - y) || 1;
-    const [nx, ny] = [-(y2 - y) / len, (x2 - x) / len];
-    const w = 4 + 46 * Math.sin(Math.PI * Math.min(1, t * 1.25)) ** 0.7 * (1 - t * 0.55) + 2 * Math.sin(t * 31);
-    top.push(`${(x + nx * w / 2).toFixed(1)} ${(y + ny * w / 2).toFixed(1)}`);
-    bot.push(`${(x - nx * w / 2).toFixed(1)} ${(y - ny * w / 2).toFixed(1)}`);
-  }
-  const streaks = [-14, -5, 6, 15].map((o, k) => {
-    const [a, b] = [pt(0.78 + k * 0.01), pt(0.99)];
-    return `M${a[0].toFixed(1)} ${(a[1] + o).toFixed(1)} Q ${((a[0] + b[0]) / 2).toFixed(1)} ${((a[1] + b[1]) / 2 + o * 0.6 - 4).toFixed(1)} ${(b[0] + 20).toFixed(1)} ${(b[1] + o * 0.4).toFixed(1)}`;
+  pts.forEach(([x, y], i) => {
+    const [px, py] = pts[Math.max(0, i - 1)];
+    const [qx, qy] = pts[Math.min(pts.length - 1, i + 1)];
+    const len = Math.hypot(qx - px, qy - py) || 1;
+    const [nx, ny] = [-(qy - py) / len, (qx - px) / len];
+    const t = i / (pts.length - 1);
+    const w = w0 + (w1 - w0) * t ** 0.8 + 0.8 * Math.sin(i * 1.7);
+    top.push(`${(x + (nx * w) / 2).toFixed(1)} ${(y + (ny * w) / 2).toFixed(1)}`);
+    bot.push(`${(x - (nx * w) / 2).toFixed(1)} ${(y - (ny * w) / 2).toFixed(1)}`);
   });
-  return { body: `M${top.join(' L')} L${bot.reverse().join(' L')} Z`, streaks };
+  return `M${top.join(' L')} L${bot.reverse().join(' L')} Z`;
 }
-const SWEEP = sweepShape();
-const SPLATTER = [[612, 62, 5], [640, 48, 2.4], [596, 40, 1.6], [660, 74, 1.8], [298, 228, 3.6], [270, 240, 1.5], [318, 250, 2], [850, 196, 2.6], [878, 210, 1.4]];
+
+/** Points along a cubic Bézier, for brushing along a curve. */
+function bez(p0: number[], p1: number[], p2: number[], p3: number[], n = 28) {
+  return Array.from({ length: n + 1 }, (_, i) => {
+    const t = i / n;
+    const u = 1 - t;
+    return [0, 1].map((k) => u * u * u * p0[k] + 3 * u * u * t * p1[k] + 3 * u * t * t * p2[k] + t * t * t * p3[k]);
+  });
+}
+
+// The peak, its shoulder to the right, and the ridges brushed from the summit down.
+const PEAK = 'M250 300 C 360 232 430 176 488 112 C 516 80 540 50 560 40 C 588 62 612 92 640 122 C 662 140 676 150 690 152 C 708 132 728 114 746 110 C 784 146 846 206 930 268 L 990 300 Z';
+const RIDGES = [
+  taper(bez([560, 40], [536, 56], [500, 96], [470, 136]), 9, 1.5),
+  taper(bez([560, 40], [586, 66], [614, 98], [646, 128]), 7, 1.2),
+  taper(bez([746, 110], [772, 140], [810, 176], [850, 206]), 6, 1),
+  taper(bez([520, 84], [512, 120], [520, 160], [540, 196]), 4, .8),
+  taper(bez([600, 84], [606, 118], [596, 150], [584, 186]), 4, .8),
+];
+// Short axe-cut strokes on the faces, the way old painters gave rock its texture.
+const TEXTURE = [
+  [[498, 128], [486, 150]], [[528, 116], [518, 142]], [[548, 98], [542, 126]], [[620, 118], [632, 144]], [[652, 138], [664, 160]],
+  [[722, 142], [736, 166]], [[760, 150], [776, 172]], [[470, 172], [458, 192]], [[574, 132], [566, 160]],
+].map(([a, b]) => taper(bez(a, [a[0] + (b[0] - a[0]) * 0.3, a[1] + 6], [b[0], b[1] - 6], b, 8), 3.4, 0.6));
+const HILLS = 'M80 300 C 210 238 300 222 400 238 C 500 256 580 222 690 236 C 800 250 880 232 1000 246 V300 Z';
+const HILL_RIDGE = taper(bez([150, 270], [260, 228], [340, 226], [430, 240]), 5, 1);
+// Pines on the near hill: a trunk and a few tiers of needles, each a quick dab of the brush.
+const PINES = [[352, 232, 1], [384, 238, 0.8], [412, 244, 0.65]];
 
 export function RoninArt() {
   return (
     <div className="rn">
-      <svg className="rn-scene" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <svg className="rn-scene" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
         <defs>
           <filter id="rn-bleed" x="-5%" y="-10%" width="110%" height="120%">
             <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="11" result="n" />
             <feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G" />
           </filter>
+          <filter id="rn-soft"><feGaussianBlur stdDeviation="2.2" /></filter>
+          <filter id="rn-mist"><feGaussianBlur stdDeviation="9" /></filter>
+          <linearGradient id="rn-wash-peak" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#1b1712" stopOpacity=".62" />
+            <stop offset=".45" stopColor="#1b1712" stopOpacity=".26" />
+            <stop offset="1" stopColor="#1b1712" stopOpacity=".04" />
+          </linearGradient>
+          <linearGradient id="rn-wash-hill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#3e5566" stopOpacity=".42" />
+            <stop offset="1" stopColor="#3e5566" stopOpacity=".08" />
+          </linearGradient>
         </defs>
+        <g transform="translate(-110 0)">
+        <path className="rn-wash" d={PEAK} fill="url(#rn-wash-peak)" filter="url(#rn-soft)" />
         <g filter="url(#rn-bleed)">
-          <path className="rn-sweep" d={SWEEP.body} />
-          {SWEEP.streaks.map((d, i) => <path key={i} className="rn-streak" d={d} />)}
-          {SPLATTER.map(([x, y, r], i) => <circle key={i} className="rn-drop" cx={x} cy={y} r={r} />)}
+          {RIDGES.map((d, i) => <path key={i} className="rn-ridge" d={d} />)}
+          {TEXTURE.map((d, i) => <path key={i} className="rn-cun" d={d} />)}
+        </g>
+        <ellipse className="rn-mist" cx="560" cy="228" rx="460" ry="22" filter="url(#rn-mist)" />
+        <path className="rn-wash" d={HILLS} fill="url(#rn-wash-hill)" filter="url(#rn-soft)" />
+        <g filter="url(#rn-bleed)">
+          <path className="rn-ridge is-hill" d={HILL_RIDGE} />
+          {PINES.map(([x, y, s], i) => (
+            <g key={i} className="rn-pine" transform={`translate(${x} ${y}) scale(${s})`}>
+              <path d="M0 0 L1 -46" className="rn-trunk" />
+              {[-40, -30, -20, -10].map((ty, k) => <ellipse key={k} cx={(k % 2 ? 3 : -2)} cy={ty} rx={14 - k} ry="3.2" />)}
+            </g>
+          ))}
+        </g>
         </g>
       </svg>
-      <div className="rn-big">{NAME[0]}</div>
       <div className="rn-signature">
         <div className="rn-column"><span>五</span><span>輪</span></div>
         <Hanko className="rn-seal" />
