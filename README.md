@@ -40,7 +40,7 @@ Each import shows what it found first, backs up Katsudō, runs in one transactio
 
 ## Six eras (and a Mixtape)
 
-Every era is a full theme with its own type, art, animated welcome and kanji. Animations are CSS-only and pause when the window is hidden; Mixtape picks a different era each day.
+Every era is a full theme with its own type, art, animated welcome and kanji. Switching era plays a piece of the one you pick: a CRT power-off into Phosphor, a pixel dissolve into Arcade, a VHS tracking roll into Synthwave, a Windows 95 window zooming open into Beige Box. Animations are CSS-only, pause when the window is hidden and respect Windows reduced motion; Mixtape picks a different era each day.
 
 | 1977 Phosphor | 1984 Arcade | 1986 Synthwave |
 | --- | --- | --- |
