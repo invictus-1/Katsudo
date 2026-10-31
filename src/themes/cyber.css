@@ -1,49 +1,68 @@
-/* 2077 Cyberpunk: the Today art (CyberArt.tsx). Everything moving is a whole element under
-   transform, never a scrolling stripe pattern, so nothing shimmers. */
+/* 2077 Cyberpunk: the Today art (CyberArt.tsx). The city stands on the waterline at 60% and is
+   drawn again below it, flipped, blurred and rippling, as its reflection in the bay. Everything
+   moving is a whole element under transform, never a scrolling stripe pattern. */
 .hero.hero-cyberpunk { background: #07060c; border-color: #5b4d8a; }
-.cy { position: absolute; inset: 0; overflow: hidden; }
-.cy-sky { position: absolute; inset: 0; background:
-  radial-gradient(ellipse 60% 70% at 62% 100%, #ff2a6d66, transparent 70%),
-  radial-gradient(ellipse 40% 50% at 80% 110%, #e8202a55, transparent 70%),
+.cy { position: absolute; inset: 0; overflow: hidden; --cy-right: clamp(220px, 15vw, 370px); }
+.cy-sky { position: absolute; inset: 0 0 40% 0; background:
+  radial-gradient(ellipse 60% 80% at 62% 100%, #ff2a6d66, transparent 70%),
+  radial-gradient(ellipse 40% 60% at 82% 110%, #e8202a55, transparent 70%),
   linear-gradient(180deg, #07060c 0%, #140a26 55%, #2a0a2e 100%); }
 
 /* Searchlights sweeping the clouds. */
-.cy-beams i { position: absolute; bottom: -10%; width: 70px; height: 150%; transform-origin: 50% 100%; opacity: .14; mix-blend-mode: screen;
+.cy-beams { position: absolute; inset: 0 0 40% 0; overflow: hidden; }
+.cy-beams i { position: absolute; bottom: 0; width: 70px; height: 160%; transform-origin: 50% 100%; opacity: .14; mix-blend-mode: screen;
   background: linear-gradient(0deg, #b8fbff, transparent 85%); clip-path: polygon(45% 100%, 55% 100%, 100% 0, 0 0); animation: cy-sweep 9s ease-in-out infinite alternate; }
 .cy-beams i:nth-child(1) { left: 50%; }
 .cy-beams i:nth-child(2) { left: 70%; animation-duration: 12s; animation-delay: -5s; background: linear-gradient(0deg, #ff9ec0, transparent 85%); }
 @keyframes cy-sweep { from { transform: rotate(-24deg); } to { transform: rotate(20deg); } }
 
-/* Far mega-structures. */
-.cy-far { position: absolute; left: 34%; right: clamp(230px, 15vw, 380px); bottom: 14%; height: 70%; display: flex; align-items: flex-end; gap: .6%; opacity: .75; }
-.cy-far i { display: block; background: linear-gradient(180deg, #1d1636, #120d24); box-shadow: inset 0 2px 0 #3a2d66; }
-
-/* Towers with their own lights. */
-.cy-towers { position: absolute; left: 36%; right: calc(clamp(250px, 17vw, 400px) - 10px); bottom: 12%; height: 86%; display: flex; align-items: flex-end; gap: 1.4%; }
+/* The skyline, standing on the waterline. */
+.cy-city { position: absolute; left: 0; right: 0; top: 0; height: 60%; }
+.cy-far { position: absolute; left: 34%; right: var(--cy-right); bottom: 0; height: 84%; display: flex; align-items: flex-end; gap: .6%; opacity: .8; }
+.cy-far i { position: relative; display: block; background: linear-gradient(180deg, #1d1636, #120d24); box-shadow: inset 0 2px 0 #3a2d66; }
+.cy-towers { position: absolute; left: 35%; right: var(--cy-right); bottom: 0; height: 100%; display: flex; align-items: flex-end; gap: 1.2%; }
 .cy-tower { position: relative; flex: none; background: linear-gradient(90deg, #0b0916 0%, #141026 60%, #0b0916 100%); border-top: 2px solid #2a2440; }
 .cy-tower.is-cyan { box-shadow: inset 2px 0 0 #00f0ff22; }
 .cy-tower.is-pink { box-shadow: inset 2px 0 0 #ff2a6d33; }
 .cy-win { position: absolute; inset: 6px 4px 4px; width: calc(100% - 8px); height: calc(100% - 10px); }
-.cy-spire { position: absolute; left: 50%; bottom: 100%; width: 2px; height: 26px; background: #3a2d66; }
+.cy-spire { position: absolute; left: 50%; bottom: 100%; width: 2px; height: 22px; background: #3a2d66; }
 .cy-spire b { position: absolute; left: -2px; top: -3px; width: 6px; height: 6px; border-radius: 50%; background: #ff3b3b; box-shadow: 0 0 8px #ff3b3b; animation: cy-blink 1.6s steps(1) infinite; }
 @keyframes cy-blink { 50% { opacity: .1; } }
 .cy-board { position: absolute; left: -18%; right: -18%; top: 12%; display: flex; flex-direction: column; align-items: center; padding: 6px 0; z-index: 1;
   background: linear-gradient(160deg, #ff2a6d, #7a1a6a 60%, #2a0a2e); border: 1px solid #ff9ec0; box-shadow: 0 0 22px #ff2a6d88;
-  font: 400 clamp(14px, 1.4vw, 24px)/1.1 var(--font-kanji); color: #fff3f7; font-synthesis: none; animation: cy-glitch 7s steps(1) infinite; }
+  font: 400 clamp(13px, 1.3vw, 22px)/1.1 var(--font-kanji); color: #fff3f7; font-synthesis: none; animation: cy-glitch 7s steps(1) infinite; }
 @keyframes cy-glitch { 0%, 100% { transform: none; filter: none; } 62% { transform: translateX(3px); filter: hue-rotate(90deg); } 63% { transform: translateX(-2px); } 64% { transform: none; filter: none; } }
 
 /* Neon signs. */
-.cy-sign { position: absolute; right: calc(clamp(250px, 17vw, 400px) + 2%); top: 12%; z-index: 2; display: flex; flex-direction: column; padding: 8px 6px; border: 2px solid #ff2a6d;
-  font: 400 clamp(26px, 2.6vw, 44px)/1.05 var(--font-kanji); color: #ffd6e4; font-synthesis: none; background: #07060ccc;
+.cy-sign { position: absolute; right: calc(var(--cy-right) + 3%); top: 6%; z-index: 2; display: flex; flex-direction: column; padding: 7px 5px; border: 2px solid #ff2a6d;
+  font: 400 clamp(22px, 2.2vw, 38px)/1.05 var(--font-kanji); color: #ffd6e4; font-synthesis: none; background: #07060ccc;
   box-shadow: 0 0 16px #ff2a6d, inset 0 0 12px #ff2a6d88; text-shadow: 0 0 10px #ff2a6d; animation: cy-flicker 6s steps(1) infinite; }
-.cy-sign-h { position: absolute; left: 44%; top: 16%; z-index: 2; padding: 2px 10px; font: 700 clamp(15px, 1.5vw, 24px)/1.2 "Rajdhani", sans-serif; letter-spacing: .3em; color: #b8fbff;
+.cy-sign-h { position: absolute; left: 44%; top: 10%; z-index: 2; padding: 2px 10px; font: 700 clamp(14px, 1.4vw, 22px)/1.2 "Rajdhani", sans-serif; letter-spacing: .3em; color: #b8fbff;
   border: 1.5px solid #00f0ff; box-shadow: 0 0 12px #00f0ff; text-shadow: 0 0 8px #00f0ff; background: #07060c99; animation: cy-flicker 9s steps(1) infinite -3s; }
-.cy-sign-s { position: absolute; left: 41%; top: 50%; z-index: 2; width: 1.6em; height: 1.6em; display: grid; place-items: center; border-radius: 50%;
-  font: 400 clamp(14px, 1.3vw, 22px)/1 var(--font-kanji); color: #fff0d0; background: #e8202a; box-shadow: 0 0 14px #e8202a; font-synthesis: none; }
+.cy-sign-s { position: absolute; left: 40%; top: 46%; z-index: 2; width: 1.6em; height: 1.6em; display: grid; place-items: center; border-radius: 50%;
+  font: 400 clamp(13px, 1.2vw, 20px)/1 var(--font-kanji); color: #fff0d0; background: #e8202a; box-shadow: 0 0 14px #e8202a; font-synthesis: none; }
 @keyframes cy-flicker { 0%, 100% { opacity: 1; } 41% { opacity: 1; } 42% { opacity: .3; } 43% { opacity: 1; } 44% { opacity: .5; } 46% { opacity: 1; } }
 
+/* The bay: the skyline again, upside down, blurred and rippling. */
+.cy-bay { position: absolute; left: 0; right: 0; top: 60%; bottom: 0; overflow: hidden; background: linear-gradient(180deg, #120a24, #07060c 70%); }
+/* 60 / 40 of the bay's height: the reflection is as tall as the city. */
+.cy-reflection { position: absolute; left: 0; right: 0; top: 0; height: 150%; opacity: .6; filter: blur(1.2px) saturate(1.4);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 58%); mask-image: linear-gradient(180deg, #000 0%, transparent 58%);
+  animation: cy-ripple 5s ease-in-out infinite alternate; }
+.cy-reflection .cy-city { height: 100%; transform: scaleY(-1); }
+@keyframes cy-ripple { from { transform: translateX(-3px) skewX(-.6deg); } to { transform: translateX(3px) skewX(.6deg); } }
+/* Still water lines over the reflection: they don't move, so they can't shimmer. */
+.cy-ripples { position: absolute; inset: 0; background: repeating-linear-gradient(180deg, transparent 0 5px, #07060c99 5px 7px); }
+.cy-waterline { position: absolute; left: 28%; right: 0; top: 60%; height: 2px; transform: translateY(-1px);
+  background: linear-gradient(90deg, transparent, #ff2a6daa 30%, #00f0ff88 75%, transparent); box-shadow: 0 0 10px #ff2a6d66; }
+/* A small boat crossing, its lights and its wake. */
+.cy-boat-lane { position: absolute; left: 30%; width: 70%; top: 42%; height: 0; will-change: transform; animation: cy-lane 46s linear infinite; }
+.cy-boat { position: absolute; right: 0; top: 0; width: 30px; height: 5px; border-radius: 0 0 6px 10px; background: #1a1628; box-shadow: 0 0 4px #00f0ff44; }
+.cy-boat::before { content: ""; position: absolute; left: 12px; top: -7px; width: 2px; height: 7px; background: #3a2d66; box-shadow: 0 -2px 4px 1px #fffbe0; }
+.cy-boat::after { content: ""; position: absolute; right: 100%; top: 2px; width: 70px; height: 2px; background: linear-gradient(90deg, transparent, #b8d4ff66); }
+
 /* Flying cars: each lane is as wide as the hero and moves its car across. */
-.cy-traffic { position: absolute; inset: 0 0 20% 30%; z-index: 3; }
+.cy-traffic { position: absolute; inset: 0 0 46% 30%; z-index: 3; }
 .cy-lane { position: absolute; left: 0; width: 100%; height: 0; will-change: transform; animation: cy-lane linear infinite; }
 .cy-lane.is-left { animation-name: cy-lane-left; }
 @keyframes cy-lane { from { transform: translateX(-100%); } to { transform: translateX(0); } }
@@ -57,18 +76,8 @@
 @keyframes cy-bob { from { transform: translateY(-2px); } to { transform: translateY(2px); } }
 @keyframes cy-bob-left { from { transform: scaleX(-1) translateY(-2px); } to { transform: scaleX(-1) translateY(2px); } }
 
-/* Elevated highway, light trails both ways, and a red bike every few seconds. */
-.cy-road { position: absolute; left: 28%; right: 0; bottom: 8%; height: 14px; z-index: 4; background: #0b0916; border-top: 2px solid #3a2d66; box-shadow: 0 -6px 14px #ff2a6d33; overflow: hidden; }
-.cy-trails { position: absolute; left: 0; width: 200%; height: 3px; will-change: transform; }
-.cy-trails.is-red { top: 3px; background: repeating-linear-gradient(90deg, #ff3b3bcc 0 14px, transparent 14px 46px); animation: cy-trail 3s linear infinite; }
-.cy-trails.is-white { top: 8px; background: repeating-linear-gradient(90deg, #fffbe0cc 0 10px, transparent 10px 38px); animation: cy-trail 2.4s linear infinite reverse; }
-@keyframes cy-trail { from { transform: translateX(-50%); } to { transform: translateX(0); } }
-.cy-bike { position: absolute; left: 0; top: 2px; width: 100%; height: 6px; animation: cy-bike 7s cubic-bezier(.4, 0, .9, .6) infinite; }
-.cy-bike i { position: absolute; right: 0; width: 140px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, transparent, #e8202a 80%, #ffd0d0); box-shadow: 0 0 10px #e8202a; }
-@keyframes cy-bike { 0% { transform: translateX(-100%); opacity: 1; } 28% { transform: translateX(10%); opacity: 1; } 29%, 100% { transform: translateX(10%); opacity: 0; } }
-
 /* Rain: separate drops falling on the slant. */
-.cy-rain { position: absolute; inset: 0; z-index: 5; pointer-events: none; transform: skewX(-12deg); opacity: .55; }
+.cy-rain { position: absolute; inset: 0; z-index: 5; pointer-events: none; transform: skewX(-12deg); opacity: .5; }
 .cy-rain i { position: absolute; top: -18px; width: 1.5px; height: 18px; border-radius: 1px; background: linear-gradient(180deg, transparent, #b8d4ffcc);
   will-change: transform; animation: cy-drop linear infinite; }
 @keyframes cy-drop { to { transform: translateY(420px); } }

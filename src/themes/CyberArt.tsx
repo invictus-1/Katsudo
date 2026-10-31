@@ -1,7 +1,7 @@
-// 2077 Cyberpunk: a night city in layers. Far mega-structures, towers with lit windows and
-// blinking antennas, a ネオ東京 billboard, an elevated highway with light trails and a red bike
-// streak, flying cars at different heights, searchlights, and rain as separate drops (moving
-// one-pixel stripes shimmer). Styles in cyber.css.
+// 2077 Cyberpunk: a night city on the water. Far mega-structures with dim windows, towers with
+// their own lit windows and blinking spires, a ネオ東京 billboard and neon signs; the whole
+// skyline mirrored in the bay below, rippling. Flying cars, searchlights, a boat crossing, and
+// rain as separate drops (moving one-pixel stripes shimmer). Styles in cyber.css.
 import type { CSSProperties } from 'react';
 import { NAME } from '../kanji';
 
@@ -11,21 +11,24 @@ function rng(seed: number) {
   return () => (s = (s * 16807) % 2147483647) / 2147483647;
 }
 
-const FAR = Array.from({ length: 16 }, (_, i) => ({ w: 3 + ((i * 37) % 5), h: 34 + ((i * 53) % 42) }));
+const FAR = Array.from({ length: 18 }, (_, i) => ({ w: 3 + ((i * 37) % 5), h: 40 + ((i * 53) % 44) }));
 const TOWERS = [
-  { w: 8, h: 64, tone: 'warm' }, { w: 5, h: 46, tone: 'cyan' }, { w: 11, h: 94, tone: 'warm', spire: true }, { w: 6, h: 58, tone: 'pink' },
-  { w: 10, h: 76, tone: 'cyan', board: true }, { w: 7, h: 62, tone: 'warm' }, { w: 9, h: 86, tone: 'pink', spire: true }, { w: 5, h: 44, tone: 'cyan' },
+  { w: 7, h: 62, tone: 'warm' }, { w: 5, h: 44, tone: 'cyan' }, { w: 9, h: 94, tone: 'warm', spire: true }, { w: 6, h: 56, tone: 'pink' },
+  { w: 9, h: 74, tone: 'cyan', board: true }, { w: 6, h: 60, tone: 'warm' }, { w: 8, h: 88, tone: 'pink', spire: true }, { w: 5, h: 46, tone: 'cyan' },
+  { w: 7, h: 70, tone: 'warm' }, { w: 5, h: 52, tone: 'pink', spire: true }, { w: 8, h: 80, tone: 'cyan' }, { w: 5, h: 42, tone: 'warm' },
 ];
-const LIT: Record<string, string[]> = { warm: ['#f5e64b', '#ffd27a', '#ffb066'], cyan: ['#6ff8ff', '#9ab8ff', '#b8fbff'], pink: ['#ff5f90', '#f5e64b', '#d99bff'] };
+const LIT: Record<string, string[]> = {
+  warm: ['#f5e64b', '#ffd27a', '#ffb066'], cyan: ['#6ff8ff', '#9ab8ff', '#b8fbff'], pink: ['#ff5f90', '#f5e64b', '#d99bff'], dim: ['#5b4d8a', '#7a5cff', '#3a2d66'],
+};
 
-function Windows({ seed, tone }: { seed: number; tone: string }) {
+function Windows({ seed, tone, density = 0.36 }: { seed: number; tone: string; density?: number }) {
   const r = rng(seed * 7919 + 13);
   const cols = 6;
   const rows = 22;
   const cells: { x: number; y: number; c: string }[] = [];
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
-      if (r() < 0.36) cells.push({ x, y, c: LIT[tone][Math.floor(r() * 3)] });
+      if (r() < density) cells.push({ x, y, c: LIT[tone][Math.floor(r() * 3)] });
     }
   }
   return (
@@ -35,22 +38,15 @@ function Windows({ seed, tone }: { seed: number; tone: string }) {
   );
 }
 
-const CARS = [
-  { y: 16, d: 13, delay: 0, left: false, s: 1 },
-  { y: 28, d: 19, delay: -7, left: true, s: 0.75 },
-  { y: 40, d: 10, delay: -3, left: false, s: 1.25 },
-  { y: 22, d: 26, delay: -15, left: true, s: 0.55 },
-  { y: 50, d: 15, delay: -9, left: true, s: 1 },
-  { y: 34, d: 22, delay: -18, left: false, s: 0.65 },
-];
-const DROPS = Array.from({ length: 70 }, (_, i) => ({ x: (i * 37.7) % 100, d: 0.45 + ((i * 13) % 7) * 0.06, delay: -((i * 0.071) % 1) }));
-
-export function CyberArt() {
+/** The skyline down to the waterline: drawn twice, once standing and once in the water. */
+function City() {
   return (
-    <div className="cy">
-      <div className="cy-sky" />
-      <div className="cy-beams"><i /><i /></div>
-      <div className="cy-far">{FAR.map((t, i) => <i key={i} style={{ width: `${t.w}%`, height: `${t.h}%` }} />)}</div>
+    <>
+      <div className="cy-far">
+        {FAR.map((t, i) => (
+          <i key={i} style={{ width: `${t.w}%`, height: `${t.h}%` }}><Windows seed={100 + i} tone="dim" density={0.18} /></i>
+        ))}
+      </div>
       <div className="cy-towers">
         {TOWERS.map((t, i) => (
           <div key={i} className={`cy-tower is-${t.tone}`} style={{ width: `${t.w}%`, height: `${t.h}%` }}>
@@ -63,17 +59,38 @@ export function CyberArt() {
       <div className="cy-sign"><span>{NAME[0]}</span><span>{NAME[1]}</span></div>
       <div className="cy-sign-h">KATSUDO</div>
       <div className="cy-sign-s">酒</div>
+    </>
+  );
+}
+
+const CARS = [
+  { y: 10, d: 13, delay: 0, left: false, s: 1 },
+  { y: 20, d: 19, delay: -7, left: true, s: 0.75 },
+  { y: 30, d: 10, delay: -3, left: false, s: 1.2 },
+  { y: 14, d: 26, delay: -15, left: true, s: 0.55 },
+  { y: 38, d: 15, delay: -9, left: true, s: 0.9 },
+  { y: 25, d: 22, delay: -18, left: false, s: 0.65 },
+];
+const DROPS = Array.from({ length: 70 }, (_, i) => ({ x: (i * 37.7) % 100, d: 0.45 + ((i * 13) % 7) * 0.06, delay: -((i * 0.071) % 1) }));
+
+export function CyberArt() {
+  return (
+    <div className="cy">
+      <div className="cy-sky" />
+      <div className="cy-beams"><i /><i /></div>
+      <div className="cy-city"><City /></div>
+      <div className="cy-bay">
+        <div className="cy-reflection"><div className="cy-city"><City /></div></div>
+        <div className="cy-ripples" />
+        <div className="cy-boat-lane"><i className="cy-boat" /></div>
+      </div>
+      <div className="cy-waterline" />
       <div className="cy-traffic">
         {CARS.map((c, i) => (
           <div key={i} className={`cy-lane${c.left ? ' is-left' : ''}`} style={{ top: `${c.y}%`, animationDuration: `${c.d}s`, animationDelay: `${c.delay}s` }}>
             <i className="cy-car" style={{ '--s': c.s } as CSSProperties} />
           </div>
         ))}
-      </div>
-      <div className="cy-road">
-        <div className="cy-trails is-red" />
-        <div className="cy-trails is-white" />
-        <div className="cy-bike"><i /></div>
       </div>
       <div className="cy-rain">{DROPS.map((d, i) => <i key={i} style={{ left: `${d.x}%`, animationDuration: `${d.d}s`, animationDelay: `${d.delay}s` }} />)}</div>
     </div>
