@@ -15,9 +15,10 @@ mod search;
 mod tags;
 mod wrapped;
 mod tracker;
+mod updates;
 mod win;
 
-use rusqlite::{Connection, TransactionBehavior};
+use rusqlite::{params, Connection, TransactionBehavior};
 use serde::Serialize;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -367,6 +368,8 @@ struct Status {
     version: String,
     /// When Windows last started (Unix seconds).
     booted_at: Option<i64>,
+    /// A newer version the weekly check found.
+    update: Option<String>,
 }
 
 #[tauri::command]
@@ -409,6 +412,7 @@ fn get_status(app: AppHandle, state: State<AppState>) -> CmdResult<Status> {
         sources,
         version: app.package_info().version.to_string(),
         booted_at: win::booted_at(),
+        update: updates::AVAILABLE.lock().unwrap().clone(),
     })
 }
 
@@ -430,6 +434,8 @@ struct Settings {
     idle_minutes: u64,
     track_titles: bool,
     track_input: bool,
+    presence_aware: bool,
+    update_weekly: bool,
     nightly_backup: bool,
     theme: String,
     ui_scale: u32,
@@ -450,6 +456,8 @@ fn get_settings(state: State<AppState>) -> CmdResult<Settings> {
         idle_minutes: db::get_setting(&conn, "idle_minutes").and_then(|v| v.parse().ok()).unwrap_or(5),
         track_titles: db::get_bool(&conn, "track_titles", true),
         track_input: db::get_bool(&conn, "track_input", true),
+        presence_aware: db::get_bool(&conn, "presence_aware", true),
+        update_weekly: db::get_bool(&conn, "update_weekly", false),
         nightly_backup: db::get_bool(&conn, "nightly_backup", true),
         theme: db::get_setting(&conn, "theme").unwrap_or_else(|| "dark".into()),
         ui_scale: db::get_setting(&conn, "ui_scale").and_then(|v| v.parse().ok()).unwrap_or(100),
@@ -473,6 +481,8 @@ fn set_setting(state: State<AppState>, key: String, value: String) -> CmdResult<
         }
         "track_titles" => c.track_titles.store(value == "true", Ordering::Relaxed),
         "track_input" => c.track_input.store(value == "true", Ordering::Relaxed),
+        "presence_aware" => c.presence_aware.store(value == "true", Ordering::Relaxed),
+        "update_weekly" => {}
         "flow_minutes" => {
             value.parse::<i64>().ok().filter(|m| (5..=240).contains(m)).ok_or("Flow needs 5 to 240 minutes.")?;
         }
@@ -482,6 +492,11 @@ fn set_setting(state: State<AppState>, key: String, value: String) -> CmdResult<
         "break_nudges" => {}
         "hands" => {
             serde_json::from_str::<serde_json::Value>(&value).map_err(err)?;
+        }
+        "sync_dir" => {
+            if !value.is_empty() && !std::path::Path::new(&value).is_dir() {
+                return Err("That folder doesn't exist.".into());
+            }
         }
         "flow_skip" => {
             serde_json::from_str::<Vec<i64>>(&value).map_err(err)?;
@@ -567,6 +582,7 @@ fn resolve_import_path(kind: &str, path: &str) -> PathBuf {
     let p = PathBuf::from(if cfg!(windows) { path.replace('/', "\\") } else { path.to_string() });
     match kind {
         import::manictime::KIND => import::manictime::resolve(&p),
+        import::katsudo::KIND => p,
         _ if p.is_dir() => p.join("whatpulse.db"),
         _ => p,
     }
@@ -603,6 +619,7 @@ async fn import_scan(state: State<'_, AppState>, kind: String, path: String) -> 
         match kind.as_str() {
             import::manictime::KIND => import::manictime::scan(&src, &ours, &shown),
             import::whatpulse::KIND => import::whatpulse::scan(&src, &ours, &shown),
+            import::katsudo::KIND => import::katsudo::scan(&src, &ours, &shown),
             _ => Err(anyhow::anyhow!("unknown source {kind}")),
         }
     })
@@ -660,6 +677,263 @@ fn run_import_job(
     result
 }
 
+// ---- keyboard layouts ----------------------------------------------------------------
+
+#[derive(Serialize)]
+struct KeyLayout {
+    /// US English (else an ISO board is likely).
+    us: bool,
+    /// Position (the key's id on a US board) -> the key id it types here and its legend,
+    /// only where either differs.
+    keys: HashMap<String, (String, String)>,
+}
+
+/// Physical positions by their US key id and scan code.
+const POSITIONS: [(&str, u32); 48] = [
+    ("`", 0x29), ("1", 0x02), ("2", 0x03), ("3", 0x04), ("4", 0x05), ("5", 0x06), ("6", 0x07), ("7", 0x08), ("8", 0x09), ("9", 0x0a), ("0", 0x0b), ("-", 0x0c), ("=", 0x0d),
+    ("q", 0x10), ("w", 0x11), ("e", 0x12), ("r", 0x13), ("t", 0x14), ("y", 0x15), ("u", 0x16), ("i", 0x17), ("o", 0x18), ("p", 0x19), ("[", 0x1a), ("]", 0x1b), ("\\", 0x2b),
+    ("a", 0x1e), ("s", 0x1f), ("d", 0x20), ("f", 0x21), ("g", 0x22), ("h", 0x23), ("j", 0x24), ("k", 0x25), ("l", 0x26), (";", 0x27), ("'", 0x28),
+    ("z", 0x2c), ("x", 0x2d), ("c", 0x2e), ("v", 0x2f), ("b", 0x30), ("n", 0x31), ("m", 0x32), (",", 0x33), (".", 0x34), ("/", 0x35), ("intl", 0x56),
+];
+
+/// What each key on the board types under the keyboard layout in use.
+#[tauri::command]
+fn get_key_layout() -> KeyLayout {
+    let scans: Vec<u32> = POSITIONS.iter().map(|p| p.1).collect();
+    let (found, us) = win::key_layout(&scans);
+    let mut keys = HashMap::new();
+    for ((pos, _), (_, vk, ch)) in POSITIONS.iter().zip(found) {
+        let id = keys::from_vk(vk);
+        if id.is_empty() {
+            continue;
+        }
+        let legend = ch.map(|c| c.to_uppercase().to_string()).unwrap_or_else(|| id.to_uppercase());
+        let default = if *pos == "intl" { String::new() } else { pos.to_uppercase() };
+        if id != *pos || legend != default {
+            keys.insert(pos.to_string(), (id.to_string(), legend));
+        }
+    }
+    KeyLayout { us, keys }
+}
+
+// ---- updates -----------------------------------------------------------------------
+
+/// Ask GitHub which release is newest (only when you ask, or weekly if you turned that on).
+#[tauri::command]
+async fn check_update() -> CmdResult<updates::Update> {
+    tauri::async_runtime::spawn_blocking(updates::check).await.map_err(err)?.map_err(err)
+}
+
+/// Download the newest installer, check its signature, start it.
+#[tauri::command]
+async fn install_update(state: State<'_, AppState>) -> CmdResult<()> {
+    let tmp = state.0.data_dir.join("tmp");
+    tauri::async_runtime::spawn_blocking(move || updates::install(&tmp)).await.map_err(err)?.map_err(err)
+}
+
+/// With "Check weekly" on: a check a few minutes after starting, then once a week.
+fn start_update_checks(read: Arc<Mutex<Connection>>, write: Arc<Mutex<Connection>>) {
+    let _ = std::thread::Builder::new().name("katsudo-updates".into()).spawn(move || {
+        std::thread::sleep(std::time::Duration::from_secs(300));
+        loop {
+            let (on, last) = {
+                let c = read.lock().unwrap();
+                (db::get_bool(&c, "update_weekly", false), db::get_setting(&c, "update_last").and_then(|v| v.parse::<i64>().ok()).unwrap_or(0))
+            };
+            if on && db::now_secs() - last >= 7 * 86400 {
+                let _ = updates::check();
+                if let Ok(c) = write.lock() {
+                    let _ = db::set_setting(&c, "update_last", &db::now_secs().to_string());
+                }
+            }
+            std::thread::sleep(std::time::Duration::from_secs(6 * 3600));
+        }
+    });
+}
+
+// ---- several PCs -------------------------------------------------------------------
+
+#[derive(Serialize)]
+struct Pc {
+    /// "this-pc" for this one, "pc:<id>" for the others.
+    device: String,
+    name: String,
+    first_day: Option<String>,
+    last_day: Option<String>,
+    imported_at: Option<i64>,
+}
+
+#[derive(Serialize)]
+struct Pcs {
+    this: Pc,
+    others: Vec<Pc>,
+    sync_dir: Option<String>,
+    last_sync: Option<i64>,
+}
+
+#[tauri::command]
+fn get_pcs(state: State<AppState>) -> CmdResult<Pcs> {
+    let conn = state.0.read.lock().map_err(err)?;
+    let (_, name) = import::katsudo::identity(&conn);
+    let range = |device: &str| -> (Option<String>, Option<String>) {
+        conn.query_row(
+            "SELECT MIN(day), MAX(day) FROM input_hour WHERE source IN (SELECT id FROM source WHERE device = ?1)",
+            [device],
+            |r| Ok((r.get(0)?, r.get(1)?)),
+        )
+        .unwrap_or((None, None))
+    };
+    let (f, l) = range(db::THIS_PC);
+    let this = Pc { device: db::THIS_PC.into(), name, first_day: f, last_day: l, imported_at: None };
+    let rows: Vec<(String, String, i64)> = conn
+        .prepare("SELECT device, MIN(label), MAX(created_at) FROM source WHERE device LIKE 'pc:%' GROUP BY device ORDER BY MAX(created_at) DESC")
+        .map_err(err)?
+        .query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))
+        .map_err(err)?
+        .collect::<rusqlite::Result<_>>()
+        .map_err(err)?;
+    let others = rows
+        .into_iter()
+        .map(|(device, label, at)| {
+            let (f, l) = range(&device);
+            Pc { name: label.split(" · ").next().unwrap_or(&label).to_string(), device, first_day: f, last_day: l, imported_at: Some(at) }
+        })
+        .collect();
+    Ok(Pcs {
+        this,
+        others,
+        sync_dir: db::get_setting(&conn, "sync_dir").filter(|s| !s.is_empty()),
+        last_sync: db::get_setting(&conn, "sync_last").and_then(|v| v.parse().ok()),
+    })
+}
+
+/// This PC's history as one file, to import on another PC.
+#[tauri::command]
+async fn export_pc(state: State<'_, AppState>, path: String) -> CmdResult<()> {
+    let s = state.0.clone();
+    tauri::async_runtime::spawn_blocking(move || backup::export_to(&s.db_path, &PathBuf::from(path)))
+        .await
+        .map_err(err)?
+        .map_err(err)
+}
+
+/// Forget another PC's history (its file, if any, is left alone).
+#[tauri::command]
+async fn remove_pc(state: State<'_, AppState>, device: String) -> CmdResult<()> {
+    if !device.starts_with("pc:") {
+        return Err("Only another PC's history can be removed here.".into());
+    }
+    let s = state.0.clone();
+    tauri::async_runtime::spawn_blocking(move || -> anyhow::Result<()> {
+        backup::run(&s.db_path, &s.data_dir, "pre-import")?;
+        {
+            let conn = s.write.lock().unwrap();
+            let tx = conn.unchecked_transaction()?;
+            let ids: Vec<i64> = tx.prepare("SELECT id FROM source WHERE device = ?1")?.query_map([&device], |r| r.get(0))?.collect::<rusqlite::Result<_>>()?;
+            for id in ids {
+                for table in ["segment", "input_hour", "key_day", "net_hour", "uptime_hour", "undated", "mouse_cell", "rhythm_session"] {
+                    tx.execute(&format!("DELETE FROM {table} WHERE source = ?1"), [id])?;
+                }
+                tx.execute("DELETE FROM source WHERE id = ?1", [id])?;
+            }
+            tx.execute("DELETE FROM meta WHERE key = ?1", [format!("sync_seen:{device}")])?;
+            tx.commit()?;
+        }
+        search::refresh_soon(s.db_path.clone(), s.write.clone());
+        tags::refresh_soon(s.db_path.clone(), s.write.clone());
+        Ok(())
+    })
+    .await
+    .map_err(err)?
+    .map_err(err)
+}
+
+/// The sync folder: write this PC's file there, then bring in every other PC's file that
+/// changed since it was last brought in. Katsudō sends nothing anywhere; whatever keeps the
+/// folder in step (OneDrive, a NAS, a USB stick) carries the files.
+fn sync_folder(app: &AppHandle, s: &Inner) -> anyhow::Result<Vec<String>> {
+    let (dir, own) = {
+        let conn = s.read.lock().unwrap();
+        (db::get_setting(&conn, "sync_dir").filter(|d| !d.is_empty()), import::katsudo::identity(&conn))
+    };
+    let Some(dir) = dir else { return Ok(Vec::new()) };
+    let dir = PathBuf::from(dir);
+    if !dir.is_dir() {
+        return Err(anyhow::anyhow!("The sync folder {} isn't there.", dir.display()));
+    }
+    let safe: String = own.1.chars().map(|c| if c.is_ascii_alphanumeric() || c == '-' { c } else { '_' }).collect();
+    let mine = dir.join(format!("katsudo-{safe}-{}.db", &own.0[..own.0.len().min(8)]));
+    backup::export_to(&s.db_path, &mine)?;
+    let mut brought = Vec::new();
+    for entry in std::fs::read_dir(&dir)?.flatten() {
+        let path = entry.path();
+        let name = path.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+        if path == mine || !name.starts_with("katsudo-") || !name.ends_with(".db") {
+            continue;
+        }
+        let modified = entry.metadata().and_then(|m| m.modified()).ok().and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| d.as_secs() as i64).unwrap_or(0);
+        let Ok((src, copy)) = import::open_source(&path, &s.data_dir.join("tmp")) else { continue };
+        let (id, pc) = import::katsudo::identity(&src);
+        if id == own.0 {
+            continue;
+        }
+        let key = format!("sync_seen:pc:{id}");
+        let seen: i64 = s.read.lock().unwrap().query_row("SELECT value FROM meta WHERE key = ?1", [&key], |r| r.get::<_, String>(0)).ok().and_then(|v| v.parse().ok()).unwrap_or(0);
+        if modified <= seen {
+            if let Some(d) = copy { let _ = std::fs::remove_dir_all(d); }
+            continue;
+        }
+        let shown = path.to_string_lossy().into_owned();
+        let done = run_import_job(app, s, import::katsudo::KIND, |ctx| {
+            ctx.report("Backing up Katsudō first", 0, 1)?;
+            backup::run(&s.db_path, &s.data_dir, "pre-import")?;
+            let mut conn = db::open(&s.db_path)?;
+            conn.busy_timeout(std::time::Duration::from_secs(30))?;
+            let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
+            let summary = import::katsudo::import(&src, &tx, ctx, &shown)?;
+            tx.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?1, ?2)", params![key, modified.to_string()])?;
+            tx.commit()?;
+            let _ = conn.execute_batch("PRAGMA wal_checkpoint(TRUNCATE);");
+            Ok(summary)
+        }, || {});
+        drop(src);
+        if let Some(d) = copy { let _ = std::fs::remove_dir_all(d); }
+        if done.is_ok() {
+            brought.push(pc);
+        }
+    }
+    let conn = s.write.lock().unwrap();
+    db::set_setting(&conn, "sync_last", &db::now_secs().to_string())?;
+    Ok(brought)
+}
+
+#[tauri::command]
+async fn sync_now(app: AppHandle, state: State<'_, AppState>) -> CmdResult<Vec<String>> {
+    let s = state.0.clone();
+    tauri::async_runtime::spawn_blocking(move || sync_folder(&app, &s)).await.map_err(err)?.map_err(err)
+}
+
+/// With a sync folder set, sync a couple of minutes after starting and then every six hours.
+fn start_sync(app: AppHandle) {
+    let _ = std::thread::Builder::new().name("katsudo-sync".into()).spawn(move || {
+        std::thread::sleep(std::time::Duration::from_secs(120));
+        loop {
+            let s = app.state::<AppState>().0.clone();
+            let (set, last) = {
+                let conn = s.read.lock().unwrap();
+                (db::get_setting(&conn, "sync_dir").is_some_and(|d| !d.is_empty()),
+                 db::get_setting(&conn, "sync_last").and_then(|v| v.parse::<i64>().ok()).unwrap_or(0))
+            };
+            if set && db::now_secs() - last >= 6 * 3600 {
+                if let Err(e) = sync_folder(&app, &s) {
+                    eprintln!("katsudo: sync: {e}");
+                }
+            }
+            std::thread::sleep(std::time::Duration::from_secs(600));
+        }
+    });
+}
+
 #[tauri::command]
 fn import_status(state: State<AppState>) -> ImportStatus {
     ImportStatus { running: state.0.import_now.lock().unwrap().clone(), last: state.0.import_last.lock().unwrap().clone() }
@@ -683,6 +957,7 @@ async fn import_run(app: AppHandle, state: State<'_, AppState>, kind: String, pa
             let summary = match kind.as_str() {
                 import::manictime::KIND => import::manictime::import(&src, &tx, ctx, &shown)?,
                 import::whatpulse::KIND => import::whatpulse::import(&src, &tx, ctx, &shown)?,
+                import::katsudo::KIND => import::katsudo::import(&src, &tx, ctx, &shown)?,
                 _ => return Err(anyhow::anyhow!("unknown source {kind}")),
             };
             ctx.report("Saving", 1, 1)?;
@@ -936,6 +1211,7 @@ fn cli_import(args: &[String]) -> anyhow::Result<()> {
     let shown = file.to_string_lossy().into_owned();
     let scan = match kind.as_str() {
         import::manictime::KIND => import::manictime::scan(&source, &conn, &shown)?,
+        import::katsudo::KIND => import::katsudo::scan(&source, &conn, &shown)?,
         _ => import::whatpulse::scan(&source, &conn, &shown)?,
     };
     println!("scan: {} days {:?}..{:?} overlap {} in {:?}", scan.days, scan.first_day, scan.last_day, scan.overlap_days, started.elapsed());
@@ -958,6 +1234,7 @@ fn cli_import(args: &[String]) -> anyhow::Result<()> {
     let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
     let summary = match kind.as_str() {
         import::manictime::KIND => import::manictime::import(&source, &tx, &ctx, &shown)?,
+        import::katsudo::KIND => import::katsudo::import(&source, &tx, &ctx, &shown)?,
         _ => import::whatpulse::import(&source, &tx, &ctx, &shown)?,
     };
     tx.commit()?;
@@ -1012,6 +1289,19 @@ fn main() {
         drop(conn);
         tags::refresh(&path, &write).expect("refresh");
         println!("catch-up with nothing new in {:?}", started.elapsed());
+        return;
+    }
+    if args.get(1).map(String::as_str) == Some("updatetest") {
+        // `katsudo updatetest <file> <file.sig>`: check a signed file against the built-in key.
+        let (Some(f), Some(sig)) = (args.get(2), args.get(3)) else { std::process::exit(2) };
+        let data = std::fs::read(f).expect("file");
+        let sig = std::fs::read_to_string(sig).expect("sig");
+        println!("{}", match updates::verify(&data, &sig) { Ok(()) => "signature OK".to_string(), Err(e) => format!("refused: {e}") });
+        return;
+    }
+    if args.get(1).map(String::as_str) == Some("presencetest") {
+        // `katsudo presencetest`: what Windows says about calls and videos right now.
+        println!("mic or camera in use: {}, display kept on: {}", win::mic_or_camera_in_use(), win::display_kept_on());
         return;
     }
     if args.get(1).map(String::as_str) == Some("flowtest") {
@@ -1243,6 +1533,13 @@ fn main() {
                 import_cancel: AtomicBool::new(false),
                 scan_copy: Mutex::new(None),
             })));
+            // A sync folder, if set, is synced in the background, and the weekly update check runs
+            // if turned on (neither in demo mode, which records nothing).
+            if !demo {
+                start_sync(app.handle().clone());
+                let st = app.state::<AppState>();
+                start_update_checks(st.0.read.clone(), st.0.write.clone());
+            }
 
             let open = MenuItem::with_id(app, "open", "Open Katsudō", true, None::<&str>)?;
             let pause = MenuItem::with_id(app, "pause", "Pause tracking for 1 hour", true, None::<&str>)?;
@@ -1308,6 +1605,13 @@ fn main() {
             flow_report,
             get_app_keys,
             get_launch,
+            get_pcs,
+            check_update,
+            get_key_layout,
+            install_update,
+            export_pc,
+            remove_pc,
+            sync_now,
             get_nudge,
             nudge_respond,
             nudge_preview,

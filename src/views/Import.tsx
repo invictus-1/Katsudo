@@ -4,6 +4,7 @@ import { api, type ImportOutcome, type ImportProgress, type ScanResult, type Sou
 import { Button, ImportSource, Panel } from '../ds/katsudo';
 import { dateTime, formatCount, shortDay, useData } from '../lib';
 import { WhatPulseAccount } from './WhatPulseAccount';
+import { OtherPcs } from './OtherPcs';
 
 type Phase = 'idle' | 'scanning' | 'ready' | 'importing' | 'done' | 'error';
 interface CardState {
@@ -18,6 +19,7 @@ interface CardState {
 const SOURCES = [
   { kind: 'manictime', file: 'ManicTimeReports.db', filter: { name: 'ManicTime database', extensions: ['db'] } },
   { kind: 'whatpulse', file: 'whatpulse.db', filter: { name: 'WhatPulse database', extensions: ['db'] } },
+  { kind: 'katsudo', file: 'a Katsudō export', filter: { name: 'Katsudō database', extensions: ['db'] } },
 ];
 
 export function Import({ onImported, sources }: { onImported: () => void; sources: SourceInfo[] }) {
@@ -31,7 +33,7 @@ export function Import({ onImported, sources }: { onImported: () => void; source
     const ended = api.onImportFinished((o) => { setProgress(null); setFinished(o); });
     return () => { progressed.then((f) => f()); ended.then((f) => f()); };
   }, []);
-  const imported = sources.filter((s) => s.kind !== 'native');
+  const imported = sources.filter((s) => s.kind !== 'native' && s.kind !== 'katsudo');
 
   return (
     <div className="page">
@@ -39,7 +41,7 @@ export function Import({ onImported, sources }: { onImported: () => void; source
         <div>
           <h1 className="display-lg">Import your history</h1>
           <p className="text-body">
-            Read from ManicTime or WhatPulse. The source files are never changed, and Katsudō is backed up before anything is written.
+            Read from ManicTime, WhatPulse or Katsudō on your other PCs. The source files are never changed, and Katsudō is backed up before anything is written.
           </p>
         </div>
       </div>
@@ -52,6 +54,7 @@ export function Import({ onImported, sources }: { onImported: () => void; source
             onImported={onImported} />
         ))}
       </div>
+      <OtherPcs onImported={onImported} />
       <WhatPulseAccount progress={progress?.kind === 'whatpulse-account' ? progress : null}
         finished={finished?.kind === 'whatpulse-account' ? finished : null} onImported={onImported} />
       {imported.length > 0 && (

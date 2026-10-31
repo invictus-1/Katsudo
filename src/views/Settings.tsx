@@ -4,6 +4,7 @@ import type { Appearance } from '../App';
 import { Button, Panel, Segmented, Switch } from '../ds/katsudo';
 import { bytesText, useData } from '../lib';
 import { THEMES, resolveTheme } from '../themes/themes';
+import { UpdatesPanel } from './Updates';
 
 const SCALES = [90, 100, 115, 130, 150, 175];
 
@@ -83,6 +84,9 @@ export function SettingsView({ status, appearance, onAppearance }: {
             <Switch defaultChecked={data.track_input} label="Count keys and clicks"
               hint="Counts presses per key and per app. Never records what you type or in what order."
               onChange={(v) => api.setSetting('track_input', String(v))} />
+            <Switch defaultChecked={data.presence_aware} label="Calls and videos count as present"
+              hint="While the microphone or camera is in use, or a video keeps the screen on, you aren't marked away for not typing. Break nudges wait for calls to end."
+              onChange={(v) => api.setSetting('presence_aware', String(v))} />
             <Switch defaultChecked={data.track_titles} label="Record window titles"
               hint="Off: only app names are stored, and the Documents lane stays empty."
               onChange={(v) => api.setSetting('track_titles', String(v))} />
@@ -132,6 +136,7 @@ export function SettingsView({ status, appearance, onAppearance }: {
           <p className="text-small faint">One SQLite file on this machine, readable by any SQLite tool. Nothing is sent anywhere.</p>
         </div>
       </Panel>
+      <UpdatesPanel version={status?.version ?? ''} weekly={data.update_weekly} />
     </div>
   );
 }

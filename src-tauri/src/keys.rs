@@ -76,6 +76,7 @@ pub fn from_vk(vk: u32) -> String {
         0xdc => "\\",
         0xdd => "]",
         0xde => "'",
+        0xe2 => "intl",
         // Numpad keys the hook told apart from their twins.
         0x10d => "numenter",
         0x12d => "num0",

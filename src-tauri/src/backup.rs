@@ -49,6 +49,20 @@ fn save_index(data_dir: &Path, items: &[BackupInfo]) -> Result<()> {
 }
 
 /// Snapshot the database at `db_path`. `kind` is "nightly", "manual", "pre-import" or "pre-restore".
+/// A checked copy of the database at `dest`, written beside it first and moved into place, so
+/// a sync tool never picks up half a file.
+pub fn export_to(db_path: &Path, dest: &Path) -> Result<()> {
+    let tmp = dest.with_extension("partial");
+    let _ = std::fs::remove_file(&tmp);
+    let src = Connection::open_with_flags(db_path, OpenFlags::SQLITE_OPEN_READ_ONLY)?;
+    src.busy_timeout(Duration::from_secs(30))?;
+    src.execute("VACUUM INTO ?1", [tmp.to_string_lossy()])?;
+    drop(src);
+    verify(&tmp)?;
+    std::fs::rename(&tmp, dest)?;
+    Ok(())
+}
+
 pub fn run(db_path: &Path, data_dir: &Path, kind: &str) -> Result<BackupInfo> {
     std::fs::create_dir_all(dir(data_dir))?;
     let now = Local::now();

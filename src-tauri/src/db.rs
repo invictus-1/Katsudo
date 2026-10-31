@@ -139,6 +139,20 @@ pub fn migrate(conn: &Connection) -> Result<()> {
              UPDATE meta SET value = '2' WHERE key = 'schema_version';",
         )?;
     }
+    // v3: rhythm sessions know their source, so another PC's can be replaced on re-import.
+    let has_source = conn.prepare("SELECT 1 FROM pragma_table_info('rhythm_session') WHERE name = 'source'")?.exists([])?;
+    if !has_source {
+        conn.execute_batch("ALTER TABLE rhythm_session ADD COLUMN source INTEGER NOT NULL DEFAULT 1;")?;
+    }
+    // This PC's identity, for when its history is imported on another PC.
+    let has_id = conn.query_row("SELECT 1 FROM meta WHERE key = 'device_id'", [], |_| Ok(())).optional()?.is_some();
+    if !has_id {
+        let seed = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0) ^ (std::process::id() as u128) << 64;
+        let id = format!("{:016x}", (seed as u64) ^ ((seed >> 64) as u64).rotate_left(17));
+        conn.execute("INSERT INTO meta (key, value) VALUES ('device_id', ?1)", [id])?;
+    }
+    let name = std::env::var("COMPUTERNAME").unwrap_or_else(|_| "This PC".into());
+    conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES ('device_name', ?1)", [name])?;
     crate::keys::remap_stored(conn)?;
     Ok(())
 }

@@ -250,7 +250,7 @@ function Shell({ appearance, onAppearance }: { appearance: Appearance; onAppeara
             },
             { icon: 'lock', label: 'Local only' },
           ]}
-          right={pausedText ?? (s ? `v${s.version}` : '')}
+          right={pausedText ?? (s ? (s.update ? `v${s.version} · ${s.update} available (Settings)` : `v${s.version}`) : '')}
         />
       </div>
     </div>

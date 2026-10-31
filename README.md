@@ -8,12 +8,16 @@
 
 ## 🔒 Nothing leaves your PC
 
-- **No account, no cloud, no telemetry, no analytics, no update pings.** Katsudō never phones home.
+- **No account, no cloud, no telemetry, no analytics.** Katsudō never phones home: it doesn't even check for updates unless you ask it to (or turn on a weekly check).
 - **Counts, never content.** It records *how many* times each key was pressed, never what you typed or in what order.
 - **One file you own:** everything is a single SQLite database in `%APPDATA%\app.katsudo.desktop\katsudo.db`. Copy it, back it up, open it in any SQLite tool, delete it.
 - **Verified backups, automatically:** a checked snapshot every day (14 daily and 8 weekly kept), plus safety snapshots before every import and restore. Restore in two clicks.
-- **The only time it touches the internet is when you ask it to:** importing your WhatPulse account calls whatpulse.org with the API key you paste in, which is used for that import and never saved. The optional OBS overlay listens on `127.0.0.1` only, refuses requests from any other site, and is only ever sent the keys you choose to show.
+- **The only time it touches the internet is when you ask it to:** importing your WhatPulse account calls whatpulse.org with the API key you paste in, which is used for that import and never saved. Checking for updates asks GitHub which release is newest, and installers are signed and checked before they run. The optional OBS overlay listens on `127.0.0.1` only, refuses requests from any other site, and is only ever sent the keys you choose to show.
 - **Open source (MIT).** Read every line that touches your data.
+
+## Several PCs, one history
+
+A work laptop, a gaming rig, a server: export a PC's history and import it on another, or point every PC at one **sync folder** (OneDrive, Dropbox, a NAS, a USB stick). Each PC writes its own file there and brings in the others every few hours. Their keys, clicks and network add up; time spent on two at once counts once. Katsudō itself still sends nothing anywhere: your sync tool carries the files.
 
 ## Leave ManicTime and WhatPulse behind
 
@@ -60,11 +64,11 @@ The installer is its own little app that picks a random era each time it runs.
 
 ## Light by design
 
-Rust and Tauri, using the WebView already built into Windows instead of shipping a browser: about 15 MB to download. In the tray Katsudō uses about 35 MB of memory and around 0.05% CPU, and its keyboard and mouse hooks count each event in about 18 ns. The window's WebView takes a few hundred MB while it's open; a minute after you close it to the tray, Katsudō unloads it completely (and started at sign-in it never loads it until you open the window). Background threads mostly sleep when you're not typing.
+Rust and Tauri, using the WebView already built into Windows instead of shipping a browser: about 17 MB to download. In the tray Katsudō uses about 35 MB of memory and around 0.05% CPU, and its keyboard and mouse hooks count each event in about 18 ns. The window's WebView takes a few hundred MB while it's open; a minute after you close it to the tray, Katsudō unloads it completely (and started at sign-in it never loads it until you open the window). Background threads mostly sleep when you're not typing.
 
 ## Install
 
-**[Download the latest Katsudo-Setup.exe](https://github.com/invictus-1/katsudo/releases/latest)** (Windows 10 and 11, about 10 MB), or build it yourself (below). It installs per user (no admin prompt), can start with Windows, upgrades in place without losing a count, and uninstalls cleanly (your data stays unless you choose otherwise). It isn't code-signed yet, so SmartScreen will warn the first time (More info → Run anyway).
+**[Download the latest Katsudo-Setup.exe](https://github.com/invictus-1/katsudo/releases/latest)** (Windows 10 and 11, about 17 MB), or build it yourself (below). It installs per user (no admin prompt), can start with Windows, upgrades in place without losing a count, and uninstalls cleanly (your data stays unless you choose otherwise). It isn't code-signed yet, so SmartScreen will warn the first time (More info → Run anyway).
 
 ### Try it with demo data
 
@@ -96,7 +100,7 @@ Useful switches: `KATSUDO_DATA_DIR=<folder>` runs a separate copy on its own dat
 
 ## Roadmap
 
-The plan lives inside the app (Roadmap in the sidebar), where you can star what you want next. Coming up: meeting and media awareness, merging several PCs, an optional fully-local "ask your history" model, ISO layouts and signed releases with updates before 1.0.
+The plan lives inside the app (Roadmap in the sidebar), where you can star what you want next. Everything on it shipped with 1.0: timeline and input tracking, imports from ManicTime, WhatPulse and your other PCs, flow detection, tags and rules, the year in review, compare, rhythm mode, the stream overlay, break nudges, the daily receipt, hand and finger balance, sixteen eras and more. Ideas are welcome as issues.
 
 ## Layout
 

@@ -92,9 +92,9 @@ pub fn minutes(conn: &Connection) -> i64 {
     db::get_setting(conn, "break_minutes").and_then(|v| v.parse().ok()).filter(|m| (15..=240).contains(m)).unwrap_or(DEFAULT_MINUTES)
 }
 
-/// Fullscreen apps, presentations and games: put the nudge off.
+/// Fullscreen apps, presentations, games and calls: put the nudge off.
 fn busy() -> bool {
-    crate::rhythm::IN_GAME.load(Ordering::Relaxed) != 0 || crate::win::fullscreen_busy()
+    crate::rhythm::IN_GAME.load(Ordering::Relaxed) != 0 || crate::win::fullscreen_busy() || crate::win::mic_or_camera_in_use()
 }
 
 /// Watch for long stretches; runs for the life of the app.

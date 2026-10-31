@@ -54,13 +54,12 @@ export const ROADMAP: RoadmapItem[] = [
   { id: 'rhythm-mode', stage: 'done', area: 'Rhythm', version: '0.6', title: 'Rhythm mode', blurb: 'Every session in a rhythm game kept second by second: true peak keys per second, streams of 10+ a second, personal bests per game. osu!, Quaver, Etterna, StepMania and more recognised; mark any other game.' },
   { id: 'wp-keys', stage: 'done', area: 'Data', version: '0.5.1', title: 'Every WhatPulse key placed', blurb: 'Shift, Ctrl, Alt, Windows, arrows, F-keys and the whole numpad, matched by a key test against Katsudō\'s own counts. Old history re-placed automatically.' },
   { id: 'mouse-map', stage: 'done', area: 'Insight', version: '0.5.1', title: 'Mouse heatmap', blurb: 'Where you click and where the pointer travels, over your monitors as they are arranged, in the era\'s heat colours. WhatPulse\'s last three months of clicks come along.' },
-  { id: 'iso', stage: 'planned', area: 'Rhythm', title: 'ISO and other layouts', blurb: 'ISO Enter and the extra key by Left Shift, plus layouts for keyboards that aren\'t US ANSI.' },
+  { id: 'iso', stage: 'done', area: 'Rhythm', version: '1.0', title: 'ISO and other layouts', blurb: 'An ISO board (tall Enter, short Left Shift and the extra key), and keys shown and counted where they physically are on your Windows keyboard layout.' },
 
   // ---- planned ----
-  { id: 'signing', stage: 'planned', area: 'Polish', version: 'pre-1.0', title: 'Signed installer and updates', blurb: 'Code signing so SmartScreen stays quiet, and a built-in update check that you trigger.' },
+  { id: 'signing', stage: 'done', area: 'Polish', version: '1.0', title: 'Signed installers and updates', blurb: 'Check for updates when you ask (or weekly, if you turn it on); every installer is signed and checked against Katsudō\'s key before it runs.' },
 
   // ---- planned: every idea approved for the road to 1.0 (Oct 2026) ----
-  { id: 'aware', stage: 'planned', area: 'Tracking', title: 'Meeting and media awareness', blurb: 'Microphone or camera in use, or video playing, counts as present rather than away.' },
-  { id: 'multi-pc', stage: 'planned', area: 'Data', title: 'Several PCs, one history', blurb: 'Merge databases from your other machines through a shared folder or the LAN. Still no cloud.' },
-  { id: 'ask', stage: 'planned', area: 'Insight', title: 'Ask your history', blurb: 'Optional local model through Ollama: "what did I work on Tuesday afternoon?" answered on your machine only.' },
+  { id: 'aware', stage: 'done', area: 'Tracking', version: '1.0', title: 'Meeting and media awareness', blurb: 'A call (microphone or camera in use) or a video keeping the screen on counts as present, not away; break nudges wait for calls to end.' },
+  { id: 'multi-pc', stage: 'done', area: 'Data', version: '1.0', title: 'Several PCs, one history', blurb: 'Export a PC and import it on another, or point every PC at one sync folder: each PC\'s history adds up, and nothing goes through any cloud of ours.' },
 ];

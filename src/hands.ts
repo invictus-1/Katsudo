@@ -46,7 +46,7 @@ const groups = (m: Record<string, string>) =>
 /** The touch-typing chart. Space is shared by both thumbs. */
 const TYPING: Record<string, Finger | 'thumbs'> = {
   ...groups({
-    lp: '` 1 q a z tab capslock lshift lctrl escape f1',
+    lp: '` 1 q a z intl tab capslock lshift lctrl escape f1',
     lr: '2 w s x f2',
     lm: '3 e d c f3',
     li: '4 5 r t f g v b f4 f5',
@@ -74,6 +74,14 @@ const GAMING: Record<string, Finger | 'thumbs'> = {
 
 export function fingerFor(key: string, preset: Preset, custom: Record<string, Finger>): Finger | 'thumbs' | null {
   return custom[key] ?? (preset === 'gaming' ? GAMING : TYPING)[key] ?? null;
+}
+
+/** Counts by physical position: on other layouts a position types another key. */
+export function byPosition(counts: Record<string, number>, map?: Record<string, [string, string]>) {
+  if (!map) return counts;
+  const out = { ...counts };
+  for (const [pos, [id]] of Object.entries(map)) out[pos] = counts[id] ?? 0;
+  return out;
 }
 
 export type Tally = Record<Finger, number>;

@@ -44,6 +44,8 @@ pub struct Control {
     pub idle_threshold_secs: AtomicU64,
     pub track_titles: AtomicBool,
     pub track_input: AtomicBool,
+    /// A call (microphone or camera in use) or a video keeps you present while you don't type.
+    pub presence_aware: AtomicBool,
     pub live: Mutex<Live>,
     /// Set to ask the tracker for a final flush; it sets `flushed` when done and stops.
     pub quit: AtomicBool,
@@ -58,6 +60,7 @@ impl Control {
             idle_threshold_secs: AtomicU64::new(idle_min * 60),
             track_titles: AtomicBool::new(db::get_bool(conn, "track_titles", true)),
             track_input: AtomicBool::new(db::get_bool(conn, "track_input", true)),
+            presence_aware: AtomicBool::new(db::get_bool(conn, "presence_aware", true)),
             live: Mutex::new(Live::default()),
             quit: AtomicBool::new(false),
             flushed: AtomicBool::new(false),
@@ -173,6 +176,8 @@ fn run(write: Arc<Mutex<Connection>>, control: Arc<Control>) {
     };
     let mut last_tick = db::now_secs();
     let mut last_flush = last_tick;
+    // Calls and videos: last checked, the answer, and the last moment one kept you present.
+    let (mut presence_checked, mut presence, mut present_until) = (0i64, false, 0i64);
 
     loop {
         std::thread::sleep(TICK);
@@ -199,7 +204,21 @@ fn run(write: Arc<Mutex<Connection>>, control: Arc<Control>) {
             st.close_all(now);
         } else {
             let idle = win::idle_secs();
-            active = idle < control.idle_threshold_secs.load(Ordering::Relaxed);
+            let threshold = control.idle_threshold_secs.load(Ordering::Relaxed);
+            // Past the away threshold, a call or a video still counts as being here. Only
+            // checked then, every few seconds.
+            if idle >= threshold && control.presence_aware.load(Ordering::Relaxed) {
+                if now - presence_checked >= 5 {
+                    presence_checked = now;
+                    presence = win::mic_or_camera_in_use() || win::display_kept_on();
+                }
+                if presence {
+                    present_until = now;
+                }
+            } else {
+                presence = false;
+            }
+            active = idle < threshold || presence;
             if active {
                 st.ensure(LANE_ACTIVITY, 1, None, now);
                 match win::foreground() {
@@ -230,8 +249,8 @@ fn run(write: Arc<Mutex<Connection>>, control: Arc<Control>) {
                     }
                 }
             } else {
-                // Idle: the away period began when input stopped.
-                let away_from = (now - idle as i64).max(st.activity.map(|s| s.start).unwrap_or(0));
+                // Idle: the away period began when input stopped, or when the call or video ended.
+                let away_from = (now - idle as i64).max(present_until).max(st.activity.map(|s| s.start).unwrap_or(0));
                 if matches!(st.activity, Some(s) if s.ref_id == 1) {
                     st.close(LANE_APP, away_from);
                     st.close(LANE_DOC, away_from);

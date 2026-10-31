@@ -336,7 +336,8 @@ pub fn range(conn: &Connection, from: &str, to: &str, live: &[Seg]) -> Result<Ra
 pub fn key_counts(conn: &Connection, from: &str, to: &str) -> Result<HashMap<String, i64>> {
     let mut stmt = conn.prepare_cached(
         "SELECT key, SUM(count) FROM key_day a
-         WHERE day BETWEEN ?1 AND ?2 AND source = (SELECT MIN(source) FROM key_day b WHERE b.day = a.day)
+         WHERE day BETWEEN ?1 AND ?2
+           AND a.source = (SELECT MIN(b.source) FROM key_day b JOIN source sb ON sb.id = b.source WHERE b.day = a.day AND sb.device = (SELECT device FROM source WHERE id = a.source))
          GROUP BY key",
     )?;
     let out = stmt

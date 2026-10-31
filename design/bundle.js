@@ -254,6 +254,14 @@
     [['Ctrl', 'lctrl', 1.25, 'Left Ctrl'], ['Win', 'meta', 1.25, 'Windows'], ['Alt', 'lalt', 1.25, 'Left Alt'], ['', 'space', 6.25, 'Space'],
       ['Alt', 'ralt', 1.25, 'Right Alt'], ['Fn', 'fn', 1.25], ['Menu', 'menu', 1.25], ['Ctrl', 'rctrl', 1.25, 'Right Ctrl']]
   ];
+  // ISO: a tall Enter, the # key under it, a short Left Shift and the extra key beside it.
+  var KB_MAIN_ISO = [
+    KB_MAIN[0],
+    [['Tab', 'tab', 1.5], ['Q'], ['W'], ['E'], ['R'], ['T'], ['Y'], ['U'], ['I'], ['O'], ['P'], ['['], [']'], 0.25, ['Enter', 'enter', 1.25, 'Enter', 2]],
+    [['Caps', 'capslock', 1.75, 'Caps Lock'], ['A'], ['S'], ['D'], ['F'], ['G'], ['H'], ['J'], ['K'], ['L'], [';'], ["'"], ['#', '\\']],
+    [['Shift', 'lshift', 1.25, 'Left Shift'], ['<', 'intl', 1, '< >'], ['Z'], ['X'], ['C'], ['V'], ['B'], ['N'], ['M'], [','], ['.'], ['/'], ['Shift', 'rshift', 2.75, 'Right Shift']],
+    KB_MAIN[4]
+  ];
   var KB_FROW = [['Esc', 'escape', 1, 'Escape'], null, ['F1', 'f1'], ['F2', 'f2'], ['F3', 'f3'], ['F4', 'f4'], 0.5,
     ['F5', 'f5'], ['F6', 'f6'], ['F7', 'f7'], ['F8', 'f8'], 0.5, ['F9', 'f9'], ['F10', 'f10'], ['F11', 'f11'], ['F12', 'f12']];
   // [label, id, x, row, w, h, tip] with x relative to the cluster and row 0 = the F-row.
@@ -272,7 +280,7 @@
   ];
   var KB_WIDTH = { compact: 15, tkl: 18.5, full: 23 };
 
-  function kbKeys(layout) {
+  function kbKeys(layout, iso) {
     var keys = [];
     function put(label, id, x, row, w, hgt, tip) {
       keys.push({ label: label, id: id || label.toLowerCase(), x: x, row: row, w: w || 1, h: hgt || 1, tip: tip || label || 'Space' });
@@ -283,9 +291,12 @@
         if (k === null) fx += 1; else if (typeof k === 'number') fx += k; else { put(k[0], k[1], fx, 0, k[2], 1, k[3]); fx += k[2] || 1; }
       });
     }
-    KB_MAIN.forEach(function (row, ri) {
+    (iso ? KB_MAIN_ISO : KB_MAIN).forEach(function (row, ri) {
       var x = 0;
-      row.forEach(function (k) { put(k[0], k[1], x, ri + 1, k[2], 1, k[3]); x += k[2] || 1; });
+      row.forEach(function (k) {
+        if (typeof k === 'number') { x += k; return; }
+        put(k[0], k[1], x, ri + 1, k[2], k[4] || 1, k[3]); x += k[2] || 1;
+      });
     });
     if (layout !== 'compact') KB_NAV.forEach(function (k) { put(k[0], k[1], 15.5 + k[2], k[3], k[4], k[5], k[6]); });
     if (layout === 'full') KB_PAD.forEach(function (k) { put(k[0], k[1], 19 + k[2], k[3], k[4], k[5], k[6] || 'Num ' + k[0]); });
@@ -299,16 +310,19 @@
     var rows = compact ? 'repeat(5, var(--kt-kb-row))' : 'var(--kt-kb-row) var(--kt-kb-fgap) repeat(5, var(--kt-kb-row))';
     return h('div', { className: cx('kt-kb', 'kt-kb-' + layout, p.className), role: 'group', 'aria-label': p.label || 'Keyboard heatmap' },
       h('div', { className: 'kt-kb-rows', style: { '--kt-kb-units': units, gridTemplateColumns: 'repeat(' + units * 4 + ', 1fr)', gridTemplateRows: rows } },
-        kbKeys(layout).map(function (key, i) {
-          var n = counts[key.id] || 0, lv = heatLevel(n, max, true);
+        kbKeys(layout, p.iso).map(function (key, i) {
+          // On other layouts a position types another key: count that one, show its legend.
+          var m = p.map && p.map[key.id];
+          var id = m ? m[0] : key.id, label = m && m[1] ? m[1] : key.label, tip = m && m[1] ? m[1] : key.tip;
+          var n = counts[id] || 0, lv = heatLevel(n, max, true);
           // Grid rows: compact has the five main rows; otherwise the F-row, a small gap, then those.
           var row = compact ? key.row : key.row === 0 ? 1 : key.row + 2;
           var top = compact ? key.row === 1 : key.row === 0;
           return h('span', {
             key: i, className: cx('kt-kb-key', 'kt-heat-' + lv, 'data-sm', top && 'is-top'),
             style: { gridColumn: (Math.round(key.x * 4) + 1) + ' / span ' + Math.round(key.w * 4), gridRow: row + ' / span ' + key.h },
-            'data-tip': key.tip + ' \u00b7 ' + formatCount(n), role: 'img', 'aria-label': key.tip + ': ' + formatCount(n)
-          }, key.label);
+            'data-tip': tip + ' \u00b7 ' + formatCount(n), role: 'img', 'aria-label': tip + ': ' + formatCount(n)
+          }, label);
         })));
   }
 
@@ -331,7 +345,8 @@
   var SOURCES = {
     manictime: { name: 'ManicTime', mono: 'MT', tone: 'amber', hint: 'ManicTime data folder or backup' },
     whatpulse: { name: 'WhatPulse', mono: 'WP', tone: 'cyan', hint: 'WhatPulse database (whatpulse.db)' },
-    csv: { name: 'CSV file', mono: 'CSV', tone: 'sky', hint: 'Exported timeline or pulse history' }
+    csv: { name: 'CSV file', mono: 'CSV', tone: 'sky', hint: 'Exported timeline or pulse history' },
+    katsudo: { name: 'Another PC', mono: 'PC', tone: 'rose', hint: 'Katsudō database exported from your other PC' }
   };
   var STATUS = {
     idle: { tone: 'neutral', label: 'Not started' },

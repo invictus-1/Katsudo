@@ -67,6 +67,11 @@ export interface FlowReport {
   longest: FlowSession[];
   untagged: boolean;
 }
+/** Position (the key's US id) -> [key id it types, legend], where the layout in use differs. */
+export interface KeyLayout { us: boolean; keys: Record<string, [string, string]> }
+export interface Update { current: string; latest: string; newer: boolean; url: string; notes: string; size: number }
+export interface Pc { device: string; name: string; first_day: string | null; last_day: string | null; imported_at: number | null }
+export interface Pcs { this: Pc; others: Pc[]; sync_dir: string | null; last_sync: number | null }
 export interface AppKeys { app_id: number; name: string; total: number; keys: Record<string, number> }
 export interface RangeView { days: DaySummary[]; apps: AppTotal[] }
 export interface Stat { label: string; value: string }
@@ -89,6 +94,8 @@ export interface Status {
   version: string;
   /** When Windows last started (Unix seconds). */
   booted_at: number | null;
+  /** A newer version the weekly check found. */
+  update: string | null;
 }
 export interface Tag { id: number; name: string; color: 'amber' | 'cyan' | 'rose' | 'lime' | 'sky' | string }
 export interface TagRule { field: 'app' | 'title'; op: 'is' | 'contains'; value: string; tag_id: number }
@@ -193,6 +200,10 @@ export interface Settings {
   idle_minutes: number;
   track_titles: boolean;
   track_input: boolean;
+  /** Calls (mic or camera in use) and videos count as present. */
+  presence_aware: boolean;
+  /** Check for a new version once a week (off by default). */
+  update_weekly: boolean;
   nightly_backup: boolean;
   theme: string;
   ui_scale: number;
@@ -202,6 +213,8 @@ export interface Settings {
   roadmap: string;
   /** Shortest flow session, in minutes. */
   flow_minutes: number;
+  /** Write-only: the folder every PC syncs through ("" for none). */
+  sync_dir?: string;
   /** Finger maps (JSON, see hands.ts). */
   hands: string;
   /** Break nudges: off by default. */
@@ -254,6 +267,13 @@ export const api = {
   days: (from: string, to: string) => invoke<DaySummary[]>('get_days', { from, to }),
   keys: (from: string, to: string) => invoke<Record<string, number>>('get_keys', { from, to }),
   appKeys: (from: string, to: string) => invoke<AppKeys[]>('get_app_keys', { from, to }),
+  pcs: () => invoke<Pcs>('get_pcs'),
+  exportPc: (path: string) => invoke<void>('export_pc', { path }),
+  removePc: (device: string) => invoke<void>('remove_pc', { device }),
+  syncNow: () => invoke<string[]>('sync_now'),
+  checkUpdate: () => invoke<Update>('check_update'),
+  keyLayout: () => invoke<KeyLayout>('get_key_layout'),
+  installUpdate: () => invoke<void>('install_update'),
   mouse: (from: string, to: string) => invoke<MouseMap>('get_mouse', { from, to }),
   rhythm: () => invoke<RhythmOverview>('get_rhythm'),
   overlay: () => invoke<OverlayStatus>('get_overlay'),

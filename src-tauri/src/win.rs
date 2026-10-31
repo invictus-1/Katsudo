@@ -96,6 +96,64 @@ mod imp {
         Some(crate::db::now_secs() - up as i64)
     }
 
+    /// Is any app using the microphone or the camera right now? Windows' privacy settings keep
+    /// a record per app (the one behind the mic icon in the taskbar): in use while it has a
+    /// start time and no stop time.
+    pub fn mic_or_camera_in_use() -> bool {
+        use winreg::enums::HKEY_CURRENT_USER;
+        use winreg::RegKey;
+        let in_use = |key: &RegKey| -> bool {
+            let start: u64 = key.get_value("LastUsedTimeStart").unwrap_or(0);
+            let stop: u64 = key.get_value("LastUsedTimeStop").unwrap_or(1);
+            start != 0 && stop == 0
+        };
+        let base = RegKey::predef(HKEY_CURRENT_USER);
+        for device in ["microphone", "webcam"] {
+            let Ok(store) = base.open_subkey(format!(r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\{device}")) else { continue };
+            for name in store.enum_keys().flatten() {
+                let Ok(app) = store.open_subkey(&name) else { continue };
+                if name == "NonPackaged" {
+                    if app.enum_keys().flatten().any(|n| app.open_subkey(&n).is_ok_and(|k| in_use(&k))) {
+                        return true;
+                    }
+                } else if in_use(&app) {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    /// Is something keeping the display on (a video playing, a presentation)?
+    pub fn display_kept_on() -> bool {
+        use windows::Win32::System::Power::{CallNtPowerInformation, SystemExecutionState, ES_DISPLAY_REQUIRED};
+        let mut state: u32 = 0;
+        let ok = unsafe {
+            CallNtPowerInformation(SystemExecutionState, None, 0, Some(&mut state as *mut u32 as *mut _), std::mem::size_of::<u32>() as u32)
+        };
+        ok.is_ok() && state & ES_DISPLAY_REQUIRED.0 != 0
+    }
+
+    /// The keyboard layout in front: for each physical key (by scan code), the virtual key and
+    /// the character it types; and whether the layout is US English.
+    pub fn key_layout(scans: &[u32]) -> (Vec<(u32, u32, Option<char>)>, bool) {
+        use windows::Win32::UI::Input::KeyboardAndMouse::{GetKeyboardLayout, MapVirtualKeyExW, MAPVK_VK_TO_CHAR, MAPVK_VSC_TO_VK_EX};
+        use windows::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, GetWindowThreadProcessId};
+        unsafe {
+            let thread = GetWindowThreadProcessId(GetForegroundWindow(), None);
+            let hkl = GetKeyboardLayout(thread);
+            let out = scans
+                .iter()
+                .map(|&scan| {
+                    let vk = MapVirtualKeyExW(scan, MAPVK_VSC_TO_VK_EX, hkl);
+                    let ch = MapVirtualKeyExW(vk, MAPVK_VK_TO_CHAR, hkl) & 0x7fff_ffff;
+                    (scan, vk, char::from_u32(ch).filter(|c| !c.is_control()))
+                })
+                .collect();
+            (out, (hkl.0 as usize & 0xffff) == 0x0409)
+        }
+    }
+
     /// Seconds since the last keyboard or mouse input anywhere in the session.
     pub fn idle_secs() -> u64 {
         unsafe {
@@ -175,3 +233,9 @@ pub fn screens() -> Vec<Screen> { Vec::new() }
 pub fn fullscreen_busy() -> bool { false }
 #[cfg(not(windows))]
 pub fn booted_at() -> Option<i64> { None }
+#[cfg(not(windows))]
+pub fn mic_or_camera_in_use() -> bool { false }
+#[cfg(not(windows))]
+pub fn key_layout(_: &[u32]) -> (Vec<(u32, u32, Option<char>)>, bool) { (Vec::new(), true) }
+#[cfg(not(windows))]
+pub fn display_kept_on() -> bool { false }

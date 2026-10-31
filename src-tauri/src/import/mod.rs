@@ -5,6 +5,7 @@
 //! - imports inside one transaction, so a failure or a cancel leaves nothing behind,
 //! - replaces an earlier import from the same tool rather than adding to it.
 
+pub mod katsudo;
 pub mod manictime;
 pub mod whatpulse;
 pub mod whatpulse_api;
@@ -162,7 +163,7 @@ pub fn replace_source(tx: &Connection, kind: &str, label: &str, path: &str) -> R
         .query_map([kind], |r| r.get(0))?
         .collect::<rusqlite::Result<_>>()?;
     for id in old {
-        for table in ["segment", "input_hour", "key_day", "net_hour", "uptime_hour", "undated", "mouse_cell"] {
+        for table in ["segment", "input_hour", "key_day", "net_hour", "uptime_hour", "undated", "mouse_cell", "rhythm_session"] {
             tx.execute(&format!("DELETE FROM {table} WHERE source = ?1"), [id])?;
         }
         tx.execute("DELETE FROM source WHERE id = ?1", [id])?;

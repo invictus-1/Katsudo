@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { api, type AppKeys } from '../api';
 import { Button, Panel, Segmented } from '../ds/katsudo';
 import { formatCount } from '../lib';
-import { FINGERS, handsReport, keyIdFromCode, keyLabel, parseHands, type Finger, type HandsConfig, type Preset } from '../hands';
+import { byPosition, FINGERS, handsReport, keyIdFromCode, keyLabel, parseHands, type Finger, type HandsConfig, type Preset } from '../hands';
 import './hands.css';
 
 // The left hand from the back, thumb towards the middle: [x, y, width, height] per finger.
@@ -67,8 +67,10 @@ const APP_PRESETS = [
   { value: 'gaming', label: 'Gaming' },
 ];
 
-export function HandsPanel({ keys, apps, clicks, scrolls, label }: {
+export function HandsPanel({ keys, apps, clicks, scrolls, label, keyMap }: {
   keys: Record<string, number>; apps: AppKeys[]; clicks: number; scrolls: number; label: string;
+  /** The keyboard layout in use, so fingers follow physical keys. */
+  keyMap?: Record<string, [string, string]>;
 }) {
   const [cfg, setCfg] = useState<HandsConfig | null>(null);
   const [listening, setListening] = useState(false);
@@ -94,7 +96,9 @@ export function HandsPanel({ keys, apps, clicks, scrolls, label }: {
     setCfg(next);
     api.setSetting('hands', JSON.stringify(next));
   };
-  const r = useMemo(() => (cfg ? handsReport(keys, apps, cfg, clicks, scrolls) : null), [keys, apps, cfg, clicks, scrolls]);
+  const r = useMemo(() => (cfg
+    ? handsReport(byPosition(keys, keyMap), apps.map((a) => ({ ...a, keys: byPosition(a.keys, keyMap) })), cfg, clicks, scrolls)
+    : null), [keys, apps, cfg, clicks, scrolls, keyMap]);
   if (!cfg || !r) return null;
   const sum = r.left + r.right || 1;
   const busiest = [...FINGERS].sort((a, b) => r.total[b.id] - r.total[a.id])[0];

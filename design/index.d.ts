@@ -127,6 +127,10 @@ export interface KeyboardHeatmapProps {
    *  (escape, f1–f12, printscreen, scrolllock, pause, insert, home, pageup, delete, end, pagedown, up, down, left, right).
    *  full: adds the numpad (numlock, num0–num9, num/, num*, num-, num+, num., numenter). */
   layout?: 'compact' | 'tkl' | 'full';
+  /** ISO: tall Enter, short Left Shift and the extra key beside it (id "intl"). */
+  iso?: boolean;
+  /** Position (the key's US id) -> [the key id it types, its legend], for other layouts. */
+  map?: Record<string, [string, string]>;
   label?: string;
 }
 export declare function KeyboardHeatmap(props: KeyboardHeatmapProps): React.ReactElement;

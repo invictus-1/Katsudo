@@ -16,6 +16,11 @@ const LAYOUTS = [
   { value: 'full', label: 'Full' },
 ];
 const LAYOUT_KEY = 'katsudo.keyboard-layout';
+const ISO_KEY = 'katsudo.keyboard-iso';
+const SHAPES = [
+  { value: 'ansi', label: 'ANSI' },
+  { value: 'iso', label: 'ISO' },
+];
 
 function savedLayout(): Layout {
   try {
@@ -40,6 +45,18 @@ export function InputView({ firstDay, undated }: { firstDay: string | null; unda
   const [metric, setMetric] = useState<Metric>('keys');
   const [range, setRange] = useState<RangeId>('month');
   const [layout, setLayoutState] = useState<Layout>(savedLayout);
+  // The board's shape (ANSI or ISO) and what each key types under the keyboard layout in use.
+  const keyLayout = useData(api.keyLayout, []);
+  const [isoChoice, setIsoChoice] = useState<boolean | null>(() => {
+    try { const v = localStorage.getItem(ISO_KEY); return v === null ? null : v === 'iso'; } catch { return null; }
+  });
+  // A board's shape can't be told from the Windows layout: ANSI unless you pick ISO.
+  const iso = isoChoice ?? false;
+  const setIso = (v: boolean) => {
+    setIsoChoice(v);
+    try { localStorage.setItem(ISO_KEY, v ? 'iso' : 'ansi'); } catch { /* not remembered, still applied */ }
+  };
+  const keyMap = keyLayout.data && Object.keys(keyLayout.data.keys).length ? keyLayout.data.keys : undefined;
   const setLayout = (v: Layout) => {
     setLayoutState(v);
     try { localStorage.setItem(LAYOUT_KEY, v); } catch { /* not remembered, still applied */ }
@@ -106,12 +123,13 @@ export function InputView({ firstDay, undated }: { firstDay: string | null; unda
             <option value="">All apps</option>
             {(appKeys.data ?? []).map((a) => <option key={a.app_id} value={a.app_id}>{a.name} · {shortCount(a.total)}</option>)}
           </select>
-          <Segmented size="sm" label="Keyboard layout" options={LAYOUTS} value={layout} onChange={(v) => setLayout(v as Layout)} />
+          <Segmented size="sm" label="Keyboard size" options={LAYOUTS} value={layout} onChange={(v) => setLayout(v as Layout)} />
+          <Segmented size="sm" label="Keyboard shape" options={SHAPES} value={iso ? 'iso' : 'ansi'} onChange={(v) => setIso(v === 'iso')} />
         </div>}>
         {kbCounts && Object.keys(kbCounts).length ? (
           <>
             <div className="scroll-x">
-              <KeyboardHeatmap counts={kbCounts} layout={layout} label={`Key presses${appKb ? ` in ${appKb.name}` : ''}, ${rangeLabel}`} />
+              <KeyboardHeatmap counts={kbCounts} layout={layout} iso={iso} map={keyMap} label={`Key presses${appKb ? ` in ${appKb.name}` : ''}, ${rangeLabel}`} />
             </div>
             {appKb && (
               <p className="text-small faint kb-top">
@@ -128,7 +146,7 @@ export function InputView({ firstDay, undated }: { firstDay: string | null; unda
         )}
       </Panel>
       {keys.data && Object.keys(keys.data).length > 0 && (
-        <HandsPanel keys={keys.data} apps={appKeys.data ?? []} label={rangeLabel ?? ''}
+        <HandsPanel keys={keys.data} apps={appKeys.data ?? []} label={rangeLabel ?? ''} keyMap={keyMap}
           clicks={(days.data ?? []).reduce((s, d) => s + d.clicks, 0)} scrolls={(days.data ?? []).reduce((s, d) => s + d.scrolls, 0)} />
       )}
       <Panel title={`Mouse · ${rangeLabel}`}
