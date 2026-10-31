@@ -3,8 +3,9 @@ import type { ThemeId } from './themes';
 import { SynthFloor } from './Hero';
 import { Hanko, NAME } from '../kanji';
 import { RamenWelcome, SteamWelcome, UkiyoeWelcome } from './EarlyArt';
+import { AnimeWelcome, CyberWelcome, SignalWelcome, StarshipWelcome, VaporWelcome } from './FutureArt';
 
-const DURATION: Record<ThemeId, number> = { ukiyoe: 2300, steampunk: 2000, ramen: 2000, phosphor: 2200, arcade: 1900, synthwave: 2200, beige: 1900, dark: 1300, light: 1300 };
+const DURATION: Record<ThemeId, number> = { ukiyoe: 2300, steampunk: 2000, ramen: 2000, anime: 1900, cyberpunk: 2100, starship: 1900, signal: 2200, vapor: 1500, phosphor: 2200, arcade: 1900, synthwave: 2200, beige: 1900, dark: 1300, light: 1300 };
 
 const BOOT = [
   'KATSUDO BIOS v0.1 · (c) your machine',
@@ -90,6 +91,11 @@ export function Welcome({ theme, enabled }: { theme: ThemeId; enabled: boolean }
       {theme === 'ukiyoe' && <UkiyoeWelcome />}
       {theme === 'steampunk' && <SteamWelcome />}
       {theme === 'ramen' && <RamenWelcome />}
+      {theme === 'anime' && <AnimeWelcome />}
+      {theme === 'cyberpunk' && <CyberWelcome />}
+      {theme === 'starship' && <StarshipWelcome />}
+      {theme === 'signal' && <SignalWelcome />}
+      {theme === 'vapor' && <VaporWelcome />}
       {(theme === 'dark' || theme === 'light') && (
         <div className="wl-now">
           <div className="wl-now-lanes">{[0, 1, 2].map((i) => <i key={i} style={{ animationDelay: `${i * 0.12}s` }} />)}</div>

@@ -1,4 +1,6 @@
 @import './early.css';
+@import './future.css';
+@import './signal.css';
 
 /* Katsudō eras. Colors come from tokens (design/tokens.json); this file adds each era's type,
    shape and decoration. Everything animated uses transform or opacity only, pauses when the

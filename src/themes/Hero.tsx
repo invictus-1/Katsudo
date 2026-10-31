@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import type { ThemeId } from './themes';
 import { formatCount } from '../lib';
 import { RamenArt, SteamArt, UkiyoeArt } from './EarlyArt';
+import { AnimeArt, CyberArt, episode, SignalArt, StarshipArt, VaporArt } from './FutureArt';
 
 interface HeroProps {
   theme: ThemeId;
@@ -17,6 +18,11 @@ const EYEBROW: Record<ThemeId, string> = {
   ukiyoe: 'The floating world · today',
   steampunk: 'Engine room · the day’s log',
   ramen: 'Open late · today',
+  anime: 'Episode',
+  cyberpunk: 'Night city · live feed',
+  starship: 'Bridge · activity log',
+  signal: 'Transmission received · today',
+  vapor: 'Today',
   phosphor: '> katsudo --today',
   arcade: '1UP · PLAYER ONE',
   synthwave: 'NOW TRACKING',
@@ -37,10 +43,15 @@ export function Hero(p: HeroProps) {
         {p.theme === 'ukiyoe' && <UkiyoeArt />}
         {p.theme === 'steampunk' && <SteamArt kps={p.kps} peak={p.peak} />}
         {p.theme === 'ramen' && <RamenArt />}
+        {p.theme === 'anime' && <AnimeArt />}
+        {p.theme === 'cyberpunk' && <CyberArt />}
+        {p.theme === 'starship' && <StarshipArt keysToday={p.keysToday} peak={p.peak} />}
+        {p.theme === 'signal' && <SignalArt />}
+        {p.theme === 'vapor' && <VaporArt hourly={p.hourly} />}
         {(p.theme === 'dark' || p.theme === 'light') && <LanesArt />}
       </div>
       <div className="hero-text">
-        <div className="hero-eyebrow">{EYEBROW[p.theme]}</div>
+        <div className="hero-eyebrow">{p.theme === 'anime' ? `Episode ${episode()}` : EYEBROW[p.theme]}</div>
         <h1 className="hero-title">{p.weekday}</h1>
         <p className="hero-sub">{p.date} · so far today</p>
       </div>

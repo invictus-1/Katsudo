@@ -1,0 +1,162 @@
+/* Newer eras: 1995 Anime, 2077 Cyberpunk, 2350 Starship. Colours come from tokens; art is in
+   FutureArt.tsx. Animations use transform and opacity only. */
+
+/* ---- 1995 Anime: cel paint, bold outlines --------------------------------------------------- */
+[data-theme="anime"] { --font-display: "Bangers", "Impact", sans-serif; --font-kanji: "Katsudo Heavy", "Yu Gothic", sans-serif;
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px; --hanko: #ff4f7b; --hanko-ink: #ffffff; --cel: #2a1f3d; }
+[data-theme="anime"] .hero-title, [data-theme="anime"] .display-xl, [data-theme="anime"] .display-lg, [data-theme="anime"] .display-md, [data-theme="anime"] .brand { font-weight: 400; letter-spacing: .03em; }
+[data-theme="anime"] .hero-title { font-size: clamp(64px, 7vw, 136px); color: #ffffff; -webkit-text-stroke: 3px var(--cel); paint-order: stroke fill; text-shadow: 5px 5px 0 var(--cel); }
+[data-theme="anime"] .hero-eyebrow { display: inline-block; padding: 4px 10px; color: #fff; background: var(--amber); border: 2px solid var(--cel); border-radius: 4px; transform: rotate(-2deg); }
+[data-theme="anime"] .hero-sub { color: var(--cel); font-weight: 600; }
+[data-theme="anime"] .kt-panel, [data-theme="anime"] .kt-stat { border: 2px solid var(--cel); box-shadow: 4px 4px 0 var(--cel); }
+[data-theme="anime"] .kt-panel-head { border-bottom: 2px solid var(--cel); }
+[data-theme="anime"] .kt-panel-head .kt-label { font-family: var(--font-display); font-size: 15px; letter-spacing: .06em; color: var(--cel); }
+[data-theme="anime"] .kt-btn { border: 2px solid var(--cel); box-shadow: 2px 2px 0 var(--cel); }
+[data-theme="anime"] .kt-btn-primary { color: #fff; }
+[data-theme="anime"] .sidebar { background: linear-gradient(180deg, #ffd6a5, #ffc2d1); border-right: 2px solid var(--cel); }
+.hero.hero-anime { background: linear-gradient(180deg, #7fd0ff 0%, #bfe6ff 40%, #ffd1e0 78%, #ffe8c9 100%); border: 2px solid var(--cel); box-shadow: 4px 4px 0 var(--cel); }
+.hero-anime .hero-live { background: #fffaf2; border: 2px solid var(--cel); box-shadow: 3px 3px 0 var(--cel); }
+.an { position: absolute; inset: 0; }
+.an-lines { position: absolute; inset: -40%; background: repeating-conic-gradient(from 0deg at 72% 46%, #ffffff00 0deg 4deg, #ffffffaa 4deg 5deg);
+  -webkit-mask-image: radial-gradient(circle at 72% 46%, transparent 10%, #000 30%, transparent 70%); mask-image: radial-gradient(circle at 72% 46%, transparent 10%, #000 30%, transparent 70%);
+  animation: an-lines 1.6s steps(2) infinite; opacity: .7; }
+@keyframes an-lines { 50% { transform: rotate(2deg); } }
+.an-cloud { position: absolute; width: clamp(110px, 10vw, 200px); fill: #ffffff; stroke: #2a1f3d; stroke-width: 3; stroke-linejoin: round; animation: an-drift 30s linear infinite alternate; }
+.an-cloud-1 { left: 46%; top: 12%; }
+.an-cloud-2 { left: 64%; top: 34%; width: clamp(80px, 7vw, 140px); animation-duration: 22s; animation-direction: alternate-reverse; }
+@keyframes an-drift { to { transform: translateX(60px); } }
+.an-city { position: absolute; left: 40%; right: clamp(250px, 17vw, 400px); bottom: 0; height: 36%; display: flex; align-items: flex-end; gap: 4px; }
+.an-city i { flex: 1; background: #6a4bd6; border: 2px solid #2a1f3d; border-bottom: 0; border-radius: 3px 3px 0 0;
+  box-shadow: inset -8px 0 0 #5236b8; }
+.an-petals i { position: absolute; top: -10%; width: calc(10px * var(--s)); height: calc(7px * var(--s)); border-radius: 60% 0 60% 0; background: #ff9ab3; border: 1px solid #d63362;
+  animation: an-petal linear infinite; }
+@keyframes an-petal { from { transform: translate(0, 0) rotate(0); } to { transform: translate(-120px, 420px) rotate(540deg); } }
+
+/* ---- 2077 Cyberpunk: neon in the rain --------------------------------------------------------- */
+[data-theme="cyberpunk"] { --font-display: "Rajdhani", "Segoe UI", sans-serif; --font-mono: "Share Tech Mono", "Cascadia Mono", Consolas, monospace;
+  --font-kanji: "Katsudo Heavy", "Yu Gothic", sans-serif; --radius-sm: 0px; --radius-md: 0px; --radius-lg: 0px; --hanko: #ff2a6d; --hanko-ink: #07060c; }
+[data-theme="cyberpunk"] .hero-title, [data-theme="cyberpunk"] .display-xl, [data-theme="cyberpunk"] .display-lg, [data-theme="cyberpunk"] .display-md, [data-theme="cyberpunk"] .brand { font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+[data-theme="cyberpunk"] .hero-title { color: #f5e64b; text-shadow: 3px 0 #ff2a6d, -3px 0 #00f0ff; }
+[data-theme="cyberpunk"] .hero-live-value { color: #00f0ff; text-shadow: 0 0 18px #00f0ffaa; }
+/* Cut corners and a neon edge. */
+[data-theme="cyberpunk"] .kt-panel, [data-theme="cyberpunk"] .kt-stat { border: 1px solid #5b4d8a;
+  background: linear-gradient(135deg, #ff2a6d 0 10px, transparent 10px), linear-gradient(315deg, #00f0ff 0 6px, transparent 6px), var(--surface-100); }
+[data-theme="cyberpunk"] .kt-panel-head .kt-label { font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: .14em; color: #ff5f90; }
+[data-theme="cyberpunk"] .kt-btn-primary { background: #f5e64b; border-color: #f5e64b; color: #07060c; }
+[data-theme="cyberpunk"] .sidebar { background: linear-gradient(180deg, #0d0b16, #07060c); border-right: 1px solid #ff2a6d55; }
+[data-theme="cyberpunk"] .kt-nav.is-active { box-shadow: inset 3px 0 0 #ff2a6d; }
+.hero.hero-cyberpunk { background: linear-gradient(180deg, #07060c 0%, #120a22 60%, #2a0a2e 100%); border-color: #5b4d8a; }
+.cy { position: absolute; inset: 0; overflow: hidden; }
+.cy-haze { position: absolute; left: 30%; right: 0; bottom: -20%; height: 70%; background: radial-gradient(ellipse at 60% 100%, #ff2a6d55, transparent 65%); }
+.cy-towers { position: absolute; left: 38%; right: clamp(250px, 17vw, 400px); bottom: 0; height: 92%; display: flex; align-items: flex-end; gap: 1.2%; }
+.cy-towers i { display: block; background: repeating-linear-gradient(0deg, #0d0b16 0 7px, transparent 7px 10px), repeating-linear-gradient(90deg, #f5e64b55 0 4px, #0d0b16 4px 8px);
+  background-color: #0d0b16; border-top: 2px solid #2a2440; box-shadow: 0 -2px 12px #ff2a6d22; }
+.cy-towers i.is-cyan { background: repeating-linear-gradient(0deg, #0d0b16 0 6px, transparent 6px 9px), repeating-linear-gradient(90deg, #00f0ff44 0 3px, #0d0b16 3px 9px); }
+.cy-sign { position: absolute; right: calc(clamp(250px, 17vw, 400px) + 4%); top: 14%; display: flex; flex-direction: column; padding: 8px 6px; border: 2px solid #ff2a6d;
+  font: 400 clamp(28px, 2.8vw, 46px)/1.05 var(--font-kanji); color: #ffd6e4; font-synthesis: none; background: #07060ccc;
+  box-shadow: 0 0 16px #ff2a6d, inset 0 0 12px #ff2a6d88; text-shadow: 0 0 10px #ff2a6d; animation: cy-flicker 6s steps(1) infinite; }
+.cy-sign-h { position: absolute; left: 50%; top: 26%; padding: 2px 10px; font: 700 clamp(16px, 1.6vw, 26px)/1.2 "Rajdhani", sans-serif; letter-spacing: .3em; color: #b8fbff;
+  border: 1.5px solid #00f0ff; box-shadow: 0 0 12px #00f0ff; text-shadow: 0 0 8px #00f0ff; background: #07060c99; animation: cy-flicker 9s steps(1) infinite -3s; }
+@keyframes cy-flicker { 0%, 100% { opacity: 1; } 41% { opacity: 1; } 42% { opacity: .3; } 43% { opacity: 1; } 44% { opacity: .5; } 46% { opacity: 1; } }
+.cy-rain { position: absolute; inset: -100% 0 0 0; height: 200%; opacity: .35;
+  background: repeating-linear-gradient(100deg, transparent 0 22px, #a9c8ff55 22px 23px, transparent 23px 47px); animation: cy-rain .6s linear infinite; }
+@keyframes cy-rain { to { transform: translate(-8px, 50%); } }
+
+/* ---- 2350 Starship: a bridge console ------------------------------------------------------------ */
+[data-theme="starship"] { --font-display: "Antonio", "Arial Narrow", sans-serif; --font-kanji: "Katsudo Code", "MS Gothic", monospace;
+  --radius-sm: 10px; --radius-md: 18px; --radius-lg: 24px; --hanko: #ff9c3d; --hanko-ink: #000000; }
+[data-theme="starship"] .hero-title, [data-theme="starship"] .display-xl, [data-theme="starship"] .display-lg, [data-theme="starship"] .display-md, [data-theme="starship"] .brand { font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+[data-theme="starship"] .hero-title { color: #ff9c3d; }
+[data-theme="starship"] .hero-eyebrow, [data-theme="starship"] .hero-live-label { font-family: "Antonio", sans-serif; letter-spacing: .14em; color: #9999ff; }
+[data-theme="starship"] .hero-live-value { color: #ffcc66; font-family: "Antonio", sans-serif; letter-spacing: 0; }
+/* Panels hang off a coloured spine with a rounded end. */
+[data-theme="starship"] .kt-panel, [data-theme="starship"] .kt-stat { border: 0; border-left: 14px solid #9999ff; border-radius: 22px 8px 8px 22px; background: var(--surface-100); }
+[data-theme="starship"] .kt-stat { border-left-color: #ff9c3d; }
+[data-theme="starship"] .kt-panel-head { border-bottom: 3px solid #cc6699; }
+[data-theme="starship"] .kt-panel-head .kt-label { font-family: "Antonio", sans-serif; font-size: 15px; letter-spacing: .16em; color: #ff9c3d; }
+[data-theme="starship"] .kt-btn { border-radius: 999px; }
+[data-theme="starship"] .kt-btn-primary { background: #ff9c3d; border-color: #ff9c3d; color: #000; }
+[data-theme="starship"] .kt-nav { border-radius: 999px; }
+[data-theme="starship"] .kt-nav.is-active { background: #ff9c3d; color: #000; }
+[data-theme="starship"] .kt-nav.is-active .kt-icon { color: #000; }
+.hero.hero-starship { background: #000; border: 0; }
+.hero-starship .hero-live { background: #000c; }
+.ss { position: absolute; inset: 0; }
+.ss-view { position: absolute; left: 44%; right: calc(clamp(250px, 17vw, 400px) + 30px); top: 30%; bottom: 30%; overflow: hidden; border-radius: 6px; background: radial-gradient(ellipse at 50% 50%, #101030, #000 70%); }
+.ss-view i { position: absolute; right: -60px; height: 1.5px; border-radius: 1px; background: linear-gradient(90deg, transparent, #cfd8ff); animation: ss-warp 1.2s linear infinite; }
+@keyframes ss-warp { from { transform: translateX(0); } to { transform: translateX(-1100px); } }
+.ss-frame { position: absolute; left: 40%; right: calc(clamp(250px, 17vw, 400px) + 20px); top: 12%; bottom: 12%; }
+.ss-top, .ss-bottom { position: absolute; left: 40px; right: 0; display: flex; gap: 6px; height: 22px; }
+.ss-top { top: 0; } .ss-bottom { bottom: 0; }
+.ss-pill { display: inline-flex; align-items: center; padding: 0 12px; border-radius: 0; font: 700 13px/1 "Antonio", sans-serif; letter-spacing: .12em; color: #000; white-space: nowrap; }
+.ss-pill.tone-amber { background: #ff9c3d; } .ss-pill.tone-sky { background: #9999ff; } .ss-pill.tone-cyan { background: #9ab8ff; } .ss-pill.tone-rose { background: #cc6699; }
+.ss-bar { flex: 1; background: #ffcc66; border-radius: 0 11px 11px 0; }
+.ss-bar.is-lime { background: #ff9c3d; }
+.ss-elbow { position: absolute; left: 0; top: 0; bottom: 0; width: 40px; border: 22px solid #cc6699; border-right: 0; border-radius: 30px 0 0 30px; box-sizing: border-box; }
+
+/* ---- Hanko ------------------------------------------------------------------------------------- */
+[data-theme="anime"] .hanko { border-radius: 50%; border: 2px solid var(--cel); box-shadow: 2px 2px 0 var(--cel); transform: rotate(-8deg); }
+[data-theme="cyberpunk"] .hanko { background: transparent; color: #ffd6e4; border: 1.5px solid #ff2a6d; border-radius: 0; transform: none; box-shadow: 0 0 10px #ff2a6d; text-shadow: 0 0 6px #ff2a6d; font-weight: 400; }
+[data-theme="starship"] .hanko { border-radius: 12px 4px 4px 12px; transform: none; box-shadow: none; font-weight: 500; }
+[data-theme="cyberpunk"] .page-head h1::before { color: #ff2a6d; text-shadow: 0 0 8px #ff2a6daa; font-weight: 400; }
+[data-theme="starship"] .page-head h1::before { color: #9999ff; font-weight: 500; }
+
+/* ---- Welcomes ------------------------------------------------------------------------------------ */
+.welcome.welcome-anime { background: #fffaf2; }
+.wl-an { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; }
+.wl-an-band { position: absolute; left: -20%; right: -20%; height: 50%; border: 3px solid #2a1f3d; }
+.wl-an-band.is-a { top: 0; background: #ff4f7b; transform: skewY(-6deg) translateX(-110%); animation: wl-an-in .45s cubic-bezier(.2, .8, .2, 1) forwards; }
+.wl-an-band.is-b { bottom: 0; background: #29a8e0; transform: skewY(-6deg) translateX(110%); animation: wl-an-in .45s cubic-bezier(.2, .8, .2, 1) .1s forwards; }
+@keyframes wl-an-in { to { transform: skewY(-6deg) translateX(0); } }
+.wl-an-card { position: relative; padding: 24px 44px; text-align: center; background: #fffaf2; border: 4px solid #2a1f3d; box-shadow: 8px 8px 0 #2a1f3d; border-radius: 14px;
+  transform: rotate(-3deg); animation: wl-an-pop .5s cubic-bezier(.3, 1.6, .5, 1) .35s both; }
+@keyframes wl-an-pop { from { transform: rotate(-3deg) scale(0); } }
+.wl-an-kanji { font: 400 clamp(80px, 10vw, 160px)/1 var(--font-kanji); color: #ff4f7b; -webkit-text-stroke: 3px #2a1f3d; paint-order: stroke fill; font-synthesis: none; }
+.wl-an-title { font: 400 clamp(40px, 4.4vw, 72px)/1 "Bangers", sans-serif; letter-spacing: .04em; color: #29a8e0; -webkit-text-stroke: 2px #2a1f3d; paint-order: stroke fill; }
+.wl-an-ep { margin-top: 8px; font: 700 15px/1 var(--font-sans); letter-spacing: .3em; text-transform: uppercase; color: #2a1f3d; }
+
+.welcome.welcome-cyberpunk { background: #07060c; }
+.wl-cy { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 14px; }
+.wl-cy-sign { padding: 10px 26px; font: 400 clamp(84px, 11vw, 180px)/1 var(--font-kanji); color: #ffd6e4; font-synthesis: none; border: 3px solid #ff2a6d;
+  box-shadow: 0 0 30px #ff2a6d, inset 0 0 20px #ff2a6d88; text-shadow: 0 0 20px #ff2a6d; animation: wl-cy-on 1.1s steps(1) both; }
+@keyframes wl-cy-on { 0% { opacity: 0; } 12% { opacity: 1; } 18% { opacity: .2; } 26% { opacity: 1; } 30% { opacity: .4; } 38% { opacity: 1; } }
+.wl-cy-title { font: 700 clamp(30px, 3.4vw, 56px)/1 "Rajdhani", sans-serif; letter-spacing: .4em; color: #f5e64b; text-shadow: 3px 0 #ff2a6d, -3px 0 #00f0ff; animation: wl-fade .5s ease .8s both; }
+.wl-cy-line { font: 400 16px/1 "Share Tech Mono", monospace; color: #00f0ff; letter-spacing: .1em; width: max-content; clip-path: inset(0 100% 0 0); animation: wl-type .6s steps(30) 1.1s forwards; }
+.wl-cy-scan { position: absolute; left: 0; right: 0; top: 0; height: 30%; background: linear-gradient(transparent, #00f0ff18, transparent); animation: wl-cy-scan 1.6s linear infinite; }
+@keyframes wl-cy-scan { from { transform: translateY(-100%); } to { transform: translateY(340%); } }
+
+.welcome.welcome-starship { background: #000; }
+.wl-ss { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: 28px; padding: 0 8vw; }
+.wl-ss-bar { height: 34px; display: flex; align-items: center; padding: 0 24px; font: 700 18px/1 "Antonio", sans-serif; letter-spacing: .2em; color: #000; }
+.wl-ss-bar.is-top { background: #ff9c3d; border-radius: 17px 0 0 17px; transform: translateX(110%); animation: wl-ss-in .5s cubic-bezier(.2, .8, .2, 1) forwards; }
+.wl-ss-bar.is-bottom { background: #9999ff; border-radius: 0 17px 17px 0; justify-content: flex-end; transform: translateX(-110%); animation: wl-ss-in .5s cubic-bezier(.2, .8, .2, 1) .15s forwards; }
+@keyframes wl-ss-in { to { transform: none; } }
+.wl-ss-main { display: grid; gap: 10px; animation: wl-fade .6s ease .5s both; }
+.wl-ss-kanji { font: 500 clamp(56px, 7vw, 110px)/1 var(--font-kanji); color: #ffcc66; font-synthesis: none; }
+.wl-ss-title { font: 700 clamp(64px, 8vw, 140px)/.9 "Antonio", sans-serif; letter-spacing: .06em; color: #ff9c3d; }
+.wl-ss-sub { font: 700 18px/1 "Antonio", sans-serif; letter-spacing: .24em; color: #9ab8ff; }
+
+/* ---- Transitions into these eras ----------------------------------------------------------------- */
+/* Anime: an eyecatch wipe on the diagonal. */
+html[data-vt="anime"]::view-transition-new(root) { animation: era-eyecatch 600ms cubic-bezier(.7, 0, .3, 1) both; }
+@keyframes era-eyecatch { from { clip-path: polygon(0 0, 0 0, -30% 100%, -30% 100%); } to { clip-path: polygon(0 0, 130% 0, 100% 100%, -30% 100%); } }
+/* Cyberpunk: the signal tears and snaps into place. */
+html[data-vt="cyberpunk"]::view-transition-new(root) { animation: era-glitch 560ms steps(1, end) both; }
+@keyframes era-glitch {
+  0% { clip-path: inset(0 0 100% 0); transform: none; }
+  10% { clip-path: inset(10% 0 70% 0); transform: translateX(-30px); filter: hue-rotate(80deg) saturate(3); }
+  22% { clip-path: inset(40% 0 35% 0); transform: translateX(24px); }
+  34% { clip-path: inset(0 0 55% 0); transform: translateX(-12px); filter: hue-rotate(-60deg) saturate(2.5); }
+  48% { clip-path: inset(25% 0 10% 0); transform: translateX(16px); }
+  62% { clip-path: inset(0 0 20% 0); transform: translateX(-6px); filter: none; }
+  76% { clip-path: inset(0 0 4% 0); transform: translateX(3px); }
+  88%, 100% { clip-path: inset(0); transform: none; filter: none; }
+}
+html[data-vt="cyberpunk"]::view-transition-old(root) { animation: era-glitch-old 560ms steps(1, end) both; }
+@keyframes era-glitch-old { 20% { transform: translateX(12px); filter: saturate(2); } 50% { transform: translateX(-8px); } 80% { filter: brightness(.5); } }
+/* Starship: the old view rushes past, the new one drops out of warp. */
+html[data-vt="starship"]::view-transition { background: #000; }
+html[data-vt="starship"]::view-transition-old(root) { animation: era-warp-out 420ms cubic-bezier(.6, 0, 1, .4) both; }
+html[data-vt="starship"]::view-transition-new(root) { animation: era-warp-in 520ms cubic-bezier(.1, .8, .3, 1) 260ms both; }
+@keyframes era-warp-out { to { transform: scale(2.6); opacity: 0; filter: brightness(2.2) blur(6px); } }
+@keyframes era-warp-in { from { transform: scale(.35); opacity: 0; filter: brightness(2) blur(4px); } to { transform: none; opacity: 1; filter: none; } }

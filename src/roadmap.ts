@@ -25,7 +25,6 @@ export const ROADMAP: RoadmapItem[] = [
   { id: 'import', stage: 'done', area: 'Data', version: '0.1', title: 'ManicTime and WhatPulse import', blurb: 'Read-only, transactional, replaces itself on re-import. 7 years in under a minute.' },
   { id: 'backups', stage: 'done', area: 'Data', version: '0.1', title: 'Verified daily backups', blurb: 'Integrity-checked snapshots, 14 daily and 8 weekly, safety snapshots before imports and restores.' },
   { id: 'live', stage: 'done', area: 'Rhythm', version: '0.2', title: 'Live, exact key counting', blurb: 'Counted on key-down, 18 ns per press, a keys-per-second meter sampled every 20 ms.' },
-  { id: 'eras', stage: 'done', area: 'Look & feel', version: '0.2', title: 'Eras and welcomes', blurb: 'Phosphor, Arcade, Synthwave, Beige Box, Night shift, Paper and Mixtape, each with its own intro.' },
   { id: 'setup', stage: 'done', area: 'Polish', version: '0.3', title: 'Bespoke installer', blurb: 'Its own animated setup in a random era each run, a matching uninstaller, clean upgrades that save before closing.' },
   { id: 'tips', stage: 'done', area: 'Rhythm', version: '0.3', title: 'Instant key read-outs', blurb: 'Hover any key or calendar day and its count pops up at once.' },
   { id: 'install', stage: 'done', area: 'Polish', version: '0.2', title: 'Installer, autostart, tray', blurb: 'Per-user installer with era art, starts with Windows in the tray, one copy at a time.' },
@@ -35,6 +34,8 @@ export const ROADMAP: RoadmapItem[] = [
   { id: 'roadmap', stage: 'done', area: 'Polish', version: '0.2', title: 'This roadmap', blurb: 'Planned work and ideas inside the app, with stars and your own notes.' },
   { id: 'layouts', stage: 'done', area: 'Rhythm', version: '0.5', title: 'Full keyboard layouts', blurb: '60%, TKL and full size with the F-row, navigation keys, arrows and numpad. Native tracking tells numpad keys apart from their twins.' },
   { id: 'net-ranges', stage: 'done', area: 'Insight', version: '0.5', title: 'Network by day, week, month, year and all time', blurb: 'The same ranges as Input, with busiest days per range.' },
+  { id: 'eras', stage: 'done', area: 'Look & feel', version: '0.2', title: 'Eras and welcomes', blurb: 'Phosphor, Arcade, Synthwave, Beige Box, Night shift, Paper and Mixtape, each with its own intro.' },
+  { id: 'more-eras', stage: 'done', area: 'Look & feel', version: '0.16', title: 'More eras', blurb: 'Eight more, from 1830 to somewhere else: Ukiyo-e, Steampunk, Ramen shop, Anime, Cyberpunk, Starship, Signal and Vapor, each with its own art, welcome and transition.' },
   { id: 'breaks', stage: 'done', area: 'Tracking', version: '0.15', title: 'Gentle break nudges', blurb: 'Opt-in: after a long stretch without a break, a small note above the tray. Waits out flow, games and fullscreen, comes sooner after hard typing, never repeats until you have had a break.' },
   { id: 'transitions', stage: 'done', area: 'Look & feel', version: '0.14', title: 'Era transitions', blurb: 'Switching era plays a piece of the one you pick: CRT power-off, pixel dissolve, VHS tracking roll, a Windows 95 window zoom, or a reveal from your click.' },
   { id: 'receipt', stage: 'done', area: 'Look & feel', version: '0.13', title: 'Daily receipt', blurb: 'A thermal-receipt slip for any day, itemised by app with keys per minute, departments from your tags, flow and a real barcode; print it or save it as an image.' },
@@ -57,7 +58,6 @@ export const ROADMAP: RoadmapItem[] = [
   { id: 'a11y', stage: 'planned', area: 'Polish', version: 'pre-1.0', title: 'Keyboard and screen-reader pass', blurb: 'Every view usable without a mouse; charts with readable summaries.' },
 
   // ---- planned: every idea approved for the road to 1.0 (Oct 2026) ----
-  { id: 'more-eras', stage: 'planned', area: 'Look & feel', title: 'More eras', blurb: '1992 Vaporwave, 2003 Glass, 2008 Gloss, a print-magazine era. Community eras as simple theme files.' },
   { id: 'aware', stage: 'planned', area: 'Tracking', title: 'Meeting and media awareness', blurb: 'Microphone or camera in use, or video playing, counts as present rather than away.' },
   { id: 'multi-pc', stage: 'planned', area: 'Data', title: 'Several PCs, one history', blurb: 'Merge databases from your other machines through a shared folder or the LAN. Still no cloud.' },
   { id: 'ask', stage: 'planned', area: 'Insight', title: 'Ask your history', blurb: 'Optional local model through Ollama: "what did I work on Tuesday afternoon?" answered on your machine only.' },

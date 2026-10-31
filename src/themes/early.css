@@ -9,7 +9,7 @@
 [data-theme="ukiyoe"] .kt-panel-head .kt-label { font-family: var(--font-display); font-weight: 800; letter-spacing: .14em; color: var(--ink); }
 [data-theme="ukiyoe"] .sidebar { background: linear-gradient(180deg, var(--surface-000), #d9cbaa); }
 [data-theme="ukiyoe"] .kt-btn-primary { color: #fbf6ea; }
-.hero-ukiyoe { background: linear-gradient(180deg, #ecdfc2 0%, #f3ebd9 62%); border-color: color-mix(in srgb, var(--ink) 30%, transparent); }
+.hero.hero-ukiyoe { background: linear-gradient(180deg, #ecdfc2 0%, #f3ebd9 62%); border-color: color-mix(in srgb, var(--ink) 30%, transparent); }
 .hero-ukiyoe .hero-live { background: color-mix(in srgb, #f3ebd9 86%, transparent); }
 .uk { position: absolute; inset: 0 clamp(250px, 17vw, 400px) 0 42%;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%); mask-image: linear-gradient(90deg, transparent, #000 18%); }
@@ -50,7 +50,7 @@
 [data-theme="steampunk"] .kt-panel-head .kt-label { font-family: var(--font-display); letter-spacing: .12em; color: var(--amber-ink); }
 [data-theme="steampunk"] .sidebar { background: repeating-linear-gradient(90deg, #170d07 0 9px, #1b110a 9px 15px, #150c06 15px 22px); }
 [data-theme="steampunk"] .kt-btn-primary { background: linear-gradient(180deg, #f0cf86, #b8862e); border-color: #7a5220; color: #1a0f06; }
-.hero-steampunk { background: radial-gradient(ellipse at 62% 30%, #3a2414 0%, #1d120a 55%, #120a05 100%); border-color: var(--line-strong); }
+.hero.hero-steampunk { background: radial-gradient(ellipse at 62% 30%, #3a2414 0%, #1d120a 55%, #120a05 100%); border-color: var(--line-strong); }
 .sp { position: absolute; inset: 0 clamp(250px, 17vw, 400px) 0 46%;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%); mask-image: linear-gradient(90deg, transparent, #000 14%); }
 .sp-machine { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -84,7 +84,7 @@
 [data-theme="ramen"] .kt-panel-head .kt-label { font-family: var(--font-display); font-weight: 400; letter-spacing: .08em; color: var(--amber-ink); }
 [data-theme="ramen"] .sidebar { background: linear-gradient(180deg, #3a1210 0, #2a0e0c 64px, var(--surface-000) 64px); }
 [data-theme="ramen"] .page-head h1::before { color: var(--rose-ink); }
-.hero-ramen { background: radial-gradient(ellipse at 60% 40%, #3a2316 0%, #1b1310 55%, #0e0907 100%); border-color: var(--line); }
+.hero.hero-ramen { background: radial-gradient(ellipse at 60% 40%, #3a2316 0%, #1b1310 55%, #0e0907 100%); border-color: var(--line); }
 .rm { position: absolute; inset: 0 clamp(250px, 17vw, 400px) 0 40%; }
 .rm-noren { position: absolute; top: 0; left: 6%; right: 8%; display: flex; gap: 6px; padding-top: 10px; }
 .rm-rod { position: absolute; top: 4px; left: -12px; right: -12px; height: 9px; border-radius: 5px; background: linear-gradient(180deg, #8a5a32, #4a2c16); }
@@ -118,7 +118,7 @@
 [data-theme="steampunk"] .page-head h1::before { color: #d4a24c; }
 
 /* ---- Welcomes ----------------------------------------------------------------------------------- */
-.welcome-ukiyoe { background: #f3ebd9; }
+.welcome.welcome-ukiyoe { background: #f3ebd9; }
 .wl-uk { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 20px; }
 .wl-uk-kanji { display: flex; flex-direction: column; align-items: center; font: 900 clamp(84px, 11vw, 180px)/1 var(--font-kanji); color: #1f2a44; font-synthesis: none; }
 .wl-uk-kanji span { clip-path: inset(0 0 100% 0); animation: wl-brush .55s cubic-bezier(.5, 0, .3, 1) forwards; }
@@ -128,7 +128,7 @@
 .wl-uk-title { font: 800 clamp(26px, 2.6vw, 40px)/1 "Shippori Mincho", serif; color: #1f2a44; letter-spacing: .2em; animation: wl-fade .8s ease 1.3s both; }
 .wl-uk-wave { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 14vh; fill: #2b5a8c; animation: wl-fade 1.2s ease .2s both; }
 
-.welcome-steampunk { background: radial-gradient(ellipse at 50% 45%, #3a2414, #120a05 70%); }
+.welcome.welcome-steampunk { background: radial-gradient(ellipse at 50% 45%, #3a2414, #120a05 70%); }
 .wl-sp { position: absolute; inset: 0; display: grid; place-items: center; }
 .wl-sp-gears { position: absolute; width: min(70vw, 760px); height: auto; opacity: .55; }
 .wl-sp-gears .sp-gear { animation: sp-turn 6s cubic-bezier(.6, 0, 1, 1) infinite; }
@@ -142,7 +142,7 @@
 .wl-sp-puffs i { left: -23px; bottom: -23px; animation-duration: 1.8s; animation-iteration-count: 1; animation-fill-mode: both; }
 .wl-sp-puffs i:nth-child(2) { left: -80px; } .wl-sp-puffs i:nth-child(3) { left: 40px; } .wl-sp-puffs i:nth-child(4) { left: -10px; }
 
-.welcome-ramen { background: #0e0907; }
+.welcome.welcome-ramen { background: #0e0907; }
 .wl-rm { position: absolute; inset: 0; display: grid; place-items: center; }
 .wl-rm-glow { position: absolute; width: 60vmin; height: 60vmin; border-radius: 50%; background: radial-gradient(circle, #f2a03d55, transparent 65%); animation: wl-fade 1s ease both; }
 .wl-rm-sign { position: relative; text-align: center; }

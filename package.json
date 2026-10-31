@@ -1,7 +1,7 @@
 {
   "name": "katsudo",
   "private": true,
-  "version": "0.15.0",
+  "version": "0.16.0",
   "type": "module",
   "scripts": {
     "ds": "node scripts/sync-ds.mjs",
@@ -12,11 +12,16 @@
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.1.0",
+    "@fontsource/antonio": "^5.3.0",
+    "@fontsource/bangers": "^5.3.0",
     "@fontsource/cinzel": "^5.3.0",
     "@fontsource/ibm-plex-mono": "^5.1.0",
     "@fontsource/ibm-plex-sans": "^5.1.0",
+    "@fontsource/major-mono-display": "^5.3.0",
     "@fontsource/orbitron": "^5.3.0",
     "@fontsource/press-start-2p": "^5.3.0",
+    "@fontsource/rajdhani": "^5.3.0",
+    "@fontsource/share-tech-mono": "^5.3.0",
     "@fontsource/shippori-mincho": "^5.3.0",
     "@fontsource/special-elite": "^5.3.0",
     "@fontsource/vt323": "^5.3.0",
