@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api, type OverlayConfig, type OverlayStatus } from '../api';
 import { Button, Input, Panel, Segmented, Switch } from '../ds/katsudo';
+import { THEMES } from '../themes/themes';
 
 const PRESETS = [
   { label: 'osu!', keys: 'Z X' },
@@ -10,12 +11,7 @@ const PRESETS = [
 ];
 const ERAS = [
   { value: 'app', label: 'Match app' },
-  { value: 'phosphor', label: 'Phosphor' },
-  { value: 'arcade', label: 'Arcade' },
-  { value: 'synthwave', label: 'Synthwave' },
-  { value: 'beige', label: 'Beige Box' },
-  { value: 'dark', label: 'Night shift' },
-  { value: 'light', label: 'Paper' },
+  ...THEMES.map((t) => ({ value: t.id, label: t.name })),
 ];
 const SHOW = [
   { value: 'both', label: 'Keys + keys/s' },

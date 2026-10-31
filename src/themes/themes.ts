@@ -1,4 +1,4 @@
-export type ThemeId = 'phosphor' | 'arcade' | 'synthwave' | 'beige' | 'dark' | 'light';
+export type ThemeId = 'ukiyoe' | 'steampunk' | 'ramen' | 'phosphor' | 'arcade' | 'synthwave' | 'beige' | 'dark' | 'light';
 export type ThemeChoice = ThemeId | 'mixtape';
 
 export interface ThemeInfo {
@@ -12,6 +12,9 @@ export interface ThemeInfo {
 
 /** In era order. Colors come from design/tokens.json; swatches only preview them. */
 export const THEMES: ThemeInfo[] = [
+  { id: 'ukiyoe', era: '1830', name: 'Ukiyo-e', blurb: 'A woodblock print: indigo waves and a red sun on washi paper.', swatches: ['#f3ebd9', '#c8402e', '#2b5a8c', '#1f2a44'] },
+  { id: 'steampunk', era: '1889', name: 'Steampunk', blurb: 'Brass, rivets and mahogany, with a gauge for your keys.', swatches: ['#1d120a', '#d4a24c', '#4fae9b', '#d0703f'] },
+  { id: 'ramen', era: '1958', name: 'Ramen shop', blurb: 'A late-night stall: red noren, a paper lantern, steam off the bowl.', swatches: ['#1b1310', '#f2a03d', '#d93b30', '#7fc4b0'] },
   { id: 'phosphor', era: '1977', name: 'Phosphor', blurb: 'Amber terminal glow, scanlines and a boot sequence.', swatches: ['#0d0a04', '#ffb000', '#62e08a', '#ffc870'] },
   { id: 'arcade', era: '1984', name: 'Arcade', blurb: 'Neon on black, pixel type, a high-score table for your fingers.', swatches: ['#04040a', '#ffe14d', '#29f0ff', '#ff3df0'] },
   { id: 'synthwave', era: '1986', name: 'Synthwave', blurb: 'A sunset over an endless grid.', swatches: ['#120f30', '#ff9e5e', '#4fe3f0', '#ff6ec7'] },

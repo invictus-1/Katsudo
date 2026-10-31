@@ -1,3 +1,5 @@
+@import './early.css';
+
 /* Katsudō eras. Colors come from tokens (design/tokens.json); this file adds each era's type,
    shape and decoration. Everything animated uses transform or opacity only, pauses when the
    window is hidden, and stops under reduced motion or the Animations setting. */

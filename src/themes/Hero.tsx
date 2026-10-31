@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { ThemeId } from './themes';
 import { formatCount } from '../lib';
+import { RamenArt, SteamArt, UkiyoeArt } from './EarlyArt';
 
 interface HeroProps {
   theme: ThemeId;
@@ -13,6 +14,9 @@ interface HeroProps {
 }
 
 const EYEBROW: Record<ThemeId, string> = {
+  ukiyoe: 'The floating world · today',
+  steampunk: 'Engine room · the day’s log',
+  ramen: 'Open late · today',
   phosphor: '> katsudo --today',
   arcade: '1UP · PLAYER ONE',
   synthwave: 'NOW TRACKING',
@@ -30,6 +34,9 @@ export function Hero(p: HeroProps) {
         {p.theme === 'phosphor' && <PhosphorArt hourly={p.hourly} />}
         {p.theme === 'arcade' && <ArcadeArt hourly={p.hourly} />}
         {p.theme === 'beige' && <BeigeArt />}
+        {p.theme === 'ukiyoe' && <UkiyoeArt />}
+        {p.theme === 'steampunk' && <SteamArt kps={p.kps} peak={p.peak} />}
+        {p.theme === 'ramen' && <RamenArt />}
         {(p.theme === 'dark' || p.theme === 'light') && <LanesArt />}
       </div>
       <div className="hero-text">

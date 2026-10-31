@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import type { ThemeId } from './themes';
 import { SynthFloor } from './Hero';
 import { Hanko, NAME } from '../kanji';
+import { RamenWelcome, SteamWelcome, UkiyoeWelcome } from './EarlyArt';
 
-const DURATION: Record<ThemeId, number> = { phosphor: 2200, arcade: 1900, synthwave: 2200, beige: 1900, dark: 1300, light: 1300 };
+const DURATION: Record<ThemeId, number> = { ukiyoe: 2300, steampunk: 2000, ramen: 2000, phosphor: 2200, arcade: 1900, synthwave: 2200, beige: 1900, dark: 1300, light: 1300 };
 
 const BOOT = [
   'KATSUDO BIOS v0.1 · (c) your machine',
@@ -86,6 +87,9 @@ export function Welcome({ theme, enabled }: { theme: ThemeId; enabled: boolean }
           </div>
         </div>
       )}
+      {theme === 'ukiyoe' && <UkiyoeWelcome />}
+      {theme === 'steampunk' && <SteamWelcome />}
+      {theme === 'ramen' && <RamenWelcome />}
       {(theme === 'dark' || theme === 'light') && (
         <div className="wl-now">
           <div className="wl-now-lanes">{[0, 1, 2].map((i) => <i key={i} style={{ animationDelay: `${i * 0.12}s` }} />)}</div>

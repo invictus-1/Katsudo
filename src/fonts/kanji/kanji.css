@@ -8,7 +8,7 @@
 @font-face { font-family: "Katsudo Seal"; font-weight: 900; font-display: block; src: url(./noto-serif-jp-6.woff2) format("woff2"); unicode-range: U+4ECA,U+53D6,U+901A,U+96C6; }
 @font-face { font-family: "Katsudo Seal"; font-weight: 900; font-display: block; src: url(./noto-serif-jp-7.woff2) format("woff2"); unicode-range: U+4E2D,U+5165,U+52D5,U+5B9A,U+5E74,U+6642,U+9593; }
 @font-face { font-family: "Katsudo Seal"; font-weight: 900; font-display: block; src: url(./noto-serif-jp-8.woff2) format("woff2"); unicode-range: U+65E5; }
-@font-face { font-family: "Katsudo Seal"; font-weight: 900; font-display: block; src: url(./noto-serif-jp-9.woff2) format("woff2"); unicode-range: U+30A2,U+30B0,U+30BF,U+30D7,U+30EA; }
+@font-face { font-family: "Katsudo Seal"; font-weight: 900; font-display: block; src: url(./noto-serif-jp-9.woff2) format("woff2"); unicode-range: U+30A2,U+30B0,U+30BF,U+30D7,U+30E1,U+30E9,U+30EA,U+30F3,U+30FC; }
 @font-face { font-family: "Katsudo Seal"; font-weight: 900; font-display: block; src: url(./noto-serif-jp-10.woff2) format("woff2"); unicode-range: U+8EF8; }
 @font-face { font-family: "Katsudo Seal"; font-weight: 900; font-display: block; src: url(./noto-serif-jp-11.woff2) format("woff2"); unicode-range: U+5F8B; }
 @font-face { font-family: "Katsudo Dot"; font-weight: 400; font-display: block; src: url(./dotgothic16-0.woff2) format("woff2"); unicode-range: U+8F03; }
@@ -20,7 +20,7 @@
 @font-face { font-family: "Katsudo Dot"; font-weight: 400; font-display: block; src: url(./dotgothic16-6.woff2) format("woff2"); unicode-range: U+4ECA,U+53D6,U+901A,U+96C6; }
 @font-face { font-family: "Katsudo Dot"; font-weight: 400; font-display: block; src: url(./dotgothic16-7.woff2) format("woff2"); unicode-range: U+4E2D,U+5165,U+52D5,U+5B9A,U+5E74,U+6642,U+9593; }
 @font-face { font-family: "Katsudo Dot"; font-weight: 400; font-display: block; src: url(./dotgothic16-8.woff2) format("woff2"); unicode-range: U+65E5; }
-@font-face { font-family: "Katsudo Dot"; font-weight: 400; font-display: block; src: url(./dotgothic16-9.woff2) format("woff2"); unicode-range: U+30A2,U+30B0,U+30BF,U+30D7,U+30EA; }
+@font-face { font-family: "Katsudo Dot"; font-weight: 400; font-display: block; src: url(./dotgothic16-9.woff2) format("woff2"); unicode-range: U+30A2,U+30B0,U+30BF,U+30D7,U+30E1,U+30E9,U+30EA,U+30F3,U+30FC; }
 @font-face { font-family: "Katsudo Dot"; font-weight: 400; font-display: block; src: url(./dotgothic16-10.woff2) format("woff2"); unicode-range: U+8EF8; }
 @font-face { font-family: "Katsudo Dot"; font-weight: 400; font-display: block; src: url(./dotgothic16-11.woff2) format("woff2"); unicode-range: U+5F8B; }
 @font-face { font-family: "Katsudo Heavy"; font-weight: 400; font-display: block; src: url(./dela-gothic-one-0.woff2) format("woff2"); unicode-range: U+8F03; }
@@ -32,7 +32,7 @@
 @font-face { font-family: "Katsudo Heavy"; font-weight: 400; font-display: block; src: url(./dela-gothic-one-6.woff2) format("woff2"); unicode-range: U+4ECA,U+53D6,U+901A,U+96C6; }
 @font-face { font-family: "Katsudo Heavy"; font-weight: 400; font-display: block; src: url(./dela-gothic-one-7.woff2) format("woff2"); unicode-range: U+4E2D,U+5165,U+52D5,U+5B9A,U+5E74,U+6642,U+9593; }
 @font-face { font-family: "Katsudo Heavy"; font-weight: 400; font-display: block; src: url(./dela-gothic-one-8.woff2) format("woff2"); unicode-range: U+65E5; }
-@font-face { font-family: "Katsudo Heavy"; font-weight: 400; font-display: block; src: url(./dela-gothic-one-9.woff2) format("woff2"); unicode-range: U+30A2,U+30B0,U+30BF,U+30D7,U+30EA; }
+@font-face { font-family: "Katsudo Heavy"; font-weight: 400; font-display: block; src: url(./dela-gothic-one-9.woff2) format("woff2"); unicode-range: U+30A2,U+30B0,U+30BF,U+30D7,U+30E1,U+30E9,U+30EA,U+30F3,U+30FC; }
 @font-face { font-family: "Katsudo Heavy"; font-weight: 400; font-display: block; src: url(./dela-gothic-one-10.woff2) format("woff2"); unicode-range: U+8EF8; }
 @font-face { font-family: "Katsudo Heavy"; font-weight: 400; font-display: block; src: url(./dela-gothic-one-11.woff2) format("woff2"); unicode-range: U+5F8B; }
 @font-face { font-family: "Katsudo Code"; font-weight: 500; font-display: block; src: url(./m-plus-1-code-0.woff2) format("woff2"); unicode-range: U+8F03; }
@@ -44,6 +44,6 @@
 @font-face { font-family: "Katsudo Code"; font-weight: 500; font-display: block; src: url(./m-plus-1-code-6.woff2) format("woff2"); unicode-range: U+4ECA,U+53D6,U+901A,U+96C6; }
 @font-face { font-family: "Katsudo Code"; font-weight: 500; font-display: block; src: url(./m-plus-1-code-7.woff2) format("woff2"); unicode-range: U+4E2D,U+5165,U+52D5,U+5B9A,U+5E74,U+6642,U+9593; }
 @font-face { font-family: "Katsudo Code"; font-weight: 500; font-display: block; src: url(./m-plus-1-code-8.woff2) format("woff2"); unicode-range: U+65E5; }
-@font-face { font-family: "Katsudo Code"; font-weight: 500; font-display: block; src: url(./m-plus-1-code-9.woff2) format("woff2"); unicode-range: U+30A2,U+30B0,U+30BF,U+30D7,U+30EA; }
+@font-face { font-family: "Katsudo Code"; font-weight: 500; font-display: block; src: url(./m-plus-1-code-9.woff2) format("woff2"); unicode-range: U+30A2,U+30B0,U+30BF,U+30D7,U+30E1,U+30E9,U+30EA,U+30F3,U+30FC; }
 @font-face { font-family: "Katsudo Code"; font-weight: 500; font-display: block; src: url(./m-plus-1-code-10.woff2) format("woff2"); unicode-range: U+8EF8; }
 @font-face { font-family: "Katsudo Code"; font-weight: 500; font-display: block; src: url(./m-plus-1-code-11.woff2) format("woff2"); unicode-range: U+5F8B; }
