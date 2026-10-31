@@ -5,6 +5,7 @@ import { formatCount, formatDuration, shiftDay, shortCount, todayIso, useData, w
 import { RANGE_OPTIONS, rangeDays, type RangeId } from './range';
 import { LivePanel } from './Widgets';
 import { MouseHeatmap, type MouseMetric } from './MouseMap';
+import { HandsPanel } from './Hands';
 
 type Metric = 'keys' | 'clicks' | 'active_secs';
 type Layout = 'compact' | 'tkl' | 'full';
@@ -102,6 +103,10 @@ export function InputView({ firstDay, undated }: { firstDay: string | null; unda
           <p className="muted">No key presses recorded in this range.</p>
         )}
       </Panel>
+      {keys.data && Object.keys(keys.data).length > 0 && (
+        <HandsPanel keys={keys.data} from={from} to={to} label={rangeLabel ?? ''}
+          clicks={(days.data ?? []).reduce((s, d) => s + d.clicks, 0)} scrolls={(days.data ?? []).reduce((s, d) => s + d.scrolls, 0)} />
+      )}
       <Panel title={`Mouse · ${rangeLabel}`}
         action={<Segmented size="sm" label="Mouse heatmap" options={MOUSE_METRICS} value={mouseMetric} onChange={(v) => setMouseMetric(v as MouseMetric)} />}>
         {mouse.data && mouseTotal > 0 ? (

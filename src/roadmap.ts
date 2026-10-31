@@ -35,6 +35,7 @@ export const ROADMAP: RoadmapItem[] = [
   { id: 'layouts', stage: 'done', area: 'Rhythm', version: '0.5', title: 'Full keyboard layouts', blurb: '60%, TKL and full size with the F-row, navigation keys, arrows and numpad. Native tracking tells numpad keys apart from their twins.' },
   { id: 'net-ranges', stage: 'done', area: 'Insight', version: '0.5', title: 'Network by day, week, month, year and all time', blurb: 'The same ranges as Input, with busiest days per range.' },
   { id: 'eras', stage: 'done', area: 'Look & feel', version: '0.2', title: 'Eras and welcomes', blurb: 'Phosphor, Arcade, Synthwave, Beige Box, Night shift, Paper and Mixtape, each with its own intro.' },
+  { id: 'ergonomics', stage: 'done', area: 'Rhythm', version: '0.17', title: 'Hand and finger balance', blurb: 'Left vs right, the load on each finger, home row vs reaching. Fingers come from a finger map: touch typing or gaming, per app, with any key moved to the finger you really use.' },
   { id: 'more-eras', stage: 'done', area: 'Look & feel', version: '0.16', title: 'More eras', blurb: 'Ten more, from 1645 to somewhere else: Ronin, Ukiyo-e, Steampunk, Ramen shop, Anime, Cyberpunk, Starship, Signal, Vapor and Vapor night, each with its own art, welcome and transition.' },
   { id: 'breaks', stage: 'done', area: 'Tracking', version: '0.15', title: 'Gentle break nudges', blurb: 'Opt-in: after a long stretch without a break, a small note above the tray. Waits out flow, games and fullscreen, comes sooner after hard typing, never repeats until you have had a break.' },
   { id: 'transitions', stage: 'done', area: 'Look & feel', version: '0.14', title: 'Era transitions', blurb: 'Switching era plays a piece of the one you pick: CRT power-off, pixel dissolve, VHS tracking roll, a Windows 95 window zoom, or a reveal from your click.' },
@@ -61,5 +62,4 @@ export const ROADMAP: RoadmapItem[] = [
   { id: 'aware', stage: 'planned', area: 'Tracking', title: 'Meeting and media awareness', blurb: 'Microphone or camera in use, or video playing, counts as present rather than away.' },
   { id: 'multi-pc', stage: 'planned', area: 'Data', title: 'Several PCs, one history', blurb: 'Merge databases from your other machines through a shared folder or the LAN. Still no cloud.' },
   { id: 'ask', stage: 'planned', area: 'Insight', title: 'Ask your history', blurb: 'Optional local model through Ollama: "what did I work on Tuesday afternoon?" answered on your machine only.' },
-  { id: 'ergonomics', stage: 'planned', area: 'Rhythm', title: 'Hand and finger balance', blurb: 'Which hand and fingers do the work, from your key counts, with the busiest reaches highlighted.' },
 ];

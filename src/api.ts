@@ -67,6 +67,7 @@ export interface FlowReport {
   longest: FlowSession[];
   untagged: boolean;
 }
+export interface AppKeys { app_id: number; name: string; total: number; keys: Record<string, number> }
 export interface RangeView { days: DaySummary[]; apps: AppTotal[] }
 export interface Stat { label: string; value: string }
 export interface SourceInfo { id: number; kind: string; label: string; path: string | null; created_at: number; summary: Stat[] | null }
@@ -199,6 +200,8 @@ export interface Settings {
   roadmap: string;
   /** Shortest flow session, in minutes. */
   flow_minutes: number;
+  /** Finger maps (JSON, see hands.ts). */
+  hands: string;
   /** Break nudges: off by default. */
   break_nudges: boolean;
   /** Minutes of unbroken activity before a nudge. */
@@ -248,6 +251,7 @@ export const api = {
   range: (from: string, to: string) => invoke<RangeView>('get_range', { from, to }),
   days: (from: string, to: string) => invoke<DaySummary[]>('get_days', { from, to }),
   keys: (from: string, to: string) => invoke<Record<string, number>>('get_keys', { from, to }),
+  appKeys: (from: string, to: string) => invoke<AppKeys[]>('get_app_keys', { from, to }),
   mouse: (from: string, to: string) => invoke<MouseMap>('get_mouse', { from, to }),
   rhythm: () => invoke<RhythmOverview>('get_rhythm'),
   overlay: () => invoke<OverlayStatus>('get_overlay'),

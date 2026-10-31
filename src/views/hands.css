@@ -1,0 +1,23 @@
+/* Hands panel (Input page). */
+.hd-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.hd-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(280px, 1fr); gap: var(--space-6); align-items: start; }
+@container (max-width: 900px) { .hd-grid { grid-template-columns: 1fr; } }
+.hd-diagram { display: block; width: 100%; max-width: 640px; height: auto; margin: 0 auto; }
+.hd-palm { fill: var(--surface-300); }
+.hd-finger { stroke: var(--line-strong); stroke-width: 1.5; transition: fill .3s; }
+.hd-pct { font: 600 13px var(--font-mono); fill: var(--ink); text-anchor: middle; pointer-events: none; }
+.hd-balance { display: flex; height: 26px; margin: var(--space-3) auto 0; max-width: 640px; border-radius: var(--radius-sm); overflow: hidden;
+  font: 600 12px/26px var(--font-mono); }
+.hd-bal-l { background: var(--amber); color: var(--on-data); padding: 0 10px; white-space: nowrap; }
+.hd-bal-r { background: var(--cyan); color: var(--on-data); padding: 0 10px; text-align: right; white-space: nowrap; }
+.hd-note { max-width: 640px; margin: var(--space-2) auto 0; }
+.hd-side { display: grid; gap: var(--space-2); align-content: start; }
+.hd-stats, .hd-apps, .hd-custom { list-style: none; margin: 0; padding: 0; }
+.hd-stats li { display: grid; grid-template-columns: 120px auto 1fr; gap: var(--space-3); align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.hd-stats li span:first-child { color: var(--ink-muted); }
+.hd-head { margin-top: var(--space-4); }
+.hd-apps li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: 4px 0; }
+.hd-app-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hd-assign { display: grid; gap: var(--space-2); }
+.hd-fingers { display: flex; flex-wrap: wrap; gap: 4px; }
+.hd-custom li { display: flex; align-items: center; justify-content: space-between; padding: 2px 0; }

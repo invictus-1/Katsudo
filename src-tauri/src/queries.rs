@@ -345,6 +345,37 @@ pub fn key_counts(conn: &Connection, from: &str, to: &str) -> Result<HashMap<Str
     Ok(out)
 }
 
+/// Presses per key for each app over a range (Katsudō's own tracking), busiest apps first.
+#[derive(Serialize)]
+pub struct AppKeys {
+    pub app_id: i64,
+    pub name: String,
+    pub total: i64,
+    pub keys: HashMap<String, i64>,
+}
+
+pub fn app_keys(conn: &Connection, from: &str, to: &str) -> Result<Vec<AppKeys>> {
+    let mut by_app: HashMap<i64, HashMap<String, i64>> = HashMap::new();
+    let mut stmt = conn.prepare_cached("SELECT app_id, key, SUM(count) FROM key_app_day WHERE day BETWEEN ?1 AND ?2 GROUP BY app_id, key")?;
+    for row in stmt.query_map(params![from, to], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, String>(1)?, r.get::<_, i64>(2)?)))? {
+        let (app, key, n) = row?;
+        by_app.entry(app).or_default().insert(key, n);
+    }
+    let names = app_names(conn, by_app.keys().copied())?;
+    let mut out: Vec<AppKeys> = by_app
+        .into_iter()
+        .map(|(app_id, keys)| AppKeys {
+            name: names.get(&app_id).cloned().unwrap_or_else(|| format!("App {app_id}")),
+            total: keys.values().sum(),
+            app_id,
+            keys,
+        })
+        .collect();
+    out.sort_by(|a, b| b.total.cmp(&a.total));
+    out.truncate(40);
+    Ok(out)
+}
+
 /// Keys and clicks stored for one day, with source precedence.
 pub fn input_totals(conn: &Connection, day: &str) -> Result<(i64, i64)> {
     let mut stmt = conn.prepare_cached(

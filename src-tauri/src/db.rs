@@ -97,6 +97,11 @@ CREATE TABLE IF NOT EXISTS flow_session (
   app_id INTEGER NOT NULL, focus INTEGER NOT NULL, breaks INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS flow_session_day ON flow_session (day);
+-- Presses per key per app per day (Katsudō's own tracking only), for per-app finger maps.
+CREATE TABLE IF NOT EXISTS key_app_day (
+  day TEXT NOT NULL, app_id INTEGER NOT NULL, key TEXT NOT NULL, count INTEGER NOT NULL,
+  PRIMARY KEY (day, app_id, key)
+) WITHOUT ROWID;
 -- How the monitors were arranged on a day (JSON list of {x, y, w, h, primary}).
 CREATE TABLE IF NOT EXISTS mouse_layout (day TEXT PRIMARY KEY, screens TEXT NOT NULL);
 -- Lifetime amounts a source knows but can't date (WhatPulse totals beyond the pulses it still

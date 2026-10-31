@@ -284,6 +284,12 @@ async fn get_wrapped(state: State<'_, AppState>, year: Option<i32>) -> CmdResult
 }
 
 #[tauri::command]
+fn get_app_keys(state: State<AppState>, from: String, to: String) -> CmdResult<Vec<queries::AppKeys>> {
+    let conn = state.0.read.lock().map_err(err)?;
+    queries::app_keys(&conn, &from, &to).map_err(err)
+}
+
+#[tauri::command]
 fn get_keys(state: State<AppState>, from: String, to: String) -> CmdResult<HashMap<String, i64>> {
     let conn = state.0.read.lock().map_err(err)?;
     queries::key_counts(&conn, &from, &to).map_err(err)
@@ -422,6 +428,8 @@ struct Settings {
     flow_minutes: i64,
     break_nudges: bool,
     break_minutes: i64,
+    /// Finger maps (JSON): preset, mouse hand, per-app presets, per-key fingers.
+    hands: String,
 }
 
 #[tauri::command]
@@ -440,6 +448,7 @@ fn get_settings(state: State<AppState>) -> CmdResult<Settings> {
         flow_minutes: flow::min_secs(&conn) / 60,
         break_nudges: db::get_bool(&conn, "break_nudges", false),
         break_minutes: breaks::minutes(&conn),
+        hands: db::get_setting(&conn, "hands").unwrap_or_else(|| "{}".into()),
     })
 }
 
@@ -460,6 +469,9 @@ fn set_setting(state: State<AppState>, key: String, value: String) -> CmdResult<
             value.parse::<i64>().ok().filter(|m| (15..=240).contains(m)).ok_or("Nudges need 15 to 240 minutes.")?;
         }
         "break_nudges" => {}
+        "hands" => {
+            serde_json::from_str::<serde_json::Value>(&value).map_err(err)?;
+        }
         "flow_skip" => {
             serde_json::from_str::<Vec<i64>>(&value).map_err(err)?;
         }
@@ -1216,6 +1228,7 @@ fn main() {
             save_tags,
             tag_report,
             flow_report,
+            get_app_keys,
             get_nudge,
             nudge_respond,
             nudge_preview,

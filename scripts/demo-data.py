@@ -123,6 +123,7 @@ def key_mix(app, n):
     return out
 
 segments, input_hour, keys, net, up, cells, layout, sessions = [], {}, {}, {}, {}, {}, [], []
+app_keys = {}  # (day, app id, key) -> presses
 day = START
 while day <= TODAY:
     ds = day.isoformat()
@@ -172,6 +173,7 @@ while day <= TODAY:
                 row[0] += k; row[1] += c; row[2] += int(c * rng.uniform(0.5, 2.5)); row[3] += m * rng.uniform(1.5, 4.0)
                 for kk, n in key_mix(app, k).items():
                     keys[(ds, kk)] = keys.get((ds, kk), 0) + n
+                    app_keys[(ds, app_id[app], kk)] = app_keys.get((ds, app_id[app], kk), 0) + n
                 for _ in range(min(c, 400)):  # clicks where this app's controls are
                     spots = HOTSPOTS.get(app, HOTSPOTS["default"])
                     if rng.random() < 0.06:
@@ -214,6 +216,7 @@ while day <= TODAY:
 db.executemany("INSERT INTO segment (lane, start, end, ref, app_id, source) VALUES (?, ?, ?, ?, ?, 1)", segments)
 db.executemany("INSERT INTO input_hour VALUES (?, ?, 1, ?, ?, ?, ?, ?)", [(d, h, a, *v) for (d, h, a), v in input_hour.items()])
 db.executemany("INSERT INTO key_day VALUES (?, 1, ?, ?)", [(d, k, n) for (d, k), n in keys.items()])
+db.executemany("INSERT INTO key_app_day VALUES (?, ?, ?, ?)", [(d, a, k, n) for (d, a, k), n in app_keys.items()])
 db.executemany("INSERT INTO net_hour VALUES (?, ?, 1, ?, ?)", [(d, h, *v) for (d, h), v in net.items()])
 db.executemany("INSERT INTO uptime_hour VALUES (?, ?, 1, ?)", [(d, h, v) for (d, h), v in up.items()])
 db.executemany("INSERT INTO mouse_cell VALUES (?, 1, ?, ?, ?, ?)", [(d, x, y, *v) for (d, x, y), v in cells.items()])

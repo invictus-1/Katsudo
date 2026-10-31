@@ -11,6 +11,8 @@ use std::sync::{Mutex, OnceLock};
 pub struct Counts {
     pub per_app: HashMap<i64, AppCounts>,
     pub per_key: HashMap<u32, u64>,
+    /// Presses per key in each app (counts only, never their order), for per-app finger maps.
+    pub per_app_key: HashMap<(i64, u32), u64>,
     /// Pointer heatmap: per `CELL_PX` square of the virtual desktop.
     pub per_cell: HashMap<(i32, i32), CellCounts>,
 }
@@ -48,6 +50,9 @@ impl Counts {
         }
         for (k, n) in other.per_key {
             *self.per_key.entry(k).or_default() += n;
+        }
+        for (k, n) in other.per_app_key {
+            *self.per_app_key.entry(k).or_default() += n;
         }
         for (k, c) in other.per_cell {
             let e = self.per_cell.entry(k).or_default();
@@ -145,11 +150,10 @@ mod imp {
         }
     }
 
-    fn with_app(f: impl FnOnce(&mut AppCounts, &mut HashMap<u32, u64>)) {
+    fn with_app(f: impl FnOnce(&mut AppCounts)) {
         let app = CURRENT_APP.load(Ordering::Relaxed);
         if let Ok(mut c) = counts().lock() {
-            let c = &mut *c;
-            f(c.per_app.entry(app).or_default(), &mut c.per_key);
+            f(c.per_app.entry(app).or_default());
         }
     }
 
@@ -167,10 +171,12 @@ mod imp {
                         UNFLUSHED_KEYS.fetch_add(1, Ordering::Relaxed);
                         let extended = kb.flags.0 & LLKHF_EXTENDED.0 != 0;
                         let id = if crate::keys::numpad_twin(vk as u32, extended) { vk as u32 | crate::keys::NUMPAD_FLAG } else { vk as u32 };
-                        with_app(|a, keys| {
-                            a.keys += 1;
-                            *keys.entry(id).or_default() += 1;
-                        });
+                        let app = CURRENT_APP.load(Ordering::Relaxed);
+                        if let Ok(mut c) = counts().lock() {
+                            c.per_app.entry(app).or_default().keys += 1;
+                            *c.per_key.entry(id).or_default() += 1;
+                            *c.per_app_key.entry((app, id)).or_default() += 1;
+                        }
                     }
                 }
                 WM_KEYUP | WM_SYSKEYUP => HELD[vk].store(false, Ordering::Relaxed),
@@ -187,10 +193,10 @@ mod imp {
                 match wparam.0 as u32 {
                     WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN | WM_XBUTTONDOWN => {
                         UNFLUSHED_CLICKS.fetch_add(1, Ordering::Relaxed);
-                        with_app(|a, _| a.clicks += 1);
+                        with_app(|a| a.clicks += 1);
                         with_cell(cell_of(m.pt.x, m.pt.y), |c| c.clicks += 1);
                     }
-                    WM_MOUSEWHEEL | WM_MOUSEHWHEEL => with_app(|a, _| a.scrolls += 1),
+                    WM_MOUSEWHEEL | WM_MOUSEHWHEEL => with_app(|a| a.scrolls += 1),
                     WM_MOUSEMOVE => {
                         let p = (m.pt.x, m.pt.y);
                         let prev = LAST_POS.lock().ok().and_then(|mut l| l.replace(p));
@@ -198,7 +204,7 @@ mod imp {
                             let d = (((p.0 - x) as f64).powi(2) + ((p.1 - y) as f64).powi(2)).sqrt();
                             // Ignore teleports (monitor switches, remote sessions).
                             if d < 1500.0 {
-                                with_app(|a, _| a.distance_px += d);
+                                with_app(|a| a.distance_px += d);
                             }
                             // Only crossing into another square takes the lock: a handful of
                             // times per sweep, not on every one of a 1000 Hz mouse's reports.

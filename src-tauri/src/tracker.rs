@@ -362,6 +362,16 @@ fn flush(conn: &Connection, p: &Pending, now: i64) -> anyhow::Result<()> {
         for (vk, n) in &p.counts.per_key {
             key.execute(params![day, NATIVE_SOURCE, keys::from_vk(*vk), *n as i64])?;
         }
+        let mut app_key = tx.prepare_cached(
+            "INSERT INTO key_app_day (day, app_id, key, count) VALUES (?1, ?2, ?3, ?4)
+             ON CONFLICT (day, app_id, key) DO UPDATE SET count = count + excluded.count",
+        )?;
+        for ((app, vk), n) in &p.counts.per_app_key {
+            let name = keys::from_vk(*vk);
+            if *app != 0 && !name.is_empty() {
+                app_key.execute(params![day, app, name, *n as i64])?;
+            }
+        }
         if !p.counts.per_cell.is_empty() {
             let mut cell = tx.prepare_cached(
                 "INSERT INTO mouse_cell (day, source, x, y, clicks, moves) VALUES (?1, ?2, ?3, ?4, ?5, ?6)
