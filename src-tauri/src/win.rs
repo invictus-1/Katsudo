@@ -87,6 +87,15 @@ mod imp {
         unsafe { SHQueryUserNotificationState().is_ok_and(|s| s == QUNS_BUSY || s == QUNS_RUNNING_D3D_FULL_SCREEN || s == QUNS_PRESENTATION_MODE) }
     }
 
+    /// When Windows last started (Unix seconds): now minus the milliseconds since boot, which
+    /// include time asleep. With Fast Startup, Shut down hibernates the kernel, so only a
+    /// restart starts this again.
+    pub fn booted_at() -> Option<i64> {
+        use windows::Win32::System::SystemInformation::GetTickCount64;
+        let up = unsafe { GetTickCount64() } / 1000;
+        Some(crate::db::now_secs() - up as i64)
+    }
+
     /// Seconds since the last keyboard or mouse input anywhere in the session.
     pub fn idle_secs() -> u64 {
         unsafe {
@@ -164,3 +173,5 @@ pub fn net_totals() -> Option<(u64, u64)> { None }
 pub fn screens() -> Vec<Screen> { Vec::new() }
 #[cfg(not(windows))]
 pub fn fullscreen_busy() -> bool { false }
+#[cfg(not(windows))]
+pub fn booted_at() -> Option<i64> { None }

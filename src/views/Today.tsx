@@ -8,16 +8,24 @@ import { DayTimeline } from './DayTimeline';
 import { openReceipt } from './Receipt';
 import { HourBars } from './Widgets';
 
-export function Today({ theme }: { theme: ThemeId }) {
+/** How long the PC has been on: "2d 4h", "3h 12m". */
+function onFor(secs: number) {
+  const d = Math.floor(secs / 86400);
+  const h = Math.floor((secs % 86400) / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  return d ? `${d}d ${h}h` : `${h}h ${String(m).padStart(2, '0')}m`;
+}
+
+export function Today({ theme, bootedAt }: { theme: ThemeId; bootedAt: number | null }) {
   const day = todayIso();
   const { data, error } = useData(() => api.day(day), [day], 10000);
   const keys = useData(() => api.keys(day, day), [day], 15000);
   if (error) return <div className="page"><p className="error">{error}</p></div>;
   if (!data) return <div className="page" />;
-  return <TodayBody data={data} theme={theme} keys={keys.data} />;
+  return <TodayBody data={data} theme={theme} keys={keys.data} bootedAt={bootedAt} />;
 }
 
-function TodayBody({ data, theme, keys }: { data: DayView; theme: ThemeId; keys: Record<string, number> | null }) {
+function TodayBody({ data, theme, keys, bootedAt }: { data: DayView; theme: ThemeId; keys: Record<string, number> | null; bootedAt: number | null }) {
   const { live, history } = useLive();
   const t = data.totals;
   // Live counters are exact (stored + not yet stored); the day view refreshes every 10 s.
@@ -53,7 +61,11 @@ function TodayBody({ data, theme, keys }: { data: DayView; theme: ThemeId; keys:
         <StatTile label={data.flow.now ? `In flow · ${data.flow.now.label}` : `Flow${data.flow.sessions.length ? ` · ${data.flow.sessions.length} ${data.flow.sessions.length === 1 ? 'session' : 'sessions'}` : ''}`}
           icon="star" tone="lime" value={formatDuration(data.flow.week[6] ?? 0)} data={data.flow.week}
           unit={data.flow.now ? `now ${formatDuration(data.flow.now.end - data.flow.now.start)}` : undefined} />
-        <StatTile label="Uptime" icon="clock" tone="sky" value={(t.uptime_ms / 3_600_000).toFixed(1)} unit="h" data={series((d) => d.uptime_ms)} />
+        {/* Today's hours as before; the label adds how long Windows has been on since it last started. */}
+        <div className="uptime-tile" title={bootedAt ? `Windows last started ${new Date(bootedAt * 1000).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}. With Fast Startup on, Shut down keeps counting; Restart starts it again.` : undefined}>
+          <StatTile label={bootedAt ? `Uptime · PC on ${onFor(Date.now() / 1000 - bootedAt)}` : 'Uptime'} icon="clock" tone="sky"
+            value={(t.uptime_ms / 3_600_000).toFixed(1)} unit="h" data={series((d) => d.uptime_ms)} />
+        </div>
       </div>
       {empty ? (
         <Panel>

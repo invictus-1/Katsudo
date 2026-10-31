@@ -365,6 +365,8 @@ struct Status {
     last_backup: Option<backup::BackupInfo>,
     sources: Vec<SourceInfo>,
     version: String,
+    /// When Windows last started (Unix seconds).
+    booted_at: Option<i64>,
 }
 
 #[tauri::command]
@@ -406,6 +408,7 @@ fn get_status(app: AppHandle, state: State<AppState>) -> CmdResult<Status> {
         last_backup: backup::list(&s.data_dir).into_iter().next(),
         sources,
         version: app.package_info().version.to_string(),
+        booted_at: win::booted_at(),
     })
 }
 

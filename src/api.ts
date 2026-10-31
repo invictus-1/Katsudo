@@ -87,6 +87,8 @@ export interface Status {
   last_backup: BackupInfo | null;
   sources: SourceInfo[];
   version: string;
+  /** When Windows last started (Unix seconds). */
+  booted_at: number | null;
 }
 export interface Tag { id: number; name: string; color: 'amber' | 'cyan' | 'rose' | 'lime' | 'sky' | string }
 export interface TagRule { field: 'app' | 'title'; op: 'is' | 'contains'; value: string; tag_id: number }

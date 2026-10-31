@@ -219,7 +219,7 @@ function Shell({ appearance, onAppearance }: { appearance: Appearance; onAppeara
       </aside>
       {palette && <Palette commands={commands} onClose={() => setPalette(false)} onDay={openDay} />}
       <main id="main" tabIndex={-1} className="main" style={{ ['--page-kanji' as string]: `"${PAGE_KANJI[view] ?? ''}"` }}>
-        {view === 'today' && <Today theme={theme} />}
+        {view === 'today' && <Today theme={theme} bootedAt={s?.booted_at ?? null} />}
         {view === 'timeline' && <TimelineView key={timelineDay ?? 'today'} initialDay={timelineDay ?? undefined} />}
         {view === 'apps' && <Applications firstDay={s?.first_day ?? null} />}
         {view === 'input' && <InputView firstDay={s?.first_day ?? null} undated={s?.undated ?? null} />}
