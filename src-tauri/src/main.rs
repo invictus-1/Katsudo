@@ -374,6 +374,17 @@ fn set_autostart(app: AppHandle, enabled: bool) -> CmdResult<()> {
     if enabled { l.enable() } else { l.disable() }.map_err(err)
 }
 
+/// Whether a "start with Windows" entry under our name exists but launches another file.
+fn autostart_points_elsewhere(name: &str) -> bool {
+    use winreg::{enums::HKEY_CURRENT_USER, RegKey};
+    let Ok(exe) = std::env::current_exe() else { return false };
+    let run = RegKey::predef(HKEY_CURRENT_USER).open_subkey(r"Software\Microsoft\Windows\CurrentVersion\Run");
+    match run.and_then(|k| k.get_value::<String, _>(name)) {
+        Ok(cmd) => !cmd.to_lowercase().contains(&exe.to_string_lossy().to_lowercase()),
+        Err(_) => false,
+    }
+}
+
 /// Turn "start with Windows" on once, on the first run of an installed copy. Builds run
 /// from the source tree (target\) never register themselves.
 fn default_autostart(app: &AppHandle, write: &Mutex<Connection>) {
@@ -386,8 +397,10 @@ fn default_autostart(app: &AppHandle, write: &Mutex<Connection>) {
         .map(|p| !p.components().any(|c| c.as_os_str().eq_ignore_ascii_case("target")))
         .unwrap_or(false)
         && !cfg!(debug_assertions);
-    // An entry left pointing at a moved or removed copy is rewritten to point at this one.
-    if installed && app.autolaunch().is_enabled().unwrap_or(false) {
+    // An entry left pointing at a moved or removed copy is rewritten to point at this one, but
+    // only then: security tools can roll back startup-entry writes by unsigned programs, so
+    // rewriting it on every launch would only invite that.
+    if installed && autostart_points_elsewhere(&app.package_info().name) {
         let _ = app.autolaunch().enable();
     }
     let Ok(conn) = write.lock() else { return };
