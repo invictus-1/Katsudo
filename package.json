@@ -1,0 +1,39 @@
+{
+  "name": "katsudo",
+  "private": true,
+  "version": "0.10.0",
+  "type": "module",
+  "scripts": {
+    "ds": "node scripts/sync-ds.mjs",
+    "dev": "npm run ds && vite",
+    "build": "npm run ds && tsc --noEmit && vite build",
+    "tauri": "tauri",
+    "setup": "tauri build --no-bundle && cd installer && tauri build --no-bundle && node ../scripts/copy-setup.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "^5.1.0",
+    "@fontsource/ibm-plex-mono": "^5.1.0",
+    "@fontsource/ibm-plex-sans": "^5.1.0",
+    "@fontsource/orbitron": "^5.3.0",
+    "@fontsource/press-start-2p": "^5.3.0",
+    "@fontsource/vt323": "^5.3.0",
+    "@tauri-apps/api": "^2.1.1",
+    "@tauri-apps/plugin-dialog": "^2.0.1",
+    "@tauri-apps/plugin-opener": "^2.2.0",
+    "html-to-image": "1.11.11",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@fontsource/dela-gothic-one": "5.3.0",
+    "@fontsource/dotgothic16": "5.3.1",
+    "@fontsource/m-plus-1-code": "5.3.1",
+    "@fontsource/noto-serif-jp": "5.3.1",
+    "@tauri-apps/cli": "^2.1.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}

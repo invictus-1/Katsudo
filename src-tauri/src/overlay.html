@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Katsudō overlay</title>
+<link rel="stylesheet" href="/tokens.css">
+<style>
+  /* Katsudō stream overlay. Transparent outside its cards, so it sits over the game in OBS. */
+  @font-face { font-family: "VT323"; src: url(/fonts/vt323.woff2) format("woff2"); }
+  @font-face { font-family: "Press Start 2P"; src: url(/fonts/press-start.woff2) format("woff2"); }
+  @font-face { font-family: "Orbitron"; font-weight: 700; src: url(/fonts/orbitron.woff2) format("woff2"); }
+  @font-face { font-family: "IBM Plex Mono"; font-weight: 500; src: url(/fonts/plex-mono.woff2) format("woff2"); }
+
+  :root { --ov-font: "IBM Plex Mono", ui-monospace, Consolas, monospace; --ov-label: var(--ov-font); --ov-radius: 10px;
+    --ov-card: color-mix(in srgb, var(--surface-100) 88%, transparent); --ov-edge: var(--line-strong);
+    --ov-bar: var(--cyan); --ov-bar-2: var(--cyan); --ov-glow: 0; --ov-hot: var(--rose-ink); }
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+  body { color: var(--ink); font-family: var(--ov-font); -webkit-font-smoothing: antialiased; }
+  #root { box-sizing: border-box; height: 100%; padding: 10px; display: flex; gap: 10px; align-items: stretch; }
+  body[data-show="kps"] .viewer, body[data-show="keys"] .kps { display: none; }
+
+  .card { background: var(--ov-card); border: 2px solid var(--ov-edge); border-radius: var(--ov-radius); box-sizing: border-box; }
+  .kps { flex: 0 0 auto; width: clamp(150px, 30vw, 320px); padding: 14px 18px; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+  body[data-show="kps"] .kps { flex: 1; width: auto; }
+  .label { font-family: var(--ov-label); font-size: clamp(10px, 2.4vh, 14px); letter-spacing: .12em; color: var(--ink-muted); text-transform: uppercase; }
+  .value { font-size: clamp(40px, 26vh, 140px); line-height: 1; font-variant-numeric: tabular-nums; color: var(--cyan-ink); letter-spacing: -.03em; }
+  .sub { font-size: clamp(11px, 3vh, 16px); color: var(--ink-muted); }
+  .streaming { color: var(--ov-hot); font-family: var(--ov-label); font-size: clamp(11px, 3vh, 16px); letter-spacing: .08em; text-transform: uppercase; }
+  .streaming[hidden] { display: none; }
+  .hot .value { color: var(--ov-hot); }
+
+  .viewer { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  #rain { flex: 1; min-height: 0; width: 100%; display: block; }
+  .caps { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; }
+  .cap { padding: 8px 4px; text-align: center; transition: background-color 40ms linear, transform 40ms linear; }
+  .cap b { display: block; font-size: clamp(14px, 6vh, 30px); font-weight: 500; line-height: 1.1; }
+  .cap span { display: block; font-size: clamp(10px, 2.6vh, 14px); color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+  .cap.down { background: var(--ov-bar); border-color: var(--ov-bar); transform: translateY(2px); }
+  .cap.down b, .cap.down span { color: var(--on-heat, #000); }
+
+  /* ---- eras ---- */
+  [data-theme="phosphor"] { --ov-font: "VT323", monospace; --ov-label: "VT323", monospace; --ov-radius: 2px; --ov-glow: 1; }
+  [data-theme="phosphor"] .card { box-shadow: 0 0 18px color-mix(in srgb, var(--cyan) 30%, transparent) inset; }
+  [data-theme="phosphor"] .value, [data-theme="phosphor"] .cap b { text-shadow: 0 0 10px var(--cyan); }
+  [data-theme="phosphor"] .card::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(transparent 0 2px, rgba(0,0,0,.18) 2px 3px); border-radius: inherit; }
+  [data-theme="phosphor"] .card { position: relative; }
+  [data-theme="phosphor"] .value { font-size: clamp(48px, 32vh, 170px); }
+
+  [data-theme="arcade"] { --ov-font: "Press Start 2P", monospace; --ov-label: "Press Start 2P", monospace; --ov-radius: 0;
+    --ov-bar: var(--amber); --ov-bar-2: var(--rose); --ov-hot: var(--amber-ink); }
+  [data-theme="arcade"] .card { border-width: 4px; box-shadow: 4px 4px 0 var(--rose); }
+  [data-theme="arcade"] .value { font-size: clamp(30px, 18vh, 96px); color: var(--amber-ink); text-shadow: 4px 4px 0 var(--rose); letter-spacing: 0; }
+  [data-theme="arcade"] .label, [data-theme="arcade"] .sub, [data-theme="arcade"] .cap span { font-size: clamp(7px, 1.8vh, 10px); }
+  [data-theme="arcade"] .cap b { font-size: clamp(12px, 4.5vh, 22px); }
+
+  [data-theme="synthwave"] { --ov-font: "Orbitron", sans-serif; --ov-label: "Orbitron", sans-serif; --ov-radius: 8px;
+    --ov-bar: var(--rose); --ov-bar-2: var(--cyan); --ov-glow: 1;
+    --ov-card: color-mix(in srgb, #0b0920 82%, transparent); }
+  [data-theme="synthwave"] .card { border-color: color-mix(in srgb, var(--rose) 70%, transparent); box-shadow: 0 0 18px color-mix(in srgb, var(--rose) 45%, transparent); }
+  [data-theme="synthwave"] .value { color: #f2edff; text-shadow: 0 0 22px var(--rose), 0 0 2px #fff; font-weight: 700; }
+  [data-theme="synthwave"] .cap b { font-weight: 700; }
+
+  [data-theme="beige"] { --ov-font: Tahoma, Verdana, sans-serif; --ov-label: Tahoma, Verdana, sans-serif; --ov-radius: 0;
+    --ov-card: var(--surface-100); --ov-bar: var(--sky); --ov-bar-2: var(--sky); }
+  [data-theme="beige"] .card { border: 0; box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #5e5a50; }
+  [data-theme="beige"] .cap.down { box-shadow: inset 2px 2px 0 #5e5a50, inset -2px -2px 0 #fff; }
+  [data-theme="beige"] .value { font-family: "Arial Black", Tahoma, sans-serif; color: var(--ink); }
+</style>
+</head>
+<body data-show="both">
+<div id="root">
+  <section class="card kps" id="kpsCard">
+    <div class="label">Keys / s</div>
+    <div class="value" id="kps">0</div>
+    <div class="sub">peak <span id="peak">0</span></div>
+    <div class="streaming" id="stream" hidden></div>
+  </section>
+  <section class="viewer">
+    <canvas id="rain"></canvas>
+    <div class="caps" id="caps"></div>
+  </section>
+</div>
+<script>
+(async () => {
+  const cfg = await (await fetch('/config.json', { cache: 'no-store' })).json();
+  document.documentElement.setAttribute('data-theme', cfg.era);
+  document.body.dataset.show = cfg.show;
+  const $ = (id) => document.getElementById(id);
+  const capsEl = $('caps');
+  const keys = cfg.keys.map((label) => {
+    const el = document.createElement('div');
+    el.className = 'card cap';
+    el.innerHTML = '<b></b><span>0</span>';
+    el.querySelector('b').textContent = label;
+    capsEl.appendChild(el);
+    return { el, count: el.querySelector('span'), down: false, presses: null, total: 0, bars: [] };
+  });
+
+  // Each press is a bar from the moment it went down to the moment it came up, rising out of
+  // its key. Taps shorter than a frame still get a short bar.
+  const es = new EventSource('/events');
+  es.onmessage = (e) => {
+    const f = JSON.parse(e.data);
+    if (f.v !== cfg.v) { es.close(); location.reload(); return; }
+    $('kps').textContent = f.kps;
+    $('peak').textContent = f.peak;
+    const streaming = f.stream !== null && f.stream >= 3;
+    $('stream').hidden = !streaming;
+    if (streaming) $('stream').textContent = `Stream · ${f.stream}s`;
+    $('kpsCard').classList.toggle('hot', streaming);
+    const now = performance.now();
+    f.k.forEach(([down, presses], i) => {
+      const k = keys[i];
+      if (!k) return;
+      if (k.presses === null) {
+        k.presses = presses;
+        if (down) k.bars.push({ a: now, b: null });
+      } else {
+        const n = (presses - k.presses) >>> 0;
+        k.presses = presses;
+        k.total += n;
+        const open = k.bars.length && k.bars[k.bars.length - 1].b === null ? k.bars[k.bars.length - 1] : null;
+        // n presses since the last frame: all but the last were whole taps in between.
+        if (n > 0) {
+          if (open) open.b = now - 8;
+          for (let t = 1; t < n; t++) k.bars.push({ a: now - 6, b: now - 6, tap: true });
+          k.bars.push(down ? { a: now, b: null } : { a: now - 6, b: now - 6, tap: true });
+        } else if (open && !down) {
+          open.b = now;
+        }
+      }
+      k.down = !!down;
+      k.el.classList.toggle('down', k.down);
+      k.count.textContent = k.total.toLocaleString();
+    });
+  };
+
+  const canvas = $('rain');
+  const g = canvas.getContext('2d');
+  const css = getComputedStyle(document.documentElement);
+  const col = (v) => css.getPropertyValue(v).trim() || '#5df5ff';
+  const glow = Number(css.getPropertyValue('--ov-glow')) > 0;
+  const pixel = cfg.era === 'arcade';
+  const draw = () => {
+    const dpr = window.devicePixelRatio || 1;
+    const w = Math.round(canvas.clientWidth * dpr), h = Math.round(canvas.clientHeight * dpr);
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    g.clearRect(0, 0, w, h);
+    const now = performance.now();
+    const speed = (cfg.speed * dpr) / 1000;
+    const gap = 8 * dpr, cw = (w - gap * (keys.length - 1)) / keys.length;
+    const grad = g.createLinearGradient(0, h, 0, 0);
+    grad.addColorStop(0, col('--ov-bar'));
+    grad.addColorStop(1, col('--ov-bar-2'));
+    g.fillStyle = grad;
+    g.shadowColor = col('--ov-bar');
+    g.shadowBlur = glow ? 14 * dpr : 0;
+    keys.forEach((k, i) => {
+      const x = i * (cw + gap) + cw * 0.18, bw = cw * 0.64;
+      k.bars = k.bars.filter((b) => h - (now - b.a) * speed > -h * 0.1 || b.b === null);
+      for (const b of k.bars) {
+        const bottom = h - (now - (b.b ?? now)) * speed;
+        let top = h - (now - b.a) * speed;
+        if (bottom - top < 4 * dpr) top = bottom - 4 * dpr;
+        if (bottom < 0) continue;
+        if (pixel) {
+          const step = 6 * dpr;
+          g.fillRect(Math.round(x / step) * step, Math.round(top / step) * step, Math.round(bw / step) * step, Math.max(step, Math.round((bottom - top) / step) * step));
+        } else {
+          g.globalAlpha = Math.max(0.15, Math.min(1, bottom / h + 0.2));
+          g.fillRect(x, top, bw, bottom - top);
+          g.globalAlpha = 1;
+        }
+      }
+    });
+    requestAnimationFrame(draw);
+  };
+  requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>

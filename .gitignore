@@ -1,0 +1,11 @@
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/schemas/
+src/ds/
+*.log
+release/
+installer/dist/
+installer/src-tauri/target/
+installer/src-tauri/gen/schemas/
+demo/

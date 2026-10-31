@@ -1,0 +1,39 @@
+/* Compare: A is always amber, B always sky, in every chart and table. */
+.cmp-ranges { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4) var(--space-6); }
+.cmp-range { display: flex; gap: var(--space-3); align-items: flex-start; }
+.cmp-swatch { flex: none; width: 12px; height: 12px; margin-top: 2px; border-radius: 2px; }
+.cmp-range.is-a .cmp-swatch, .cmp-bar.is-a, .cmp-mini .is-a { background: var(--amber); }
+.cmp-range.is-b .cmp-swatch, .cmp-bar.is-b, .cmp-mini .is-b { background: var(--sky); }
+.cmp-range .text-small { margin-top: 2px; }
+.cmp-dates { display: flex; align-items: center; gap: var(--space-2); margin-top: 4px; color: var(--ink-muted); }
+.cmp-dates input { font: 500 13px/1 var(--font-mono); padding: 6px 8px; color: var(--ink); background: var(--surface-100);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm); color-scheme: dark; }
+[data-theme="light"] .cmp-dates input, [data-theme="beige"] .cmp-dates input { color-scheme: light; }
+
+.cmp-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); }
+.cmp-metric-a { font: 500 clamp(24px, 2.2vw, 40px)/1.1 var(--font-mono); color: var(--amber-ink); font-variant-numeric: tabular-nums; }
+.cmp-metric-b { color: var(--sky-ink, var(--ink-muted)); }
+.cmp-delta { font: 500 13px/1 var(--font-mono); color: var(--ink-muted); white-space: nowrap; }
+
+.cmp-bars { display: flex; align-items: stretch; gap: 3px; height: clamp(180px, 24vh, 320px); }
+.cmp-bar-group { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; position: relative; }
+.cmp-bar-pair { flex: 1; display: flex; align-items: flex-end; gap: 1px; }
+.cmp-bar { flex: 1; min-height: 1px; border-radius: 1px 1px 0 0; }
+.cmp-bar-label { text-align: center; color: var(--ink-faint); white-space: nowrap; overflow: hidden; }
+.cmp-bar-group:hover .cmp-bar-pair { outline: 1px solid var(--line-strong); outline-offset: 1px; }
+.cmp-bar-group[data-tip]:hover::after, .cmp-hour[data-tip]:hover::after {
+  content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translateX(-50%); z-index: 30; padding: 4px 8px;
+  white-space: nowrap; pointer-events: none; font: 500 13px/18px var(--font-mono); color: var(--ink); background: var(--surface-000);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm); box-shadow: var(--shadow-pop); }
+
+.cmp-hours { position: relative; display: grid; grid-template-columns: repeat(24, 1fr); align-items: end; gap: 3px; height: clamp(160px, 20vh, 260px); padding-bottom: 20px; }
+.cmp-hour { position: relative; height: 100%; display: flex; align-items: flex-end; }
+.cmp-hour .cmp-bar { position: absolute; bottom: 0; left: 0; right: 0; }
+.cmp-hour .cmp-bar.is-b { opacity: .55; }
+.cmp-hour .cmp-bar.is-a { left: 25%; right: 25%; }
+.cmp-hours-axis { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; color: var(--ink-faint); }
+
+.cmp-table .cmp-num { text-align: right; white-space: nowrap; }
+.cmp-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46ch; }
+.cmp-mini { display: grid; gap: 2px; margin-top: 4px; max-width: 280px; }
+.cmp-mini span { display: block; height: 3px; border-radius: 1px; min-width: 1px; }

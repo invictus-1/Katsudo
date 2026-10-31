@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Katsudo Setup",
+  "version": "0.1.0",
+  "identifier": "app.katsudo.setup",
+  "build": {
+    "beforeDevCommand": "npx vite --config vite.config.ts",
+    "devUrl": "http://localhost:1421",
+    "beforeBuildCommand": "npx vite build --config vite.config.ts",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "setup",
+        "title": "Katsudō Setup",
+        "width": 980,
+        "height": 640,
+        "resizable": false,
+        "maximizable": false,
+        "decorations": false,
+        "shadow": true,
+        "center": true,
+        "visible": false,
+        "backgroundColor": "#0e0d0b"
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:; connect-src ipc: http://ipc.localhost"
+    }
+  },
+  "bundle": {
+    "active": false,
+    "icon": ["../../src-tauri/icons/icon.ico"]
+  }
+}

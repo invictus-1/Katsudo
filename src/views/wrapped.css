@@ -1,0 +1,96 @@
+/* Year in review cards. Portrait 4:5 (1080 × 1350 when saved); everything inside is sized
+   from the card's own width so a saved image looks the same at any window size. */
+
+.wr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: var(--space-5); }
+/* The slot is the size container, not the card: the card's own padding is in card widths
+   too, and units on a container resolve against the one outside it. */
+.wr-slot { container-type: inline-size; display: flex; flex-direction: column; gap: var(--space-2); align-items: stretch; }
+.wr-save { align-self: flex-end; }
+.wr-note { margin: 0; }
+
+.wr-card { position: relative; aspect-ratio: 4 / 5; overflow: hidden; box-sizing: border-box;
+  display: flex; flex-direction: column; gap: 3cqw; padding: 8cqw 8cqw 7cqw;
+  background: linear-gradient(160deg, var(--surface-200), var(--surface-000) 75%);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-lg); color: var(--ink); }
+.wr-kicker { font: 600 3.4cqw/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--amber-ink); }
+.wr-brand { margin-top: auto; display: flex; align-items: center; gap: 2.4cqw; font: 600 3.2cqw/1 var(--font-display); color: var(--ink-faint); letter-spacing: .02em; }
+.wr-brand .wr-hanko { width: 8cqw; height: 8cqw; font-size: 3.2cqw; border-radius: 1cqw; }
+/* A big vertical 活動 behind the cover's year. */
+.wr-watermark { position: absolute; right: -4cqw; top: 6cqw; writing-mode: vertical-rl; font: 900 46cqw/0.92 var(--font-kanji); font-synthesis: none;
+  color: var(--ink); opacity: .06; text-shadow: none; pointer-events: none; user-select: none; }
+.wr-cover > :not(.wr-watermark) { position: relative; }
+.wr-big { font: 700 19cqw/0.95 var(--font-display); letter-spacing: -0.03em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.wr-big small { display: block; margin-top: 2cqw; font: 500 4.4cqw/1.2 var(--font-sans); letter-spacing: 0; color: var(--ink-muted); }
+.wr-headline { font: 700 7cqw/1.1 var(--font-display); letter-spacing: -0.01em; }
+.wr-headline em { font-style: normal; color: var(--cyan-ink); }
+.wr-line, .wr-foot { margin: 0; font: 400 4.2cqw/1.4 var(--font-sans); color: var(--ink-muted); }
+.wr-line b, .wr-foot b { color: var(--ink); font-weight: 600; }
+.wr-foot { font-size: 3.6cqw; }
+
+.wr-facts { margin: 0; display: grid; gap: 2.6cqw; }
+.wr-facts div { display: flex; justify-content: space-between; gap: 3cqw; padding-bottom: 2cqw; border-bottom: 1px solid var(--line); }
+.wr-facts dt { font: 500 3.6cqw/1.3 var(--font-sans); color: var(--ink-muted); }
+.wr-facts dd { margin: 0; font: 500 3.8cqw/1.3 var(--font-mono); text-align: right; }
+
+.wr-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2.2cqw; }
+.wr-list li { position: relative; display: grid; grid-template-columns: 6cqw 1fr auto; align-items: center; gap: 2cqw; padding: 1.6cqw 2cqw;
+  border-radius: var(--radius-sm); overflow: hidden; font: 500 4cqw/1.2 var(--font-sans); }
+.wr-rank { font: 700 4cqw/1 var(--font-mono); color: var(--amber-ink); }
+.wr-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; z-index: 1; }
+.wr-val { font: 500 3.6cqw/1 var(--font-mono); color: var(--ink-muted); position: relative; z-index: 1; }
+.wr-bar { position: absolute; left: 0; top: 0; bottom: 0; background: color-mix(in srgb, var(--cyan) 18%, transparent); border-right: 2px solid var(--cyan); }
+.wr-hide { position: absolute; right: 1.5cqw; top: 50%; transform: translateY(-50%); z-index: 2; display: none; padding: 2px 8px;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface-000); color: var(--ink); font: 500 12px/1.4 var(--font-sans); cursor: pointer; }
+.wr-list li:hover .wr-hide { display: block; }
+
+.wr-kb { margin-top: 1cqw; }
+.wr-kb .kt-kb { min-width: 0; }
+
+.wr-hours { display: flex; align-items: flex-end; gap: 0.8cqw; height: 30cqw; margin-top: 2cqw; }
+.wr-hours span { flex: 1; background: color-mix(in srgb, var(--cyan) 55%, transparent); border-radius: 1px; }
+.wr-hours span.is-peak { background: var(--rose); }
+.wr-hours-axis { display: flex; justify-content: space-between; font: 400 2.8cqw/1 var(--font-mono); color: var(--ink-faint); }
+
+.wr-versus { margin: 2cqw 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4cqw; }
+.wr-versus div { padding: 3cqw; border: 1px solid var(--line); border-radius: var(--radius-md); }
+.wr-versus dt { font: 500 3.4cqw/1.2 var(--font-sans); color: var(--ink-muted); }
+.wr-versus dd { margin: 1.5cqw 0 0; font: 700 9cqw/1 var(--font-display); }
+.wr-versus .is-up { color: var(--lime-ink, var(--cyan-ink)); }
+.wr-versus .is-down { color: var(--rose-ink); }
+
+/* Cover */
+.wr-cover { justify-content: flex-start; }
+.wr-year { margin-top: 10cqw; font: 800 30cqw/0.85 var(--font-display); letter-spacing: -0.05em; white-space: nowrap;
+  background: linear-gradient(180deg, var(--amber-ink), var(--rose-ink)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.wr-lede { font: 500 5cqw/1.3 var(--font-sans); color: var(--ink-muted); }
+.wr-cover-facts { display: flex; flex-wrap: wrap; gap: 2cqw 5cqw; margin-top: 4cqw; font: 400 4cqw/1.2 var(--font-sans); color: var(--ink-muted); }
+.wr-cover-facts b { display: block; font: 700 8cqw/1 var(--font-display); color: var(--ink); }
+
+/* ---- eras ---- */
+[data-theme="phosphor"] .wr-card { background: var(--surface-000); border-radius: 2px; }
+[data-theme="phosphor"] .wr-card::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(transparent 0 2px, rgba(0, 0, 0, .22) 2px 3px); }
+[data-theme="phosphor"] .wr-big, [data-theme="phosphor"] .wr-headline, [data-theme="phosphor"] .wr-year { text-shadow: 0 0 2.5cqw color-mix(in srgb, var(--amber) 55%, transparent); }
+[data-theme="phosphor"] .wr-year { background: none; color: var(--amber-ink); }
+
+[data-theme="arcade"] .wr-card { background: var(--surface-000); border: 1.2cqw solid var(--cyan); border-radius: 0; box-shadow: inset 0 0 0 1.2cqw var(--surface-000), inset 0 0 0 2cqw var(--rose); }
+[data-theme="arcade"] .wr-big, [data-theme="arcade"] .wr-headline { font-size: 12cqw; letter-spacing: 0; line-height: 1.1; text-shadow: 0.8cqw 0.8cqw 0 var(--rose); color: var(--amber-ink); }
+[data-theme="arcade"] .wr-headline { font-size: 5.4cqw; }
+[data-theme="arcade"] .wr-year { font-size: 20cqw; letter-spacing: 0; background: none; color: var(--amber-ink); text-shadow: 1.4cqw 1.4cqw 0 var(--rose), 0 0 6cqw var(--cyan); }
+[data-theme="arcade"] .wr-cover-facts b { font-size: 5.6cqw; }
+
+[data-theme="synthwave"] .wr-card { background: linear-gradient(180deg, #0b0920 0%, #1d1248 55%, #4a1d5e 100%); border-color: color-mix(in srgb, #ff6ec7 60%, transparent); }
+[data-theme="synthwave"] .wr-card::before { content: ""; position: absolute; left: -20%; right: -20%; bottom: 0; height: 22%; pointer-events: none; opacity: .5;
+  background: repeating-linear-gradient(90deg, transparent 0 7cqw, #4fe3f0 7cqw calc(7cqw + 1px)), repeating-linear-gradient(transparent 0 3.5cqw, #ff6ec7 3.5cqw calc(3.5cqw + 1px));
+  -webkit-mask-image: linear-gradient(transparent, #000); mask-image: linear-gradient(transparent, #000); }
+[data-theme="synthwave"] .wr-big, [data-theme="synthwave"] .wr-headline { color: #f2edff; text-shadow: 0 0 4cqw #ff6ec7; text-transform: uppercase; }
+[data-theme="synthwave"] .wr-year { font-size: 21cqw; letter-spacing: 0; background: linear-gradient(180deg, #ffd27a 10%, #ff6ec7 70%); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 0 3cqw #ff6ec7aa); }
+
+[data-theme="beige"] .wr-card { background: var(--surface-100); border: 0; border-radius: 0; padding-top: 14cqw;
+  box-shadow: inset 0.5cqw 0.5cqw 0 #fff, inset -0.5cqw -0.5cqw 0 #5e5a50; }
+[data-theme="beige"] .wr-card::before { content: "Katsud\014D \2014  Year in review"; position: absolute; left: 1.2cqw; right: 1.2cqw; top: 1.2cqw; height: 7cqw;
+  display: flex; align-items: center; padding-left: 2.5cqw; background: linear-gradient(90deg, #1c3d9e, #5f80d6); color: #fff; font: 700 3.4cqw/1 Tahoma, sans-serif; }
+[data-theme="beige"] .wr-year { background: none; color: #1c3d9e; }
+[data-theme="beige"] .wr-list li, [data-theme="beige"] .wr-versus div { border-radius: 0; }
+
+[data-theme="light"] .wr-card { background: linear-gradient(160deg, var(--surface-100), var(--surface-300)); }
