@@ -3,6 +3,7 @@ import { api } from '../api';
 import { Button, Panel, UsageList } from '../ds/katsudo';
 import { formatDuration, longDay, rankRefs, shiftDay, todayIso, useData } from '../lib';
 import { DayTimeline } from './DayTimeline';
+import { openReceipt } from './Receipt';
 
 export function TimelineView({ initialDay }: { initialDay?: string }) {
   const [day, setDay] = useState(initialDay ?? todayIso());
@@ -22,6 +23,7 @@ export function TimelineView({ initialDay }: { initialDay?: string }) {
           {data && <p className="text-body">Active {formatDuration(data.totals.active_secs)}</p>}
         </div>
         <div className="page-tools">
+          <Button size="sm" icon="export" onClick={() => openReceipt(day)}>Receipt</Button>
           <Button size="sm" icon="chevron" aria-label="Previous day" className="flip" onClick={() => setDay(shiftDay(day, -1))} />
           <Button size="sm" disabled={isToday} onClick={() => setDay(todayIso())}>Today</Button>
           <Button size="sm" icon="chevron" aria-label="Next day" disabled={isToday} onClick={() => setDay(shiftDay(day, 1))} />

@@ -1,0 +1,41 @@
+/* Daily receipt: thermal paper in every era (it's a receipt), printable at 80 mm. */
+.rc-backdrop { position: fixed; inset: 0; z-index: 200; display: grid; place-items: start center; overflow-y: auto; padding: 48px 16px;
+  background: color-mix(in srgb, #000 62%, transparent); }
+.rc-dialog { display: grid; gap: var(--space-3); justify-items: center; }
+.rc-tools { display: flex; gap: var(--space-2); }
+
+.rc-paper { --paper: #f6f3ea; --ink-receipt: #23211d; position: relative; padding: 18px 0; filter: drop-shadow(0 18px 30px rgba(0, 0, 0, .45)); }
+/* Torn top and bottom edges. */
+.rc-paper::before, .rc-paper::after { content: ''; position: absolute; left: 0; right: 0; height: 10px;
+  background: linear-gradient(-45deg, var(--paper) 5px, transparent 0) 0 0 / 10px 10px repeat-x,
+              linear-gradient(45deg, var(--paper) 5px, transparent 0) 0 0 / 10px 10px repeat-x; }
+.rc-paper::before { top: 9px; transform: rotate(180deg); }
+.rc-paper::after { bottom: 9px; }
+.rc-slip { width: 36ch; padding: 22px 1ch 26px; box-sizing: content-box; background: var(--paper); color: var(--ink-receipt);
+  font: 500 13.5px/1.45 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .01em; text-transform: none;
+  background-image: repeating-linear-gradient(180deg, transparent 0 3px, rgba(0, 0, 0, .012) 3px 4px); }
+.rc-center { text-align: center; }
+.rc-kanji { font: 900 40px/1 "Katsudo Seal", serif; letter-spacing: .08em; margin-bottom: 6px; }
+.rc-shop { font-weight: 700; font-size: 20px; letter-spacing: .3em; margin-bottom: 2px; }
+.rc-line { display: flex; justify-content: space-between; gap: 1ch; white-space: pre; }
+.rc-line.is-strong { font-weight: 700; }
+.rc-line.is-sub { opacity: .68; font-size: 12px; }
+.rc-left { overflow: hidden; text-overflow: ellipsis; }
+.rc-right { flex: none; font-variant-numeric: tabular-nums; }
+.rc-rule { height: 0; margin: 7px 0; border-top: 1.5px dashed var(--ink-receipt); opacity: .55; }
+.rc-rule.is-double { border-top-style: double; border-top-width: 4px; opacity: .8; }
+.rc-barcode { display: block; width: 100%; height: 52px; margin: 8px 0 2px; fill: var(--ink-receipt); }
+.rc-code { letter-spacing: .4em; font-size: 12px; margin-bottom: 8px; }
+.rc-thanks { font-weight: 700; margin-bottom: 2px; }
+
+@media print {
+  /* No page margin (it can print in the dark theme's colour); the slip pads itself instead. */
+  @page { margin: 0; }
+  html:has(body.rc-open) { color-scheme: light !important; }
+  html:has(body.rc-open), body.rc-open { background: #fff !important; }
+  body.rc-open > :not(.rc-backdrop), body.rc-open .rc-tools, body.rc-open .error { display: none !important; }
+  body.rc-open .rc-backdrop { position: static; display: block; background: none; padding: 0; overflow: visible; }
+  body.rc-open .rc-paper { padding: 0; filter: none; }
+  body.rc-open .rc-paper::before, body.rc-open .rc-paper::after { display: none; }
+  body.rc-open .rc-slip { width: 72mm; padding: 4mm; background: #fff; color: #000; font-size: 11pt; }
+}

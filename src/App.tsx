@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from './api';
 import { Button, Icon, NavItem, StatusBar } from './ds/katsudo';
 import type { IconName } from './ds/katsudo';
-import { bytesText, dateTime, useData } from './lib';
+import { bytesText, dateTime, todayIso, useData } from './lib';
 import { LiveProvider, useLive } from './live';
 import { applyMotion, applyScale, applyTheme, resolveTheme, THEMES, type ThemeId } from './themes/themes';
 import { Welcome } from './themes/Welcome';
@@ -21,6 +21,7 @@ import { WrappedView } from './views/Wrapped';
 import { CompareView } from './views/Compare';
 import { TagsView } from './views/Tags';
 import { FlowView } from './views/Flow';
+import { openReceipt, ReceiptDialog } from './views/Receipt';
 import { Hanko, PAGE_KANJI } from './kanji';
 
 type View = 'today' | 'timeline' | 'apps' | 'input' | 'rhythm' | 'network' | 'wrapped' | 'compare' | 'tags' | 'flow' | 'import' | 'backups' | 'roadmap' | 'settings';
@@ -134,6 +135,11 @@ function Shell({ appearance, onAppearance }: { appearance: Appearance; onAppeara
       label: s?.tracking === false ? 'Resume tracking' : 'Pause tracking for 1 hour',
     },
     { id: 'backup', icon: 'backup', label: 'Back up now', keywords: 'backup save snapshot', run: () => { api.backupNow().then(status.reload); } },
+    { id: 'receipt-today', icon: 'export', label: "Today's receipt", keywords: 'receipt print slip summary day', run: () => openReceipt(todayIso()) },
+    { id: 'receipt-yesterday', icon: 'export', label: "Yesterday's receipt", keywords: 'receipt print slip summary day', run: () => {
+      const d = new Date(); d.setDate(d.getDate() - 1);
+      openReceipt(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
+    } },
     { id: 'day-yesterday', icon: 'calendar', label: 'Yesterday on the timeline', keywords: 'day', run: () => {
       const d = new Date(); d.setDate(d.getDate() - 1);
       openDay(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
@@ -195,6 +201,7 @@ function Shell({ appearance, onAppearance }: { appearance: Appearance; onAppeara
         {view === 'roadmap' && <Roadmap />}
         {view === 'settings' &&<SettingsView status={s} appearance={appearance} onAppearance={onAppearance} />}
       </main>
+      <ReceiptDialog firstDay={s?.first_day ?? null} />
       <div className="statusbar">
         <StatusBar
           tracking={s?.tracking !== false}

@@ -1,10 +1,11 @@
 import { api, type DayView } from '../api';
-import { KeyboardHeatmap, Panel, StatTile, UsageList } from '../ds/katsudo';
+import { Button, KeyboardHeatmap, Panel, StatTile, UsageList } from '../ds/katsudo';
 import { bytes, formatCount, formatDuration, longDay, todayIso, useData, weekdayName } from '../lib';
 import { bucketMax, useLive } from '../live';
 import { Hero } from '../themes/Hero';
 import type { ThemeId } from '../themes/themes';
 import { DayTimeline } from './DayTimeline';
+import { openReceipt } from './Receipt';
 import { HourBars } from './Widgets';
 
 export function Today({ theme }: { theme: ThemeId }) {
@@ -64,7 +65,7 @@ function TodayBody({ data, theme, keys }: { data: DayView; theme: ThemeId; keys:
       ) : (
         <div className="split">
           <div className="stack">
-            <Panel title="Timeline · today">
+            <Panel title="Timeline · today" action={<Button size="sm" variant="ghost" icon="export" onClick={() => openReceipt(data.day)}>Receipt</Button>}>
               <DayTimeline data={data} live />
             </Panel>
             <Panel title="Hour by hour" action={<div className="legend text-small"><span className="k">Keys</span><span className="c">Clicks</span></div>}>
