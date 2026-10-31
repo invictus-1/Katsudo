@@ -11,7 +11,7 @@ from fontTools import subset
 from fontTools.ttLib import TTFont
 
 # Every character any kanji text in the app uses. Keep in sync with src/kanji.ts.
-KANJI = "活動今日時間軸アプリ入力律通信年取込保存道標設定比較タグ集中ラーメン"
+KANJI = "活動今日時間軸アプリ入力律通信年取込保存道標設定比較タグ集中ラーメンネオ東京酒五輪"
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "src", "fonts", "kanji")
@@ -21,6 +21,7 @@ FONTS = [
     ("Katsudo Dot", "dotgothic16", 400),
     ("Katsudo Heavy", "dela-gothic-one", 400),
     ("Katsudo Code", "m-plus-1-code", 500),
+    ("Katsudo Brush", "yuji-boku", 400),
 ]
 
 os.makedirs(OUT, exist_ok=True)

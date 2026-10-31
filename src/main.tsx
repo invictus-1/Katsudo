@@ -25,6 +25,8 @@ import '@fontsource/antonio/latin-700.css';
 import '@fontsource/antonio/latin-ext-700.css';
 import '@fontsource/major-mono-display/latin-400.css';
 import '@fontsource/major-mono-display/latin-ext-400.css';
+import '@fontsource/yuji-boku/latin-400.css';
+import '@fontsource/yuji-boku/latin-ext-400.css';
 import './fonts/kanji/kanji.css';
 import './ds/tokens.css';
 import './ds/katsudo.css';

@@ -38,9 +38,9 @@ Each import shows what it found first, backs up Katsudō, runs in one transactio
 | ![Timeline](docs/screenshots/timeline.png) | **Timeline.** Activity, apps, documents and keys per hour for any day, ManicTime style. |
 | ![Stream overlay](docs/screenshots/overlay.png) | **Stream overlay for OBS.** Keys per second and a key viewer with rising trails, in any era, from a local page. |
 
-## Fourteen eras (and a Mixtape)
+## Sixteen eras (and a Mixtape)
 
-From 1830 to somewhere else. Every era is a full theme with its own type, art, animated welcome and kanji. Switching era plays a piece of the one you pick: a CRT power-off into Phosphor, a pixel dissolve into Arcade, a VHS tracking roll into Synthwave, a Windows 95 window zooming open into Beige Box. Animations are CSS-only, pause when the window is hidden and respect Windows reduced motion; Mixtape picks a different era each day.
+From 1645 to somewhere else. Every era is a full theme with its own type, art, animated welcome and kanji. Switching era plays a piece of the one you pick: a CRT power-off into Phosphor, a pixel dissolve into Arcade, a VHS tracking roll into Synthwave, a Windows 95 window zooming open into Beige Box. Animations are CSS-only, pause when the window is hidden and respect Windows reduced motion; Mixtape picks a different era each day.
 
 | 1977 Phosphor | 1984 Arcade | 1986 Synthwave |
 | --- | --- | --- |
@@ -48,9 +48,9 @@ From 1830 to somewhere else. Every era is a full theme with its own type, art, a
 | **1996 Beige Box** | **Night shift** | **Paper** |
 | ![Beige Box](docs/screenshots/today-beige.png) | ![Night shift](docs/screenshots/today-dark.png) | ![Paper](docs/screenshots/today-light.png) |
 
-**New in 0.16:** 1830 Ukiyo-e, 1889 Steampunk, 1958 Ramen shop, 1995 Anime, 2077 Cyberpunk, 2350 Starship, ???? Signal and Vapor (now).
+**New in 0.16:** 1645 Ronin, 1830 Ukiyo-e, 1889 Steampunk, 1958 Ramen shop, 1995 Anime, 2077 Cyberpunk, 2350 Starship, ???? Signal, and Vapor by day and by night.
 
-![Eight new eras: Ukiyo-e, Steampunk, Ramen shop, Anime, Cyberpunk, Starship, Signal and Vapor](docs/screenshots/eras-new.png)
+![Ten new eras: Ronin, Ukiyo-e, Steampunk, Ramen shop, Anime, Cyberpunk, Starship, Signal, Vapor and Vapor night](docs/screenshots/eras-new.png)
 
 | Welcome: Synthwave | Welcome: Arcade | Welcome: Phosphor |
 | --- | --- | --- |

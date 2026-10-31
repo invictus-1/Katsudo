@@ -45,22 +45,6 @@
 [data-theme="cyberpunk"] .kt-btn-primary { background: #f5e64b; border-color: #f5e64b; color: #07060c; }
 [data-theme="cyberpunk"] .sidebar { background: linear-gradient(180deg, #0d0b16, #07060c); border-right: 1px solid #ff2a6d55; }
 [data-theme="cyberpunk"] .kt-nav.is-active { box-shadow: inset 3px 0 0 #ff2a6d; }
-.hero.hero-cyberpunk { background: linear-gradient(180deg, #07060c 0%, #120a22 60%, #2a0a2e 100%); border-color: #5b4d8a; }
-.cy { position: absolute; inset: 0; overflow: hidden; }
-.cy-haze { position: absolute; left: 30%; right: 0; bottom: -20%; height: 70%; background: radial-gradient(ellipse at 60% 100%, #ff2a6d55, transparent 65%); }
-.cy-towers { position: absolute; left: 38%; right: clamp(250px, 17vw, 400px); bottom: 0; height: 92%; display: flex; align-items: flex-end; gap: 1.2%; }
-.cy-towers i { display: block; background: repeating-linear-gradient(0deg, #0d0b16 0 7px, transparent 7px 10px), repeating-linear-gradient(90deg, #f5e64b55 0 4px, #0d0b16 4px 8px);
-  background-color: #0d0b16; border-top: 2px solid #2a2440; box-shadow: 0 -2px 12px #ff2a6d22; }
-.cy-towers i.is-cyan { background: repeating-linear-gradient(0deg, #0d0b16 0 6px, transparent 6px 9px), repeating-linear-gradient(90deg, #00f0ff44 0 3px, #0d0b16 3px 9px); }
-.cy-sign { position: absolute; right: calc(clamp(250px, 17vw, 400px) + 4%); top: 14%; display: flex; flex-direction: column; padding: 8px 6px; border: 2px solid #ff2a6d;
-  font: 400 clamp(28px, 2.8vw, 46px)/1.05 var(--font-kanji); color: #ffd6e4; font-synthesis: none; background: #07060ccc;
-  box-shadow: 0 0 16px #ff2a6d, inset 0 0 12px #ff2a6d88; text-shadow: 0 0 10px #ff2a6d; animation: cy-flicker 6s steps(1) infinite; }
-.cy-sign-h { position: absolute; left: 50%; top: 26%; padding: 2px 10px; font: 700 clamp(16px, 1.6vw, 26px)/1.2 "Rajdhani", sans-serif; letter-spacing: .3em; color: #b8fbff;
-  border: 1.5px solid #00f0ff; box-shadow: 0 0 12px #00f0ff; text-shadow: 0 0 8px #00f0ff; background: #07060c99; animation: cy-flicker 9s steps(1) infinite -3s; }
-@keyframes cy-flicker { 0%, 100% { opacity: 1; } 41% { opacity: 1; } 42% { opacity: .3; } 43% { opacity: 1; } 44% { opacity: .5; } 46% { opacity: 1; } }
-.cy-rain { position: absolute; inset: -100% 0 0 0; height: 200%; opacity: .35;
-  background: repeating-linear-gradient(100deg, transparent 0 22px, #a9c8ff55 22px 23px, transparent 23px 47px); animation: cy-rain .6s linear infinite; }
-@keyframes cy-rain { to { transform: translate(-8px, 50%); } }
 
 /* ---- 2350 Starship: a bridge console ------------------------------------------------------------ */
 [data-theme="starship"] { --font-display: "Antonio", "Arial Narrow", sans-serif; --font-kanji: "Katsudo Code", "MS Gothic", monospace;

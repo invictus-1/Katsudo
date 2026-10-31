@@ -180,8 +180,8 @@ body { overflow: hidden; user-select: none; }
 .empty p { margin: 0 auto var(--space-4); color: var(--ink-muted); max-width: 520px; }
 .error { color: var(--danger); }
 .scroll-x { overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
-[data-theme="dark"], [data-theme="phosphor"], [data-theme="arcade"], [data-theme="synthwave"], [data-theme="steampunk"], [data-theme="ramen"], [data-theme="cyberpunk"], [data-theme="starship"], [data-theme="signal"] { color-scheme: dark; }
-[data-theme="light"], [data-theme="beige"], [data-theme="ukiyoe"], [data-theme="anime"], [data-theme="vapor"] { color-scheme: light; }
+[data-theme="dark"], [data-theme="phosphor"], [data-theme="arcade"], [data-theme="synthwave"], [data-theme="steampunk"], [data-theme="ramen"], [data-theme="cyberpunk"], [data-theme="starship"], [data-theme="signal"], [data-theme="vapornight"] { color-scheme: dark; }
+[data-theme="light"], [data-theme="beige"], [data-theme="ukiyoe"], [data-theme="anime"], [data-theme="vapor"], [data-theme="ronin"] { color-scheme: light; }
 
 /* Scrollbars in every era's colours (WebView2 is Chromium, so the -webkit- parts apply). */
 ::-webkit-scrollbar { width: 12px; height: 12px; }

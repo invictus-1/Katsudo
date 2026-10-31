@@ -1,5 +1,5 @@
-// Art for the newer eras: 1995 Anime, 2077 Cyberpunk, 2350 Starship, ???? Signal and Vapor (now).
-// Styles in future.css and signal.css.
+// Art for the newer eras: 1995 Anime, 2350 Starship, ???? Signal and Vapor (now); Cyberpunk is in
+// CyberArt.tsx. Styles in future.css and signal.css.
 import { useEffect, useState, type CSSProperties } from 'react';
 import { formatCount } from '../lib';
 import { Hanko, NAME } from '../kanji';
@@ -37,26 +37,6 @@ export function AnimeArt() {
       <div className="an-petals">
         {PETALS.map((p, i) => <i key={i} style={{ left: `${p.x}%`, animationDuration: `${p.d}s`, animationDelay: `${p.delay}s`, '--s': p.s } as CSSProperties} />)}
       </div>
-    </div>
-  );
-}
-
-// ---- 2077 Cyberpunk: towers in the rain, a neon sign flickering ------------------------------
-
-const TOWERS = [
-  { w: 9, h: 72 }, { w: 6, h: 54 }, { w: 11, h: 88 }, { w: 7, h: 62 }, { w: 12, h: 96 }, { w: 8, h: 70 }, { w: 10, h: 82 }, { w: 6, h: 50 },
-];
-
-export function CyberArt() {
-  return (
-    <div className="cy">
-      <div className="cy-haze" />
-      <div className="cy-towers">
-        {TOWERS.map((t, i) => <i key={i} className={i % 3 === 1 ? 'is-cyan' : ''} style={{ width: `${t.w}%`, height: `${t.h}%` }} />)}
-      </div>
-      <div className="cy-sign"><span>{NAME[0]}</span><span>{NAME[1]}</span></div>
-      <div className="cy-sign-h">KATSUDO</div>
-      <div className="cy-rain" />
     </div>
   );
 }
@@ -139,18 +119,28 @@ function GlyphRow({ seed, count }: { seed: number; count: number }) {
   );
 }
 
-export function SignalArt() {
+const TERM_LINES = [
+  { seed: 4, n: 22 }, { seed: 7, n: 15 }, { seed: 11, n: 26 }, { seed: 2, n: 9 }, { seed: 13, n: 19 },
+];
+
+/** An alien console: glyph lines typing in, one line decoded, a cursor, a small radar. */
+export function SignalArt({ keysToday, kps }: { keysToday: number; kps: number }) {
   return (
     <div className="sg">
       <div className="sg-grid" />
-      <div className="sg-beacon">
-        {[0, 1, 2].map((i) => <i key={i} style={{ animationDelay: `${i * 1.2}s` }} />)}
-        <b />
+      <div className="sg-term">
+        <div className="sg-term-bar"><i /><i /><i /><GlyphRow seed={21} count={9} /></div>
+        <div className="sg-term-body">
+          {TERM_LINES.map((l, i) => (
+            <div key={i} className="sg-line" style={{ animationDelay: `${i * 0.9}s` }}><span className="sg-prompt">&gt;</span><GlyphRow seed={l.seed} count={l.n} /></div>
+          ))}
+          <div className="sg-line is-plain" style={{ animationDelay: `${TERM_LINES.length * 0.9}s` }}>
+            <span className="sg-prompt">&gt;</span>decoded: {formatCount(keysToday)} keys today · {kps}/s
+          </div>
+          <div className="sg-line is-cursor"><span className="sg-prompt">&gt;</span><span className="sg-cursor" /></div>
+        </div>
+        <div className="sg-radar"><i /><b /></div>
       </div>
-      <div className="sg-glyphs">{[1, 2, 3].map((s) => <div key={s} className="sg-strip"><GlyphRow seed={s} count={40} /><GlyphRow seed={s} count={40} /></div>)}</div>
-      <svg className="sg-wave" viewBox="0 0 400 40" preserveAspectRatio="none">
-        <path d={`M0 20 ${Array.from({ length: 40 }, (_, i) => `Q ${i * 10 + 5} ${i % 2 ? 4 : 36} ${i * 10 + 10} 20`).join(' ')}`} />
-      </svg>
     </div>
   );
 }

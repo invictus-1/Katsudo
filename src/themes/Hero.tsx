@@ -2,7 +2,9 @@ import type { CSSProperties } from 'react';
 import type { ThemeId } from './themes';
 import { formatCount } from '../lib';
 import { RamenArt, SteamArt, UkiyoeArt } from './EarlyArt';
-import { AnimeArt, CyberArt, episode, SignalArt, StarshipArt, VaporArt } from './FutureArt';
+import { AnimeArt, episode, SignalArt, StarshipArt, VaporArt } from './FutureArt';
+import { CyberArt } from './CyberArt';
+import { RoninArt } from './RoninArt';
 
 interface HeroProps {
   theme: ThemeId;
@@ -15,6 +17,7 @@ interface HeroProps {
 }
 
 const EYEBROW: Record<ThemeId, string> = {
+  ronin: 'A ronin’s notebook · today',
   ukiyoe: 'The floating world · today',
   steampunk: 'Engine room · the day’s log',
   ramen: 'Open late · today',
@@ -23,6 +26,7 @@ const EYEBROW: Record<ThemeId, string> = {
   starship: 'Bridge · activity log',
   signal: 'Transmission received · today',
   vapor: 'Today',
+  vapornight: 'Tonight',
   phosphor: '> katsudo --today',
   arcade: '1UP · PLAYER ONE',
   synthwave: 'NOW TRACKING',
@@ -46,8 +50,9 @@ export function Hero(p: HeroProps) {
         {p.theme === 'anime' && <AnimeArt />}
         {p.theme === 'cyberpunk' && <CyberArt />}
         {p.theme === 'starship' && <StarshipArt keysToday={p.keysToday} peak={p.peak} />}
-        {p.theme === 'signal' && <SignalArt />}
-        {p.theme === 'vapor' && <VaporArt hourly={p.hourly} />}
+        {p.theme === 'signal' && <SignalArt keysToday={p.keysToday} kps={p.kps} />}
+        {(p.theme === 'vapor' || p.theme === 'vapornight') && <VaporArt hourly={p.hourly} />}
+        {p.theme === 'ronin' && <RoninArt />}
         {(p.theme === 'dark' || p.theme === 'light') && <LanesArt />}
       </div>
       <div className="hero-text">

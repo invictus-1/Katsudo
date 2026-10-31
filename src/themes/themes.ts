@@ -1,4 +1,4 @@
-export type ThemeId = 'ukiyoe' | 'steampunk' | 'ramen' | 'phosphor' | 'arcade' | 'synthwave' | 'anime' | 'beige' | 'cyberpunk' | 'starship' | 'signal' | 'dark' | 'light' | 'vapor';
+export type ThemeId = 'ronin' | 'ukiyoe' | 'steampunk' | 'ramen' | 'phosphor' | 'arcade' | 'synthwave' | 'anime' | 'beige' | 'cyberpunk' | 'starship' | 'signal' | 'dark' | 'light' | 'vapor' | 'vapornight';
 export type ThemeChoice = ThemeId | 'mixtape';
 
 export interface ThemeInfo {
@@ -12,6 +12,7 @@ export interface ThemeInfo {
 
 /** In era order. Colors come from design/tokens.json; swatches only preview them. */
 export const THEMES: ThemeInfo[] = [
+  { id: 'ronin', era: '1645', name: 'Ronin', blurb: 'The Musashi era as an old notebook: sumi ink on tea-stained paper, a brushed ensō, a red seal.', swatches: ['#efe4c8', '#1b1712', '#b0341f', '#3e5566'] },
   { id: 'ukiyoe', era: '1830', name: 'Ukiyo-e', blurb: 'A woodblock print: indigo waves and a red sun on washi paper.', swatches: ['#f3ebd9', '#c8402e', '#2b5a8c', '#1f2a44'] },
   { id: 'steampunk', era: '1889', name: 'Steampunk', blurb: 'Brass, rivets and mahogany, with a gauge for your keys.', swatches: ['#1d120a', '#d4a24c', '#4fae9b', '#d0703f'] },
   { id: 'ramen', era: '1958', name: 'Ramen shop', blurb: 'A late-night stall: red noren, a paper lantern, steam off the bowl.', swatches: ['#1b1310', '#f2a03d', '#d93b30', '#7fc4b0'] },
@@ -26,6 +27,7 @@ export const THEMES: ThemeInfo[] = [
   { id: 'dark', era: 'Now', name: 'Night shift', blurb: 'Calm, warm and dense. The default.', swatches: ['#15130f', '#ffb347', '#4fd1c5', '#ff8fa3'] },
   { id: 'light', era: 'Now', name: 'Paper', blurb: 'The same, printed on warm paper.', swatches: ['#f3ede0', '#c47400', '#1a9484', '#d8607b'] },
   { id: 'vapor', era: 'Now', name: 'Vapor', blurb: 'Frosted glass over soft pastel light, like a current OS.', swatches: ['#fbfbff', '#7c5cff', '#ff6fa8', '#22b8cf'] },
+  { id: 'vapornight', era: 'Now', name: 'Vapor night', blurb: 'The same glass after dark: deep indigo with neon pastel light.', swatches: ['#141230', '#9d85ff', '#ff7eb6', '#4fd8eb'] },
 ];
 
 /** Mixtape plays a different era each local day. */
