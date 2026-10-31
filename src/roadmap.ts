@@ -35,6 +35,7 @@ export const ROADMAP: RoadmapItem[] = [
   { id: 'layouts', stage: 'done', area: 'Rhythm', version: '0.5', title: 'Full keyboard layouts', blurb: '60%, TKL and full size with the F-row, navigation keys, arrows and numpad. Native tracking tells numpad keys apart from their twins.' },
   { id: 'net-ranges', stage: 'done', area: 'Insight', version: '0.5', title: 'Network by day, week, month, year and all time', blurb: 'The same ranges as Input, with busiest days per range.' },
   { id: 'eras', stage: 'done', area: 'Look & feel', version: '0.2', title: 'Eras and welcomes', blurb: 'Phosphor, Arcade, Synthwave, Beige Box, Night shift, Paper and Mixtape, each with its own intro.' },
+  { id: 'app-keys', stage: 'done', area: 'Rhythm', version: '0.18', title: 'Per-app keyboard heatmaps', blurb: 'Pick any app above the keyboard heatmap to see only its keys, with its most pressed keys and its share of all your typing.' },
   { id: 'ergonomics', stage: 'done', area: 'Rhythm', version: '0.17', title: 'Hand and finger balance', blurb: 'Left vs right, the load on each finger, home row vs reaching. Fingers come from a finger map: touch typing or gaming, per app, with any key moved to the finger you really use.' },
   { id: 'more-eras', stage: 'done', area: 'Look & feel', version: '0.16', title: 'More eras', blurb: 'Ten more, from 1645 to somewhere else: Ronin, Ukiyo-e, Steampunk, Ramen shop, Anime, Cyberpunk, Starship, Signal, Vapor and Vapor night, each with its own art, welcome and transition.' },
   { id: 'breaks', stage: 'done', area: 'Tracking', version: '0.15', title: 'Gentle break nudges', blurb: 'Opt-in: after a long stretch without a break, a small note above the tray. Waits out flow, games and fullscreen, comes sooner after hard typing, never repeats until you have had a break.' },
@@ -50,7 +51,6 @@ export const ROADMAP: RoadmapItem[] = [
   { id: 'rhythm-mode', stage: 'done', area: 'Rhythm', version: '0.6', title: 'Rhythm mode', blurb: 'Every session in a rhythm game kept second by second: true peak keys per second, streams of 10+ a second, personal bests per game. osu!, Quaver, Etterna, StepMania and more recognised; mark any other game.' },
   { id: 'wp-keys', stage: 'done', area: 'Data', version: '0.5.1', title: 'Every WhatPulse key placed', blurb: 'Shift, Ctrl, Alt, Windows, arrows, F-keys and the whole numpad, matched by a key test against Katsudō\'s own counts. Old history re-placed automatically.' },
   { id: 'mouse-map', stage: 'done', area: 'Insight', version: '0.5.1', title: 'Mouse heatmap', blurb: 'Where you click and where the pointer travels, over your monitors as they are arranged, in the era\'s heat colours. WhatPulse\'s last three months of clicks come along.' },
-  { id: 'app-keys', stage: 'planned', area: 'Rhythm', title: 'Per-app keyboard heatmaps', blurb: 'The keyboard for one game or editor at a time, from Katsudō\'s own tracking and WhatPulse\'s per-app key history.' },
   { id: 'iso', stage: 'planned', area: 'Rhythm', title: 'ISO and other layouts', blurb: 'ISO Enter and the extra key by Left Shift, plus layouts for keyboards that aren\'t US ANSI.' },
 
   // ---- planned ----

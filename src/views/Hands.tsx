@@ -67,16 +67,14 @@ const APP_PRESETS = [
   { value: 'gaming', label: 'Gaming' },
 ];
 
-export function HandsPanel({ keys, from, to, clicks, scrolls, label }: {
-  keys: Record<string, number>; from: string; to: string; clicks: number; scrolls: number; label: string;
+export function HandsPanel({ keys, apps, clicks, scrolls, label }: {
+  keys: Record<string, number>; apps: AppKeys[]; clicks: number; scrolls: number; label: string;
 }) {
   const [cfg, setCfg] = useState<HandsConfig | null>(null);
-  const [apps, setApps] = useState<AppKeys[]>([]);
   const [listening, setListening] = useState(false);
   const [pending, setPending] = useState<string | null>(null);
 
   useEffect(() => { api.settings().then((s) => setCfg(parseHands(s.hands))); }, []);
-  useEffect(() => { api.appKeys(from, to).then(setApps, () => setApps([])); }, [from, to]);
   useEffect(() => {
     if (!listening) return;
     const on = (e: KeyboardEvent) => {

@@ -6,6 +6,7 @@ import { RANGE_OPTIONS, rangeDays, type RangeId } from './range';
 import { LivePanel } from './Widgets';
 import { MouseHeatmap, type MouseMetric } from './MouseMap';
 import { HandsPanel } from './Hands';
+import { keyLabel } from '../hands';
 
 type Metric = 'keys' | 'clicks' | 'active_secs';
 type Layout = 'compact' | 'tkl' | 'full';
@@ -48,6 +49,12 @@ export function InputView({ firstDay, undated }: { firstDay: string | null; unda
   const year = useData(() => api.days(yearFrom, yearTo), [yearFrom, yearTo]);
   const [from, to] = rangeDays(range, firstDay);
   const keys = useData(() => api.keys(from, to), [from, to]);
+  const appKeys = useData(() => api.appKeys(from, to), [from, to]);
+  // The keyboard for one app (Katsudō counts keys per app from 0.17 on), or all of them.
+  const [kbApp, setKbApp] = useState<number | null>(null);
+  const appKb = kbApp === null ? null : appKeys.data?.find((a) => a.app_id === kbApp) ?? null;
+  const kbCounts = appKb ? appKb.keys : keys.data;
+  const topKeys = appKb ? Object.entries(appKb.keys).sort((a, b) => b[1] - a[1]).slice(0, 6) : [];
   const days = useData(() => api.days(from, to), [from, to]);
   const mouse = useData(() => api.mouse(from, to), [from, to]);
   const [mouseMetric, setMouseMetric] = useState<MouseMetric>('clicks');
@@ -93,18 +100,35 @@ export function InputView({ firstDay, undated }: { firstDay: string | null; unda
           )}
         </Panel>
       </div>
-      <Panel title={`Keyboard · ${rangeLabel}`}
-        action={<Segmented size="sm" label="Keyboard layout" options={LAYOUTS} value={layout} onChange={(v) => setLayout(v as Layout)} />}>
-        {keys.data && Object.keys(keys.data).length ? (
-          <div className="scroll-x">
-            <KeyboardHeatmap counts={keys.data} layout={layout} label={`Key presses, ${rangeLabel}`} />
-          </div>
+      <Panel title={`Keyboard · ${appKb ? appKb.name : rangeLabel}`}
+        action={<div className="kb-actions">
+          <select className="kb-app" aria-label="Keyboard for one app" value={kbApp ?? ''} onChange={(e) => setKbApp(e.target.value ? Number(e.target.value) : null)}>
+            <option value="">All apps</option>
+            {(appKeys.data ?? []).map((a) => <option key={a.app_id} value={a.app_id}>{a.name} · {shortCount(a.total)}</option>)}
+          </select>
+          <Segmented size="sm" label="Keyboard layout" options={LAYOUTS} value={layout} onChange={(v) => setLayout(v as Layout)} />
+        </div>}>
+        {kbCounts && Object.keys(kbCounts).length ? (
+          <>
+            <div className="scroll-x">
+              <KeyboardHeatmap counts={kbCounts} layout={layout} label={`Key presses${appKb ? ` in ${appKb.name}` : ''}, ${rangeLabel}`} />
+            </div>
+            {appKb && (
+              <p className="text-small faint kb-top">
+                Most pressed in {appKb.name}: {topKeys.map(([k, n]) => `${keyLabel(k)} ${shortCount(n)}`).join(' · ')}
+                {' '}· {formatCount(appKb.total)} presses, {Math.round((appKb.total / Math.max(1, Object.values(keys.data ?? {}).reduce((a, b) => a + b, 0))) * 100)}% of all
+              </p>
+            )}
+          </>
         ) : (
           <p className="muted">No key presses recorded in this range.</p>
         )}
+        {!appKeys.data?.length && keys.data && Object.keys(keys.data).length > 0 && (
+          <p className="text-small faint kb-top">Keyboards per app start with 0.17: they fill in as you type.</p>
+        )}
       </Panel>
       {keys.data && Object.keys(keys.data).length > 0 && (
-        <HandsPanel keys={keys.data} from={from} to={to} label={rangeLabel ?? ''}
+        <HandsPanel keys={keys.data} apps={appKeys.data ?? []} label={rangeLabel ?? ''}
           clicks={(days.data ?? []).reduce((s, d) => s + d.clicks, 0)} scrolls={(days.data ?? []).reduce((s, d) => s + d.scrolls, 0)} />
       )}
       <Panel title={`Mouse · ${rangeLabel}`}
