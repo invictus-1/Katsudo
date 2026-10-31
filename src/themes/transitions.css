@@ -1,0 +1,66 @@
+/* Era transitions (see transitions.ts). Each is named after the era being switched to. */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+
+/* Phosphor: the old screen collapses to a line, then a dot; the tube warms up into amber. */
+html[data-vt="phosphor"]::view-transition { background: #000; }
+html[data-vt="phosphor"]::view-transition-old(root) { animation: era-crt-off 380ms cubic-bezier(.6, 0, .9, .4) forwards; }
+html[data-vt="phosphor"]::view-transition-new(root) { animation: era-crt-on 560ms 360ms cubic-bezier(.2, .7, .3, 1) both; }
+@keyframes era-crt-off {
+  0% { transform: none; filter: none; }
+  55% { transform: scale(1, .006); filter: brightness(2.6) saturate(.4); }
+  85% { transform: scale(.02, .006); filter: brightness(5); opacity: 1; }
+  100% { transform: scale(0, 0); opacity: 0; }
+}
+@keyframes era-crt-on {
+  0% { transform: scale(0, .006); filter: brightness(5) blur(1px); opacity: 1; }
+  30% { transform: scale(1, .006); filter: brightness(4) blur(1px); }
+  60% { transform: scale(1, 1.02); filter: brightness(1.6) blur(.5px); }
+  100% { transform: none; filter: none; }
+}
+
+/* Arcade: the new screen fills in block by block (masks built in transitions.ts). */
+html[data-vt="arcade"]::view-transition-new(root) {
+  animation: era-dissolve 620ms steps(1, end) both;
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+}
+
+/* Synthwave: the tape rolls in from above, wobbles and settles; a tracking band runs down. */
+html[data-vt="synthwave"]::view-transition-old(root) { animation: era-vhs-old 820ms ease-in both; }
+html[data-vt="synthwave"]::view-transition-new(root) { animation: era-vhs-roll 820ms cubic-bezier(.3, .8, .4, 1) both; }
+@keyframes era-vhs-old { to { filter: brightness(.35) saturate(2) blur(2px); transform: translateX(-1.5%); } }
+@keyframes era-vhs-roll {
+  0% { transform: translateY(-100%); filter: saturate(2.4) contrast(1.5) hue-rotate(-24deg) blur(2px); }
+  38% { transform: translateY(9%) skewX(-3deg); filter: saturate(2) contrast(1.3) blur(1.2px); }
+  52% { transform: translateY(-5%) skewX(2deg); }
+  66% { transform: translateY(2.5%) skewX(-1deg); filter: saturate(1.5) blur(.6px); }
+  82% { transform: translateY(-.8%); }
+  100% { transform: none; filter: none; }
+}
+.era-fx { position: fixed; inset: 0; z-index: 10000; pointer-events: none; overflow: hidden; }
+.era-fx-vhs { animation: era-fade 900ms ease-in forwards; }
+.era-fx-osd { position: absolute; left: 4%; top: 6%; font: 700 clamp(22px, 3vw, 40px)/1 "IBM Plex Mono", ui-monospace, monospace;
+  color: #fff; letter-spacing: .08em; text-shadow: 2px 0 #ff2fd0, -2px 0 #2ff4ff, 0 0 12px rgba(255, 255, 255, .5); }
+.era-fx-band { position: absolute; left: 0; right: 0; top: -12%; height: 9%; mix-blend-mode: screen; opacity: .55;
+  background: repeating-linear-gradient(180deg, rgba(255, 255, 255, .55) 0 1px, transparent 1px 3px),
+              linear-gradient(90deg, transparent, rgba(255, 255, 255, .5) 20%, rgba(180, 220, 255, .35) 60%, transparent);
+  animation: era-band 800ms linear forwards; }
+@keyframes era-band { to { transform: translateY(1300%); } }
+@keyframes era-fade { 0%, 60% { opacity: 1; } 100% { opacity: 0; } }
+
+/* Beige Box: the window zooms open from the middle in jumps, like Windows 95. */
+html[data-vt="beige"]::view-transition-new(root) { animation: era-win-zoom 420ms steps(7, end) both; }
+html[data-vt="beige"]::view-transition-old(root) { animation: era-win-dim 420ms steps(7, end) both; }
+@keyframes era-win-zoom {
+  0% { transform: scale(.06); outline: 2px solid #000; }
+  99% { outline: 2px solid #000; }
+  100% { transform: none; outline: none; }
+}
+@keyframes era-win-dim { to { filter: brightness(.85); } }
+
+/* Night shift and Paper: the new look spreads out from where you clicked. */
+html[data-vt="dark"]::view-transition-new(root),
+html[data-vt="light"]::view-transition-new(root) { animation: era-reveal 650ms cubic-bezier(.65, 0, .35, 1) both; }
+@keyframes era-reveal {
+  from { clip-path: circle(0 at var(--vt-x, 50%) var(--vt-y, 50%)); }
+  to { clip-path: circle(150vmax at var(--vt-x, 50%) var(--vt-y, 50%)); }
+}

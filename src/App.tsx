@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { api } from './api';
 import { Button, Icon, NavItem, StatusBar } from './ds/katsudo';
 import type { IconName } from './ds/katsudo';
@@ -6,6 +7,7 @@ import { bytesText, dateTime, todayIso, useData } from './lib';
 import { LiveProvider, useLive } from './live';
 import { applyMotion, applyScale, applyTheme, resolveTheme, THEMES, type ThemeId } from './themes/themes';
 import { Welcome } from './themes/Welcome';
+import { transitionEra } from './themes/transitions';
 import { Today } from './views/Today';
 import { TimelineView } from './views/Timeline';
 import { Applications } from './views/Applications';
@@ -76,10 +78,20 @@ export function App() {
     applyMotion(appearance.motion);
   }, [appearance]);
 
+  // A new era plays its transition: the update has to land in the DOM before the browser
+  // captures the new look, so render synchronously and set the era straight away.
+  const changeAppearance = (next: Appearance) => {
+    if (!appearance || next.theme === appearance.theme) return setAppearance(next);
+    transitionEra(appearance.theme, next.theme, next.motion, () => {
+      applyTheme(next.theme);
+      flushSync(() => setAppearance(next));
+    });
+  };
+
   if (!appearance) return null;
   return (
     <LiveProvider>
-      <Shell appearance={appearance} onAppearance={setAppearance} />
+      <Shell appearance={appearance} onAppearance={changeAppearance} />
       <Welcome theme={resolveTheme(appearance.theme)} enabled={appearance.welcome && appearance.motion} />
     </LiveProvider>
   );
