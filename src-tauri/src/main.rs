@@ -32,6 +32,33 @@ use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 /// Passed by the autostart entry: start in the tray without showing the window.
 const MINIMIZED_ARG: &str = "--minimized";
 
+/// Remember where the main window is. A maximized or minimized window keeps the normal
+/// bounds saved before, so un-maximizing later goes back to them.
+macro_rules! save_placement {
+    ($app:expr, $w:expr) => {{
+        let w = $w;
+        let max = w.is_maximized().unwrap_or(false);
+        let min = w.is_minimized().unwrap_or(false);
+        let mut p = saved_placement($app);
+        if !max && !min {
+            if let (Ok(pos), Ok(size)) = (w.outer_position(), w.inner_size()) {
+                if size.width > 0 && size.height > 0 {
+                    p = Some(Placement { x: pos.x, y: pos.y, w: size.width, h: size.height, max: false });
+                }
+            }
+        }
+        if let Some(mut p) = p {
+            if !min {
+                p.max = max;
+            }
+            let state = $app.state::<AppState>();
+            if let Ok(conn) = state.0.write.lock() {
+                let _ = db::set_setting(&conn, "window", &p.text());
+            };
+        }
+    }};
+}
+
 struct Inner {
     read: Arc<Mutex<Connection>>,
     write: Arc<Mutex<Connection>>,
@@ -1052,6 +1079,11 @@ async fn restore_backup(state: State<'_, AppState>, file: String) -> CmdResult<(
 /// Quit after the tracker has written everything (at most ~3 s). Used by the tray's Quit and
 /// by `katsudo.exe --quit`, which the installer sends before replacing the app.
 fn graceful_exit(app: &AppHandle) {
+    if let Some(w) = app.get_webview_window("main") {
+        if w.is_visible().unwrap_or(false) {
+            save_placement!(app, &w);
+        }
+    }
     let state = app.state::<AppState>();
     let control = state.0.control.clone();
     control.quit.store(true, Ordering::SeqCst);
@@ -1134,6 +1166,7 @@ fn show_main(app: &AppHandle) {
         let Some(config) = app.config().app.windows.iter().find(|w| w.label == "main").cloned() else { return };
         match tauri::WebviewWindowBuilder::from_config(&app, &config).and_then(|b| b.build()) {
             Ok(w) => {
+                restore_placement(&app, &w);
                 let _ = w.show();
                 let _ = w.set_focus();
             }
@@ -1142,12 +1175,61 @@ fn show_main(app: &AppHandle) {
     });
 }
 
+/// The main window's last place on screen: its normal (unmaximized) position and size in
+/// physical pixels, and whether it was maximized. Saved when it goes to the tray or Katsudō
+/// quits, and put back each time the window is built again.
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct Placement {
+    x: i32,
+    y: i32,
+    w: u32,
+    h: u32,
+    max: bool,
+}
+
+impl Placement {
+    fn parse(v: &str) -> Option<Placement> {
+        let p: Vec<&str> = v.split_whitespace().collect();
+        let [x, y, w, h, max] = p[..] else { return None };
+        Some(Placement { x: x.parse().ok()?, y: y.parse().ok()?, w: w.parse().ok()?, h: h.parse().ok()?, max: max == "1" })
+    }
+    fn text(&self) -> String {
+        format!("{} {} {} {} {}", self.x, self.y, self.w, self.h, self.max as u8)
+    }
+}
+
+fn saved_placement(app: &AppHandle) -> Option<Placement> {
+    let state = app.state::<AppState>();
+    let conn = state.0.read.lock().ok()?;
+    let v = db::get_setting(&conn, "window")?;
+    Placement::parse(&v)
+}
+
+/// Put a freshly built (still hidden) main window back where it was. A position that is no
+/// longer on any screen (a monitor unplugged since) keeps the size but lets Windows place it.
+fn restore_placement(app: &AppHandle, w: &tauri::WebviewWindow) {
+    let Some(p) = saved_placement(app) else { return };
+    let on_screen = w.available_monitors().unwrap_or_default().iter().any(|m| {
+        let (mp, ms) = (m.position(), m.size());
+        let (cx, cy) = (p.x + p.w as i32 / 2, p.y + 20);
+        cx >= mp.x && cx < mp.x + ms.width as i32 && cy >= mp.y && cy < mp.y + ms.height as i32
+    });
+    if on_screen {
+        let _ = w.set_position(tauri::PhysicalPosition::new(p.x, p.y));
+    }
+    let _ = w.set_size(tauri::PhysicalSize::new(p.w, p.h));
+    if p.max {
+        let _ = w.maximize();
+    }
+}
+
 /// Whether the main window was minimized when last seen, to notice it being restored.
 static MINIMIZED: AtomicBool = AtomicBool::new(false);
 
 /// The window went to the tray: hide it now, and free its webview (most of Katsudō's memory)
 /// if it is still hidden a minute later. Tracking carries on without it.
 fn hide_main(window: &tauri::Window) {
+    save_placement!(window.app_handle(), window);
     let _ = window.hide();
     let shown = SHOWN.load(Ordering::SeqCst);
     let app = window.app_handle().clone();
