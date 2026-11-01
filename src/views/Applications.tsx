@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { api, type AppTotal } from '../api';
-import { Panel, Segmented, UsageList } from '../ds/katsudo';
+import { Button, Panel, Segmented, UsageList } from '../ds/katsudo';
 import { formatCount, formatDuration, useData } from '../lib';
 import { RANGE_OPTIONS, rangeDays, type RangeId } from './range';
 
@@ -34,11 +34,17 @@ export function Applications({ firstDay }: { firstDay: string | null }) {
   );
 }
 
+const TOP = 25;
+
 function Ranked({ title, apps, metric, loaded }: { title: string; apps: AppTotal[]; metric: Metric; loaded: boolean }) {
-  const top = apps.filter((a) => a[metric] > 0).sort((a, b) => b[metric] - a[metric]).slice(0, 25);
+  // The top 25, or every app down to the smallest in a scrolling list.
+  const [all, setAll] = useState(false);
+  const ranked = apps.filter((a) => a[metric] > 0).sort((a, b) => b[metric] - a[metric]);
+  const top = all ? ranked : ranked.slice(0, TOP);
   return (
     <Panel title={title} flush>
       {top.length ? (
+        <div className={all ? 'apps-all' : undefined}>
         <UsageList
           items={top.map((a, i) => ({
             name: a.name,
@@ -51,8 +57,16 @@ function Ranked({ title, apps, metric, loaded }: { title: string; apps: AppTotal
             tone: TONES[i] ?? 'sky',
           }))}
         />
+        </div>
       ) : (
         <div className="empty"><p className="text-body">{loaded ? 'Nothing recorded in this range.' : ''}</p></div>
+      )}
+      {ranked.length > TOP && (
+        <div className="apps-more">
+          <Button size="sm" variant="ghost" onClick={() => setAll(!all)} aria-expanded={all}>
+            {all ? `Show top ${TOP}` : `Show all ${ranked.length}`}
+          </Button>
+        </div>
       )}
     </Panel>
   );

@@ -33,6 +33,9 @@ import './ds/katsudo.css';
 import './app.css';
 import './themes/themes.css';
 import { App } from './App';
+import { installTooltips } from './tooltip';
+
+installTooltips();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

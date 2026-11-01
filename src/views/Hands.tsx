@@ -33,17 +33,15 @@ function HandsDiagram({ total }: { total: Record<Finger, number> }) {
           const fx = mirror(x, w);
           return (
             <g key={k}>
-              <rect className="hd-finger" x={fx} y={y} width={w} height={h} rx={w / 2} style={fill(f)}>
-                <title>{`${name(f)}: ${formatCount(Math.round(total[f]))} (${Math.round((total[f] / sum) * 100)}%)`}</title>
-              </rect>
+              <rect className="hd-finger" x={fx} y={y} width={w} height={h} rx={w / 2} style={fill(f)}
+                data-hint={`${name(f)}: ${formatCount(Math.round(total[f]))} (${Math.round((total[f] / sum) * 100)}%)`} />
               <text className="hd-pct" x={fx + w / 2} y={y + 26}>{Math.round((total[f] / sum) * 100)}%</text>
             </g>
           );
         })}
         <g transform={`rotate(${thumbAngle} ${thumbCx} 206)`}>
-          <rect className="hd-finger" x={thumbX} y={118} width={34} height={86} rx={17} style={fill(`${side}t` as Finger)}>
-            <title>{`${name(`${side}t` as Finger)}: ${formatCount(Math.round(total[`${side}t` as Finger]))}`}</title>
-          </rect>
+          <rect className="hd-finger" x={thumbX} y={118} width={34} height={86} rx={17} style={fill(`${side}t` as Finger)}
+            data-hint={`${name(`${side}t` as Finger)}: ${formatCount(Math.round(total[`${side}t` as Finger]))} (${Math.round((total[`${side}t` as Finger] / sum) * 100)}%)`} />
         </g>
         <text className="hd-pct" x={side === 'l' ? OX + 214 : W - OX - 214} y={160}>{Math.round((total[`${side}t` as Finger] / sum) * 100)}%</text>
       </g>

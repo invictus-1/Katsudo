@@ -49,7 +49,7 @@ function HitDetail({ hit, onDay }: { hit: SearchHit; onDay: (day: string) => voi
       {detail && detail.years.length > 1 && (
         <div className="pal-years" aria-label="Time per year">
           {detail.years.map(([y, s]) => (
-            <div key={y} className="pal-year" title={`${y}: ${hours(s)}`}>
+            <div key={y} className="pal-year" data-hint={`${y}: ${hours(s)}`}>
               <span style={{ height: `${Math.max(4, (s / topYear) * 100)}%` }} />
               <em className="data-sm">{y.slice(2)}</em>
             </div>

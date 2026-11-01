@@ -245,3 +245,15 @@ body { overflow: hidden; user-select: none; }
 .pcs-row:last-of-type { border-bottom: 0; }
 .pcs-row > div:first-child { min-width: 0; }
 .pcs-message { margin: var(--space-3) 0 0; }
+
+/* The instant tooltip (tooltip.ts): the same look as the keyboard's, in every era. */
+.hint-tip { position: fixed; left: 0; top: 0; z-index: 400; max-width: min(420px, calc(100vw - 16px)); padding: 4px 8px; pointer-events: none;
+  font: 500 13px/18px var(--font-mono); color: var(--ink); background: var(--surface-000); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm); box-shadow: var(--shadow-pop); }
+.hint-tip[hidden] { display: none; }
+[data-hint] { cursor: default; }
+.hd-finger[data-hint]:hover, .kt-tl-seg[data-hint]:hover { filter: brightness(1.15); }
+
+/* Applications: every app, scrolling inside its panel. */
+.apps-all { max-height: 70vh; overflow-y: auto; }
+.apps-more { display: flex; justify-content: center; padding: var(--space-2); border-top: 1px solid var(--line); }

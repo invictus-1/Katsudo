@@ -62,7 +62,7 @@ function TodayBody({ data, theme, keys, bootedAt }: { data: DayView; theme: Them
           icon="star" tone="lime" value={formatDuration(data.flow.week[6] ?? 0)} data={data.flow.week}
           unit={data.flow.now ? `now ${formatDuration(data.flow.now.end - data.flow.now.start)}` : undefined} />
         {/* Today's hours as before; the label adds how long Windows has been on since it last started. */}
-        <div className="uptime-tile" title={bootedAt ? `Windows last started ${new Date(bootedAt * 1000).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}. With Fast Startup on, Shut down keeps counting; Restart starts it again.` : undefined}>
+        <div className="uptime-tile" data-hint={bootedAt ? `Windows last started ${new Date(bootedAt * 1000).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}. With Fast Startup on, Shut down keeps counting; Restart starts it again.` : undefined}>
           <StatTile label={bootedAt ? `Uptime · PC on ${onFor(Date.now() / 1000 - bootedAt)}` : 'Uptime'} icon="clock" tone="sky"
             value={(t.uptime_ms / 3_600_000).toFixed(1)} unit="h" data={series((d) => d.uptime_ms)} />
         </div>

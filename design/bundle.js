@@ -205,7 +205,7 @@
             (l.segments || []).map(function (g, j) {
               var label = (g.title ? g.title + ' · ' : '') + formatClock(g.from) + '–' + formatClock(g.to);
               return h('span', {
-                key: j, className: 'kt-tl-seg kt-fill-' + (g.tone || 'amber'), title: label, role: 'img', 'aria-label': label,
+                key: j, className: 'kt-tl-seg kt-fill-' + (g.tone || 'amber'), 'data-hint': label, role: 'img', 'aria-label': label,
                 style: { left: pct(g.from), width: ((Math.min(e, g.to) - Math.max(s, g.from)) / span * 100) + '%' }
               });
             }),

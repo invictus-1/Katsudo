@@ -11,7 +11,7 @@ export function HourBars({ hourly, live }: { hourly: { hour: number; keys: numbe
       <div className="hours">
         {hourly.map((h) => (
           <div key={h.hour} className={`hours-col${live && h.hour === now ? ' is-now' : ''}`}
-            title={`${String(h.hour).padStart(2, '0')}:00 · ${formatCount(h.keys)} keys · ${formatCount(h.clicks)} clicks`}>
+            data-hint={`${String(h.hour).padStart(2, '0')}:00 · ${formatCount(h.keys)} keys · ${formatCount(h.clicks)} clicks`}>
             <i className="c" style={{ height: `${(h.clicks / peak) * 100}%` }} />
             <i className="k" style={{ height: `${(h.keys / peak) * 100}%` }} />
           </div>
