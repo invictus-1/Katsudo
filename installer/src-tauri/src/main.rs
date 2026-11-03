@@ -118,6 +118,9 @@ mod reg {
     pub fn set_str(path: &str, name: &str, value: &str) -> std::io::Result<()> {
         hkcu().create_subkey(path)?.0.set_value(name, &value)
     }
+    pub fn get_u32(path: &str, name: &str) -> Option<u32> {
+        hkcu().open_subkey(path).ok()?.get_value::<u32, _>(name).ok()
+    }
     pub fn set_u32(path: &str, name: &str, value: u32) -> std::io::Result<()> {
         hkcu().create_subkey(path)?.0.set_value(name, &value)
     }
@@ -380,7 +383,12 @@ fn do_install(app: &AppHandle, o: &Options) -> anyhow::Result<()> {
     } else {
         reg::delete_value(app_key(), "InitialTheme");
     }
-    if o.autostart {
+    if o.autostart && reg::get_u32(app_key(), "RunAsAdmin").is_some_and(|v| v != 0) {
+        // Set to run as administrator, Katsudō starts from its own sign-in task; this entry
+        // would only start a second copy that asks for admin rights.
+        reg::delete_value(run_key(), RUN_VALUE);
+        emit(app, 0.9, "starts with windows as administrator");
+    } else if o.autostart {
         reg::set_str(run_key(), RUN_VALUE, &format!("{} --minimized", quoted(&exe))).context("registering Katsudō with Windows")?;
         emit(app, 0.9, "starts with windows");
     } else {
@@ -415,6 +423,9 @@ fn do_uninstall(app: &AppHandle, dir: &Path, remove_data: bool) -> anyhow::Resul
     reg::delete_value(run_key(), RUN_VALUE);
     if !test_mode() {
         reg::delete_value(r"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run", RUN_VALUE);
+        if let Some(task) = reg::get(app_key(), "AdminTask") {
+            delete_admin_task(&task);
+        }
     }
     reg::delete_tree(uninstall_key());
     reg::delete_tree(app_key());
@@ -439,6 +450,36 @@ fn do_uninstall(app: &AppHandle, dir: &Path, remove_data: bool) -> anyhow::Resul
     }
     emit(app, 1.0, "done");
     Ok(())
+}
+
+/// The sign-in task Katsudō makes when set to run as administrator. Only an admin can remove
+/// it, so if the plain attempt is refused, Windows asks.
+#[cfg(windows)]
+fn delete_admin_task(name: &str) {
+    use std::os::windows::process::CommandExt;
+    use windows::core::{w, HSTRING, PCWSTR};
+    use windows::Win32::UI::Shell::{ShellExecuteExW, SEE_MASK_NOASYNC, SHELLEXECUTEINFOW};
+    const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+    let removed = std::process::Command::new("schtasks")
+        .args(["/Delete", "/TN", name, "/F"])
+        .creation_flags(CREATE_NO_WINDOW)
+        .output()
+        .is_ok_and(|o| o.status.success());
+    if !removed {
+        let params = HSTRING::from(format!("/Delete /TN \"{name}\" /F"));
+        let mut info = SHELLEXECUTEINFOW {
+            cbSize: std::mem::size_of::<SHELLEXECUTEINFOW>() as u32,
+            fMask: SEE_MASK_NOASYNC,
+            lpVerb: w!("runas"),
+            lpFile: w!("schtasks.exe"),
+            lpParameters: PCWSTR(params.as_ptr()),
+            nShow: 0, // hidden
+            ..Default::default()
+        };
+        unsafe {
+            let _ = ShellExecuteExW(&mut info);
+        }
+    }
 }
 
 #[tauri::command]

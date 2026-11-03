@@ -4,6 +4,7 @@ mod backup;
 mod breaks;
 mod compare;
 mod db;
+mod elevation;
 mod flow;
 mod hooks;
 mod import;
@@ -537,13 +538,112 @@ fn set_setting(state: State<AppState>, key: String, value: String) -> CmdResult<
 
 #[tauri::command]
 fn get_autostart(app: AppHandle) -> CmdResult<bool> {
+    if elevation::wanted() && elevation::task_exists() {
+        return Ok(true);
+    }
     app.autolaunch().is_enabled().map_err(err)
 }
 
 #[tauri::command]
 fn set_autostart(app: AppHandle, enabled: bool) -> CmdResult<()> {
     let l = app.autolaunch();
+    // As administrator, starting with Windows is the sign-in task (the ordinary entry would
+    // ask for admin rights at every sign-in).
+    if elevation::wanted() && elevation::is_elevated() {
+        if enabled {
+            elevation::create_task(&std::env::current_exe().map_err(err)?)?;
+        } else if elevation::task_exists() && !elevation::delete_task() {
+            return Err("Windows didn't remove the sign-in task.".into());
+        }
+        return l.disable().map_err(err);
+    }
     if enabled { l.enable() } else { l.disable() }.map_err(err)
+}
+
+/// A copy run from the source tree (target\) or as a test, portable or demo copy, which
+/// leaves "start with Windows" alone: that belongs to the installed copy.
+fn is_installed_copy() -> bool {
+    !["KATSUDO_DATA_DIR", "KATSUDO_SETUP_TEST", "KATSUDO_DEMO"].iter().any(|v| std::env::var_os(v).is_some())
+        && !cfg!(debug_assertions)
+        && std::env::current_exe().is_ok_and(|p| !p.components().any(|c| c.as_os_str().eq_ignore_ascii_case("target")))
+}
+
+/// Make "start with Windows" match the administrator setting: the sign-in task while it is on,
+/// the ordinary entry while it is off. Only an elevated copy can add or remove the task.
+fn reconcile_admin_autostart(app: &AppHandle) {
+    if !is_installed_copy() || !elevation::is_elevated() {
+        return;
+    }
+    let l = app.autolaunch();
+    if elevation::wanted() {
+        if l.is_enabled().unwrap_or(false) {
+            match std::env::current_exe().map_err(err).and_then(|exe| elevation::create_task(&exe)) {
+                Ok(()) => {
+                    let _ = l.disable();
+                }
+                Err(e) => eprintln!("katsudo: sign-in task: {e}"),
+            }
+        }
+    } else if elevation::task_exists() && elevation::delete_task() {
+        let _ = l.enable();
+    }
+}
+
+#[derive(Serialize)]
+struct Admin {
+    /// The setting.
+    wanted: bool,
+    /// Whether this copy actually has admin rights (you can say no when Windows asks).
+    elevated: bool,
+}
+
+#[tauri::command]
+fn get_admin() -> Admin {
+    Admin { wanted: elevation::wanted(), elevated: elevation::is_elevated() }
+}
+
+/// On: Katsudō restarts as administrator (Windows asks first). Off: it restarts without.
+/// True while it restarts. Async so the UAC prompt doesn't hold the window's thread.
+#[tauri::command]
+async fn set_admin(app: AppHandle, enabled: bool) -> CmdResult<bool> {
+    let elevated = elevation::is_elevated();
+    elevation::set_wanted(enabled);
+    if enabled == elevated {
+        reconcile_admin_autostart(&app);
+        return Ok(false);
+    }
+    let restarted = if enabled {
+        elevation::begin_handoff();
+        elevation::relaunch_elevated("")
+    } else {
+        reconcile_admin_autostart(&app);
+        elevation::begin_handoff();
+        std::env::current_exe().is_ok_and(|exe| elevation::open_unelevated(&exe.to_string_lossy()))
+    };
+    if !restarted {
+        elevation::cancel_handoff();
+        if enabled {
+            elevation::set_wanted(false);
+            return Err("Windows didn't give Katsudō administrator rights, so nothing changed.".into());
+        }
+        // Off, but the restart failed: it takes effect the next time Katsudō starts.
+        return Ok(false);
+    }
+    graceful_exit(&app);
+    Ok(true)
+}
+
+/// Open a web page in your browser. An elevated copy goes through Explorer, so the browser
+/// doesn't run as administrator too.
+#[tauri::command]
+fn open_link(url: String) -> CmdResult<()> {
+    if !url.starts_with("https://") {
+        return Err("Only web links open from here.".into());
+    }
+    if elevation::is_elevated() {
+        return if elevation::open_unelevated(&url) { Ok(()) } else { Err("Couldn't open the link.".into()) };
+    }
+    tauri_plugin_opener::open_url(&url, None::<&str>).map_err(err)
 }
 
 /// Whether a "start with Windows" entry under our name exists but launches another file.
@@ -565,10 +665,7 @@ fn default_autostart(app: &AppHandle, write: &Mutex<Connection>) {
     if ["KATSUDO_DATA_DIR", "KATSUDO_SETUP_TEST", "KATSUDO_DEMO"].iter().any(|v| std::env::var_os(v).is_some()) {
         return;
     }
-    let installed = std::env::current_exe()
-        .map(|p| !p.components().any(|c| c.as_os_str().eq_ignore_ascii_case("target")))
-        .unwrap_or(false)
-        && !cfg!(debug_assertions);
+    let installed = is_installed_copy();
     // An entry left pointing at a moved or removed copy is rewritten to point at this one, but
     // only then: security tools can roll back startup-entry writes by unsigned programs, so
     // rewriting it on every launch would only invite that.
@@ -1116,7 +1213,8 @@ fn listen_for_quit(app: AppHandle) {
     let Ok(exe) = std::env::current_exe() else { return };
     let name = HSTRING::from(quit_event_name(&exe));
     std::thread::spawn(move || unsafe {
-        if let Ok(event) = CreateEventW(None, true, false, &name) {
+        let attrs = elevation::quit_event_attributes();
+        if let Ok(event) = CreateEventW(attrs.as_ref().map(|a| a as *const _), true, false, &name) {
             WaitForSingleObject(event, INFINITE);
             graceful_exit(&app);
         }
@@ -1498,6 +1596,7 @@ fn main() {
     if args.get(1).map(String::as_str) == Some("selftest") {
         // `katsudo selftest`: the input counter under rhythm-game and flat-out load.
         println!("{}", hooks::selftest(1_000_000));
+        println!("{}", hooks::selftest_held());
         hooks::start_kps_sampler();
         for (rate, secs) in [(60u64, 3u64), (250, 2), (1000, 2)] {
             hooks::PEAK_KPS.store(0, Ordering::SeqCst);
@@ -1542,6 +1641,30 @@ fn main() {
             std::env::set_var("WEBVIEW2_USER_DATA_FOLDER", PathBuf::from(dir).join("webview"));
         }
     }
+    // Run as administrator (elevation.rs), for the copy that keeps the single-instance lock.
+    if std::env::var_os("KATSUDO_DATA_DIR").is_none() {
+        // Restarted by a copy that is quitting: let it finish first.
+        elevation::wait_for_handoff();
+        let elevated = elevation::is_elevated();
+        match elevation::instance() {
+            // An elevated copy is running and Windows won't let this one open its lock, so the
+            // plugin would start a second tracker: pass the request on (open the window, or
+            // `--quit`) by hand and go. Usually the lock opens and the plugin forwards it.
+            elevation::Instance::Elevated if !elevated => {
+                elevation::forward();
+                return;
+            }
+            // The setting is on: start elevated instead (Windows asks). Refused, this copy runs
+            // as usual and only input in elevated windows goes uncounted.
+            elevation::Instance::None if !elevated && elevation::wanted() && !args.iter().any(|a| a == "--quit") => {
+                let pass = if args.iter().any(|a| a == MINIMIZED_ARG) { MINIMIZED_ARG } else { "" };
+                if elevation::relaunch_elevated(pass) {
+                    return;
+                }
+            }
+            _ => {}
+        }
+    }
     let mut builder = tauri::Builder::default();
     // One copy per database: a second launch (or a second autostart) focuses the running
     // copy instead of starting another tracker on the same file. A copy pointed at its own
@@ -1550,7 +1673,8 @@ fn main() {
         builder = builder.plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
             if args.iter().any(|a| a == "--quit") {
                 graceful_exit(app);
-            } else {
+            } else if !args.iter().any(|a| a == MINIMIZED_ARG) {
+                // A second sign-in start (a leftover entry beside the admin task) stays quiet.
                 show_main(app);
             }
         }));
@@ -1582,6 +1706,10 @@ fn main() {
             let read = Arc::new(Mutex::new(read));
 
             default_autostart(app.handle(), &write);
+            if elevation::is_elevated() && std::env::var_os("KATSUDO_DATA_DIR").is_none() {
+                elevation::allow_forwarding();
+                reconcile_admin_autostart(app.handle());
+            }
             listen_for_quit(app.handle().clone());
             // Started at sign-in, the window isn't made at all until it is opened; otherwise show it.
             if !std::env::args().any(|a| a == MINIMIZED_ARG) {
@@ -1715,6 +1843,9 @@ fn main() {
             set_setting,
             get_autostart,
             set_autostart,
+            get_admin,
+            set_admin,
+            open_link,
             import_detect,
             import_scan,
             import_run,

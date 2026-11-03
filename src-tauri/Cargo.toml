@@ -1,6 +1,6 @@
 [package]
 name = "katsudo"
-version = "1.0.2"
+version = "1.0.3"
 description = "Local-first activity and input tracker"
 edition = "2021"
 
@@ -41,6 +41,9 @@ windows = { version = "0.58", features = [
   "Win32_NetworkManagement_Ndis",
   "Win32_Networking_WinSock",
   "Win32_Security",
+  "Win32_Security_Authorization",
+  "Win32_System_DataExchange",
+  "Win32_System_Registry",
 ] }
 
 [profile.release]

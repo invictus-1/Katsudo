@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { openUrl } from '@tauri-apps/plugin-opener';
 import { api, type Update } from '../api';
 import { Button, Panel, Switch } from '../ds/katsudo';
 import { bytesText } from '../lib';
@@ -49,7 +48,7 @@ export function UpdatesPanel({ version, weekly }: { version: string; weekly: boo
             {update?.newer && state !== 'started' && (
               <Button variant="primary" onClick={install} disabled={state !== 'idle'}>Download and install</Button>
             )}
-            {update?.newer && <Button variant="ghost" onClick={() => openUrl(update.url)}>What's new</Button>}
+            {update?.newer && <Button variant="ghost" onClick={() => api.openLink(update.url)}>What's new</Button>}
             {!update?.newer && <Button onClick={check} disabled={state !== 'idle'}>Check for updates</Button>}
           </div>
         </div>

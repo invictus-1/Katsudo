@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { openUrl } from '@tauri-apps/plugin-opener';
 import { api, type AccountRole, type AccountScan, type ImportOutcome, type ImportProgress, type Stat } from '../api';
 import { Badge, Button, ImportSource, Input, Segmented } from '../ds/katsudo';
 import { dateTime, formatCount, shortCount, shortDay } from '../lib';
@@ -94,7 +93,7 @@ export function WhatPulseAccount({ progress, finished, onImported }: {
             {phase === 'looking' ? 'Looking up…' : 'Look up'}
           </Button>
           <p className="text-small faint wp-note">
-            Create a free key in your WhatPulse settings (<a href={KEY_PAGE} onClick={(e) => { e.preventDefault(); openUrl(KEY_PAGE); }}>whatpulse.org/go/settings-api-keys</a>).
+            Create a free key in your WhatPulse settings (<a href={KEY_PAGE} onClick={(e) => { e.preventDefault(); api.openLink(KEY_PAGE); }}>whatpulse.org/go/settings-api-keys</a>).
             It is sent to WhatPulse only, used for this import, and never saved.
           </p>
         </form>

@@ -1,4 +1,5 @@
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
+import { useState } from 'react';
 import { api, type Status } from '../api';
 import type { Appearance } from '../App';
 import { Button, Panel, Segmented, Switch } from '../ds/katsudo';
@@ -15,7 +16,20 @@ export function SettingsView({ status, appearance, onAppearance }: {
 }) {
   const { data } = useData(api.settings, []);
   const autostart = useData(api.autostart, []);
-  if (!data || autostart.data === null) return <div className="page" />;
+  const admin = useData(api.admin, []);
+  const [adminNote, setAdminNote] = useState<string | null>(null);
+  if (!data || autostart.data === null || admin.data === null) return <div className="page" />;
+  const setAdmin = (v: boolean) => {
+    setAdminNote(v ? 'Restarting as administrator…' : 'Restarting…');
+    api.setAdmin(v).then(
+      (restarting) => { if (!restarting) { setAdminNote(null); admin.reload(); autostart.reload(); } },
+      (e) => { setAdminNote(String(e)); admin.reload(); },
+    );
+  };
+  const adminHint = adminNote
+    ?? (admin.data.wanted && !admin.data.elevated
+      ? 'On, but Windows wasn\'t asked or said no this time, so input in apps run as administrator isn\'t counted. Turn it off and on to try again.'
+      : 'Many games, often those with anti-cheat, run as administrator and hide their keys and clicks from apps that don\'t. Katsudō restarts as administrator (Windows asks first) and starts that way at sign-in without asking, so anything that can change files in your user folder could also start as administrator then.');
 
   const set = (patch: Partial<Appearance>, key: 'theme' | 'ui_scale' | 'motion' | 'welcome', value: string) => {
     onAppearance({ ...appearance, ...patch });
@@ -84,6 +98,7 @@ export function SettingsView({ status, appearance, onAppearance }: {
             <Switch defaultChecked={data.track_input} label="Count keys and clicks"
               hint="Counts presses per key and per app. Never records what you type or in what order."
               onChange={(v) => api.setSetting('track_input', String(v))} />
+            <Switch checked={admin.data.wanted} label="Run as administrator" hint={adminHint} onChange={setAdmin} />
             <Switch defaultChecked={data.presence_aware} label="Calls and videos count as present"
               hint="While the microphone or camera is in use, or a video keeps the screen on, you aren't marked away for not typing. Break nudges wait for calls to end."
               onChange={(v) => api.setSetting('presence_aware', String(v))} />

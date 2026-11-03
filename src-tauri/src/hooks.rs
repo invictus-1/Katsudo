@@ -147,6 +147,11 @@ mod imp {
     /// key remappers that re-inject presses, and for load-testing the counter.
     static COUNT_INJECTED: AtomicBool = AtomicBool::new(false);
     static LAST_POS: Mutex<Option<(i32, i32)>> = Mutex::new(None);
+    /// The last key to go down, and when (the event's own millisecond clock). Auto-repeat
+    /// only ever repeats that key, at most a second apart.
+    static LAST_DOWN_VK: AtomicU32 = AtomicU32::new(u32::MAX);
+    static LAST_DOWN_AT: AtomicU32 = AtomicU32::new(0);
+    const REPEAT_GAP_MS: u32 = 1500;
 
     fn with_cell(at: (i32, i32), f: impl FnOnce(&mut CellCounts)) {
         if let Ok(mut c) = counts().lock() {
@@ -162,14 +167,22 @@ mod imp {
     }
 
     unsafe extern "system" fn keyboard_proc(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
-        if code >= 0 && ENABLED.load(Ordering::Relaxed) {
+        if code >= 0 {
             let kb = &*(lparam.0 as *const KBDLLHOOKSTRUCT);
             let vk = (kb.vkCode & 0xff) as usize;
             let injected = kb.flags.0 & LLKHF_INJECTED.0 != 0 && !COUNT_INJECTED.load(Ordering::Relaxed);
             match wparam.0 as u32 {
-                WM_KEYDOWN | WM_SYSKEYDOWN => {
-                    // Held keys auto-repeat; count the press, not the repeats.
-                    if !HELD[vk].swap(true, Ordering::Relaxed) && !injected {
+                // Releases are tracked even while paused, so no key is left marked as held.
+                WM_KEYUP | WM_SYSKEYUP => HELD[vk].store(false, Ordering::Relaxed),
+                WM_KEYDOWN | WM_SYSKEYDOWN if ENABLED.load(Ordering::Relaxed) => {
+                    // Held keys auto-repeat; count the press, not the repeats. A release can go
+                    // unseen (it landed in an admin window, or on the lock screen), so a key
+                    // already marked held is only a repeat if it is still the latest key down.
+                    let was_held = HELD[vk].swap(true, Ordering::Relaxed);
+                    let last_vk = LAST_DOWN_VK.swap(vk as u32, Ordering::Relaxed);
+                    let gap = kb.time.wrapping_sub(LAST_DOWN_AT.swap(kb.time, Ordering::Relaxed));
+                    let repeat = was_held && last_vk == vk as u32 && gap < REPEAT_GAP_MS;
+                    if !repeat && !injected {
                         PRESSES[vk].fetch_add(1, Ordering::Relaxed);
                         KEYS_TOTAL.fetch_add(1, Ordering::Relaxed);
                         UNFLUSHED_KEYS.fetch_add(1, Ordering::Relaxed);
@@ -183,7 +196,6 @@ mod imp {
                         }
                     }
                 }
-                WM_KEYUP | WM_SYSKEYUP => HELD[vk].store(false, Ordering::Relaxed),
                 _ => {}
             }
         }
@@ -271,10 +283,53 @@ mod imp {
             presses as f64 / elapsed.as_secs_f64() / 1e6
         )
     }
+
+    /// Auto-repeat counts once, and a key whose release went unseen still counts next time.
+    pub fn selftest_held() -> String {
+        let send = |msg: u32, vk: u32, time: u32| {
+            let ev = KBDLLHOOKSTRUCT { vkCode: vk, time, ..Default::default() };
+            unsafe { keyboard_proc(0, WPARAM(msg as usize), LPARAM(&ev as *const _ as isize)) };
+        };
+        let k0 = KEYS_TOTAL.load(Ordering::SeqCst);
+        let mut checks = Vec::new();
+        let mut expect = |label: &str, want: u64, f: &dyn Fn()| {
+            let before = KEYS_TOTAL.load(Ordering::SeqCst);
+            f();
+            let got = KEYS_TOTAL.load(Ordering::SeqCst) - before;
+            checks.push((got == want, format!("{label} {got}/{want}")));
+        };
+        // Held for a second and a half: the first press only.
+        expect("repeat", 1, &|| {
+            for i in 0..40 {
+                send(WM_KEYDOWN, 0x57, 10_000 + if i == 0 { 0 } else { 500 + i * 33 });
+            }
+            send(WM_KEYUP, 0x57, 12_000);
+        });
+        // Win+L: both releases are lost behind the lock screen, then each is pressed again.
+        expect("lost release", 4, &|| {
+            send(WM_KEYDOWN, 0x5B, 20_000);
+            send(WM_KEYDOWN, 0x4C, 20_100);
+            send(WM_KEYDOWN, 0x5B, 30_000);
+            send(WM_KEYUP, 0x5B, 30_100);
+            send(WM_KEYDOWN, 0x4C, 30_200);
+            send(WM_KEYUP, 0x4C, 30_300);
+        });
+        // Released unseen, then the same key again after a pause with nothing in between.
+        expect("same key later", 2, &|| {
+            send(WM_KEYDOWN, 0x09, 40_000);
+            send(WM_KEYDOWN, 0x09, 45_000);
+            send(WM_KEYUP, 0x09, 45_100);
+        });
+        let _ = take();
+        UNFLUSHED_KEYS.fetch_sub((KEYS_TOTAL.load(Ordering::SeqCst) - k0) as i64, Ordering::SeqCst);
+        let ok = checks.iter().all(|(ok, _)| *ok);
+        let detail: Vec<_> = checks.into_iter().map(|(_, s)| s).collect();
+        format!("{}: held keys: {}", if ok { "PASS" } else { "FAIL" }, detail.join(", "))
+    }
 }
 
 #[cfg(windows)]
-pub use imp::{selftest, start};
+pub use imp::{selftest, selftest_held, start};
 
 #[cfg(not(windows))]
 pub fn start() {}
